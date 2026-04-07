@@ -1,0 +1,30 @@
+# ===== Java / Maven =====
+*.class
+target/
+
+# ===== Frontend =====
+**/node_modules/
+dist/
+build/
+.nuxt/
+.output/
+
+# ===== IDE / Editor =====
+.idea/
+*.iml
+.vscode/
+
+# ===== Env =====
+.env
+.env.*
+!.env.example
+
+# ===== Logs =====
+*.log
+logs/
+
+# ===== OS / Temp =====
+.DS_Store
+Thumbs.db
+tmp/
+test-data/
