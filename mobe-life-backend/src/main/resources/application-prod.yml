@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://你的生产库地址:3306/mobe_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: 你的生产用户名
+    password: 你的生产密码
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    root: INFO

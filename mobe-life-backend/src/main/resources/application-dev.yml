@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mobe_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 148632
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jmx:
+    enabled: false
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    root: INFO
+    "[com.mobe.mobe_life_backend]": DEBUG
+    "[org.springframework]": INFO
+    "[org.springframework.web]": INFO
+    "[org.mybatis]": INFO
+    "[javax.management]": WARN
+    "[javax.management.remote.rmi]": WARN
+    "[javax.management.mbeanserver]": WARN
+    "[sun.rmi]": WARN
+management:
+  endpoints:
+    jmx:
+      exposure:
+        exclude: "*"
