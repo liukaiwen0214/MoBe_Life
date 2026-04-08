@@ -1,0 +1,22 @@
+.page {
+  padding: 32rpx;
+}
+
+.title {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #243024;
+  margin-bottom: 16rpx;
+}
+
+.desc {
+  font-size: 28rpx;
+  color: #5f6f5f;
+  margin-bottom: 32rpx;
+}
+
+.go-btn {
+  background: #9caf88;
+  color: #ffffff;
+  border-radius: 16rpx;
+}

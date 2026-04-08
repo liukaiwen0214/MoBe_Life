@@ -1,0 +1,8 @@
+<view class="page">
+  <view class="title">欢迎来到 MoBe Life</view>
+  <view class="desc">使用微信登录后即可同步你的个人数据</view>
+
+  <button class="login-btn" bindtap="handleLogin" loading="{{loading}}" disabled="{{loading}}">
+    微信登录
+  </button>
+</view>

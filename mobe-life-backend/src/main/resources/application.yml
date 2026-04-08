@@ -6,3 +6,7 @@ spring:
 logging:
   level:
     root: DEBUG
+wechat:
+  miniapp:
+    app-id: wx5992d0bb44379dea
+    app-secret: d8989a5e2d77e9d74fae0f5ec76d3fd1

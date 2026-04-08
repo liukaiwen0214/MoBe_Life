@@ -1,0 +1,8 @@
+<view wx:if="{{loading}}" class="page">
+  <view class="desc">加载中...</view>
+</view>
+
+<view wx:else class="page">
+  <view class="title">MoBe Life</view>
+  <view class="desc">欢迎回来，{{userInfo.nickname || '微信用户'}}</view>
+</view>

@@ -9,6 +9,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jmx:
     enabled: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 mybatis-plus:
   configuration:
@@ -16,16 +20,24 @@ mybatis-plus:
 logging:
   level:
     root: INFO
-    "[com.mobe.mobe_life_backend]": DEBUG
-    "[org.springframework]": INFO
-    "[org.springframework.web]": INFO
-    "[org.mybatis]": INFO
-    "[javax.management]": WARN
-    "[javax.management.remote.rmi]": WARN
-    "[javax.management.mbeanserver]": WARN
-    "[sun.rmi]": WARN
+    '[com.mobe.mobe_life_backend]': DEBUG
+    '[org.springframework]': INFO
+    '[org.springframework.web]': INFO
+    '[org.mybatis]': INFO
+    '[javax.management]': WARN
+    '[javax.management.remote.rmi]': WARN
+    '[javax.management.mbeanserver]': WARN
+    '[sun.rmi]': WARN
 management:
   endpoints:
     jmx:
       exposure:
-        exclude: "*"
+        exclude: '*'
+file:
+  upload:
+    path: /Users/liukaiwen/Desktop/MoBe_Life/mobe-life-backend/uploads
+    access-url-prefix: http://127.0.0.1:8080/uploads
+wechat:
+  miniapp:
+    app-id: wx5992d0bb44379dea
+    app-secret: d8989a5e2d77e9d74fae0f5ec76d3fd1

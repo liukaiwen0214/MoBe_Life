@@ -1,0 +1,42 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/task/index",
+    "pages/finance/index",
+    "pages/mine/index",
+    "pages/login/login"
+  ],
+  "window": {
+    "navigationBarTitleText": "MoBe Life",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f6f8f4",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#7d8b7d",
+    "selectedColor": "#9caf88",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/task/index",
+        "text": "任务"
+      },
+      {
+        "pagePath": "pages/finance/index",
+        "text": "财务"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
