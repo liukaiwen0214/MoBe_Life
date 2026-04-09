@@ -19,12 +19,18 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * 认证服务接口。
  *
- * <p>设计初衷是在控制层和具体实现之间建立稳定边界，让认证相关用例都围绕“业务动作”建模，
- * 而不是围绕数据库操作或第三方 SDK 细节建模。</p>
+ * <p>
+ * 设计初衷是在控制层和具体实现之间建立稳定边界，让认证相关用例都围绕“业务动作”建模，
+ * 而不是围绕数据库操作或第三方 SDK 细节建模。
+ * </p>
  *
- * <p>线程安全性：接口本身无状态；实现类若以 Spring 单例形式存在，必须避免保存请求级可变状态。</p>
+ * <p>
+ * 线程安全性：接口本身无状态；实现类若以 Spring 单例形式存在，必须避免保存请求级可变状态。
+ * </p>
  *
- * <p>极简使用示例：</p>
+ * <p>
+ * 极简使用示例：
+ * </p>
  *
  * <pre>{@code
  * LoginUserVO loginUser = authService.wxMiniLogin(dto);
@@ -74,7 +80,7 @@ public interface AuthService {
    * 发送绑定邮箱所需的验证码。
    *
    * @param sendEmailCodeDTO 发送参数，不允许为 null；`email` 应为有效邮箱地址。
-   * @param request 当前 HTTP 请求，允许为 null；主要用于提取真实请求来源 IP 以支撑风控与审计。
+   * @param request          当前 HTTP 请求，允许为 null；主要用于提取真实请求来源 IP 以支撑风控与审计。
    * @throws RuntimeException 当当前用户未登录、邮箱已被占用、发送频率过高或邮件服务失败时抛出。
    * @implNote 该方法会写入消息日志和验证码记录，并发起邮件远程调用。
    */
@@ -106,4 +112,12 @@ public interface AuthService {
    * @implNote 该方法会修改用户密码密文；设置成功后账号将多出一种本地认证方式。
    */
   void setPassword(SetPasswordDTO setPasswordDTO);
+
+  /**
+   * 注销当前账号。
+   *
+   * @throws RuntimeException 当当前用户未登录、账号状态异常或用户不存在时抛出。
+   * @implNote 该方法会修改用户状态为“已注销”，但不会删除数据库记录；未来可能引入数据清理或匿名化流程。
+   */
+  void cancelAccount();
 }

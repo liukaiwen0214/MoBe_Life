@@ -24,9 +24,13 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 认证控制器。
  *
- * <p>设计初衷是把与“身份建立”和“账号安全增强”相关的接口集中收口，保证客户端在认证域中有清晰稳定的 API 入口。</p>
+ * <p>
+ * 设计初衷是把与“身份建立”和“账号安全增强”相关的接口集中收口，保证客户端在认证域中有清晰稳定的 API 入口。
+ * </p>
  *
- * <p>线程安全性：Controller 由 Spring 以单例方式管理；本类仅持有不可变依赖，不保存请求级状态，线程安全。</p>
+ * <p>
+ * 线程安全性：Controller 由 Spring 以单例方式管理；本类仅持有不可变依赖，不保存请求级状态，线程安全。
+ * </p>
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -95,7 +99,7 @@ public class AuthController {
    * 发送绑定邮箱验证码。
    *
    * @param sendEmailCodeDTO 请求体，不允许为 null；`email` 必须通过格式校验。
-   * @param request 当前 HTTP 请求，不允许为 null；服务层会尝试提取真实来源 IP。
+   * @param request          当前 HTTP 请求，不允许为 null；服务层会尝试提取真实来源 IP。
    * @return 固定返回 `true`，表示发送请求已成功受理。
    * @throws RuntimeException 当邮箱已被占用、发送过于频繁或邮件服务失败时抛出。
    * @implNote 该接口会写消息日志、验证码表，并发起邮件远程调用。
@@ -146,6 +150,19 @@ public class AuthController {
   @PostMapping("/change-password")
   public Result<Boolean> changePassword(@RequestBody @Valid ChangePasswordDTO changePasswordDTO) {
     authService.changePassword(changePasswordDTO);
+    return Result.success(true);
+  }
+
+  /**
+   * 注销账号。
+   *
+   * @return 固定返回 `true`，表示账号已成功标记为注销状态。
+   * @throws RuntimeException 当当前用户未登录、账号状态异常或用户不存在时抛出。
+   * @implNote 该接口会修改用户状态为“已注销”，但不会删除数据库记录；未来可能引入数据清理或匿名化流程。
+   */
+  @PostMapping("/cancel-account")
+  public Result<Boolean> cancelAccount() {
+    authService.cancelAccount();
     return Result.success(true);
   }
 }

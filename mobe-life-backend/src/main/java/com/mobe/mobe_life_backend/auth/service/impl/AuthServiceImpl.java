@@ -43,16 +43,28 @@ import java.time.LocalDateTime;
 /**
  * 认证服务实现。
  *
- * <p>设计初衷是把“用户身份建立”和“账号安全增强”收敛在同一应用服务中，
- * 使 Controller 看见的是稳定用例，而底层数据库与第三方系统交互则被完整封装。</p>
+ * <p>
+ * 设计初衷是把“用户身份建立”和“账号安全增强”收敛在同一应用服务中，
+ * 使 Controller 看见的是稳定用例，而底层数据库与第三方系统交互则被完整封装。
+ * </p>
  *
- * <p>核心业务概念：</p>
- * <p>1. 微信登录以 `openid` 为当前小程序内唯一身份锚点，首次登录自动建档。</p>
- * <p>2. 邮箱验证码以“目标 + 业务类型 + 验证码”摘要存储，避免明文落库。</p>
- * <p>3. 密码设置与密码修改分离，避免未校验旧密码的逻辑误用于改密场景。</p>
+ * <p>
+ * 核心业务概念：
+ * </p>
+ * <p>
+ * 1. 微信登录以 `openid` 为当前小程序内唯一身份锚点，首次登录自动建档。
+ * </p>
+ * <p>
+ * 2. 邮箱验证码以“目标 + 业务类型 + 验证码”摘要存储，避免明文落库。
+ * </p>
+ * <p>
+ * 3. 密码设置与密码修改分离，避免未校验旧密码的逻辑误用于改密场景。
+ * </p>
  *
- * <p>线程安全性：本类作为 Spring 单例 Bean 使用，本身不保存请求级可变状态；数据库状态变更依赖事务和约束保持一致性。
- * 当前类未显式声明事务，若未来在更复杂的消息补偿场景下扩展，应重新评估发送日志与验证码记录的一致性边界。</p>
+ * <p>
+ * 线程安全性：本类作为 Spring 单例 Bean 使用，本身不保存请求级可变状态；数据库状态变更依赖事务和约束保持一致性。
+ * 当前类未显式声明事务，若未来在更复杂的消息补偿场景下扩展，应重新评估发送日志与验证码记录的一致性边界。
+ * </p>
  */
 @Service
 @RequiredArgsConstructor
@@ -132,7 +144,9 @@ public class AuthServiceImpl implements AuthService {
     String unionid = wxSession.getUnionid();
 
     MobeUser user = mobeUserService.getOne(
-        new LambdaQueryWrapper<MobeUser>().eq(MobeUser::getOpenid, openid));
+        new LambdaQueryWrapper<MobeUser>()
+            .eq(MobeUser::getOpenid, openid)
+            .eq(MobeUser::getIsDeleted, 0));
 
     if (user == null) {
       user = new MobeUser();
@@ -240,7 +254,7 @@ public class AuthServiceImpl implements AuthService {
    * 发送绑定邮箱验证码。
    *
    * @param sendEmailCodeDTO 发送参数，不允许为 null。
-   * @param request 当前请求，允许为 null；用于记录请求来源 IP。
+   * @param request          当前请求，允许为 null；用于记录请求来源 IP。
    * @throws BusinessException 当用户未登录、邮箱被占用、发送过于频繁或邮件发送失败时抛出。
    * @implNote 该方法会创建消息日志、创建验证码记录，并调用邮件通道。
    */
@@ -519,7 +533,8 @@ public class AuthServiceImpl implements AuthService {
    * 从请求中提取尽量接近真实客户端的 IP。
    *
    * @param request 当前请求，允许为 null。
-   * @return 若请求为空则返回 null；否则优先返回 `X-Forwarded-For` 首个地址，再降级到 `X-Real-IP` 和 `remoteAddr`。
+   * @return 若请求为空则返回 null；否则优先返回 `X-Forwarded-For` 首个地址，再降级到 `X-Real-IP` 和
+   *         `remoteAddr`。
    * @implNote 该方法不保证一定得到真实公网 IP，因为可信代理链仍依赖部署层约束。
    */
   private String getRequestIp(HttpServletRequest request) {
@@ -539,5 +554,27 @@ public class AuthServiceImpl implements AuthService {
     }
 
     return request.getRemoteAddr();
+  }
+
+  /**
+   * 注销账号。
+   *
+   * @throws BusinessException 当用户未登录或用户不存在时抛出。
+   * @implNote 该方法通过标记删除的方式注销账号，保留数据以支持后续的数据分析和潜在的账号恢复需求。
+   */
+  @Override
+  public void cancelAccount() {
+    Long userId = UserContext.getCurrentUserId();
+    if (userId == null) {
+      throw new BusinessException("当前用户未登录");
+    }
+
+    MobeUser currentUser = mobeUserService.getById(userId);
+    if (currentUser == null || Integer.valueOf(1).equals(currentUser.getIsDeleted())) {
+      throw new BusinessException("用户不存在");
+    }
+
+    currentUser.setIsDeleted(1);
+    mobeUserService.updateById(currentUser);
   }
 }

@@ -4,7 +4,7 @@
  * 重要依赖关系或外部约束：页面状态高度依赖当前用户资料，因此每次展示时都会主动刷新而不是只吃全局缓存。
  */
 import { getCurrentUser } from '../../api/user'
-import { logout } from '../../api/auth'
+import { logout, cancelAccount } from '../../api/auth'
 import { updateUserProfile, bindPhone } from '../../api/profile'
 import storage from '../../utils/storage'
 import config from '../../config/index'
@@ -73,7 +73,8 @@ Page({
 
   handleEmail() {
     const rawEmail = this.data.profile.emailText || ''
-    const hasEmail = rawEmail && rawEmail !== '未维护邮箱' && rawEmail !== '未绑定邮箱'
+    const hasEmail =
+      rawEmail && rawEmail !== '未维护邮箱' && rawEmail !== '未绑定邮箱'
 
     wx.navigateTo({
       url: `/pages/email/bind?hasEmail=${hasEmail ? 1 : 0}&email=${encodeURIComponent(hasEmail ? rawEmail : '')}`,
@@ -101,24 +102,93 @@ Page({
   },
 
   async handleLogout() {
-    try {
-      await logout()
-    } catch (error) {
-      console.error('logout error:', error)
-    }
+    wx.showModal({
+      title: '退出登录',
+      content: '确认退出当前账号吗？',
+      confirmText: '退出',
+      cancelText: '取消',
+      success: async (res) => {
+        if (!res.confirm) return
 
-    storage.removeToken()
-    getApp().globalData.userInfo = null
+        try {
+          wx.showLoading({
+            title: '退出中',
+            mask: true,
+          })
 
-    wx.reLaunch({
-      url: '/pages/login/login',
+          try {
+            await logout()
+          } catch (error) {
+            console.error('logout request error:', error)
+          }
+
+          storage.removeToken()
+
+          const app = getApp()
+          if (app && app.globalData) {
+            app.globalData.userInfo = null
+          }
+
+          wx.hideLoading()
+          wx.reLaunch({
+            url: '/pages/login/login',
+          })
+        } catch (error) {
+          wx.hideLoading()
+          console.error('handle logout error:', error)
+          wx.showToast({
+            title: '退出失败',
+            icon: 'none',
+          })
+        }
+      },
     })
   },
-
   handleCancelAccount() {
-    wx.showToast({
-      title: '后续开放',
-      icon: 'none',
+    wx.showModal({
+      title: '注销账号',
+      content: '注销后账号将无法恢复，是否继续？',
+      confirmText: '确认注销',
+      confirmColor: '#d84f4f',
+      cancelText: '取消',
+      success: async (res) => {
+        if (!res.confirm) return
+
+        try {
+          wx.showLoading({
+            title: '处理中',
+            mask: true,
+          })
+
+          await cancelAccount()
+
+          storage.removeToken()
+
+          const app = getApp()
+          if (app && app.globalData) {
+            app.globalData.userInfo = null
+          }
+
+          wx.hideLoading()
+          wx.showToast({
+            title: '账号已注销',
+            icon: 'success',
+          })
+
+          setTimeout(() => {
+            wx.reLaunch({
+              url: '/pages/login/login',
+            })
+          }, 500)
+        } catch (error) {
+          wx.hideLoading()
+          console.error('cancel account error:', error)
+          wx.showToast({
+            title: error?.message || '注销失败',
+            icon: 'none',
+          })
+        }
+      },
     })
   },
 
@@ -231,7 +301,8 @@ Page({
   handleBirthday() {
     this.setData({
       birthdayPickerValue:
-        this.data.profile.birthdayText && this.data.profile.birthdayText !== '未设置'
+        this.data.profile.birthdayText &&
+        this.data.profile.birthdayText !== '未设置'
           ? this.data.profile.birthdayText
           : '2000-01-01',
     })
@@ -273,7 +344,10 @@ Page({
 
       if (!code) {
         wx.showToast({
-          title: errMsg && errMsg.includes('deny') ? '你已取消授权' : '未获取到微信手机号授权',
+          title:
+            errMsg && errMsg.includes('deny')
+              ? '你已取消授权'
+              : '未获取到微信手机号授权',
           icon: 'none',
         })
         return

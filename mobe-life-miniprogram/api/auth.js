@@ -15,7 +15,7 @@ export const wxMiniLogin = (data) => {
   return request({
     url: '/api/auth/wx-mini-login',
     method: 'POST',
-    data
+    data,
   })
 }
 
@@ -27,6 +27,16 @@ export const wxMiniLogin = (data) => {
 export const logout = () => {
   return request({
     url: '/api/auth/logout',
-    method: 'POST'
+    method: 'POST',
+  })
+}
+/**
+ * 注销账号
+ * @returns {Promise<boolean>} 成功时返回 `true`。
+ */
+export const cancelAccount = () => {
+  return request({
+    url: '/api/auth/cancel-account',
+    method: 'POST',
   })
 }
