@@ -127,10 +127,17 @@
 			<artifactId>jjwt-orgjson</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>com.tencentcloudapi</groupId>
+			<artifactId>tencentcloud-sdk-java-ses</artifactId>
+			<version>3.1.600</version>
 		</dependency>
 
 		<!-- 测试 -->

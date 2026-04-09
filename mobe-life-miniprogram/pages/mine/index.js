@@ -29,8 +29,8 @@ Page({
     this.setData({ loading: true })
 
     try {
-      const res = await getCurrentUser()
-      const user = res?.data || {}
+      
+      const user = await getCurrentUser()
 
       this.setData({
         profile: {
@@ -41,6 +41,9 @@ Page({
           birthdayText: user.birthday || '未设置',
           phoneText: user.phone || '未维护手机号',
           emailText: user.email || '未维护邮箱',
+          hasPassword: !!user.hasPassword,
+          hasPhone: !!user.hasPhone,
+          hasEmail: !!user.hasEmail,
         },
       })
     } catch (error) {
@@ -69,11 +72,28 @@ Page({
   },
 
   handleEmail() {
-    wx.showToast({ title: '后续开放', icon: 'none' })
+    const rawEmail = this.data.profile.emailText || ''
+    const hasEmail = rawEmail && rawEmail !== '未维护邮箱' && rawEmail !== '未绑定邮箱'
+  
+    wx.navigateTo({
+      url: `/pages/email/bind?hasEmail=${hasEmail ? 1 : 0}&email=${encodeURIComponent(hasEmail ? rawEmail : '')}`,
+    })
   },
 
   handlePassword() {
-    wx.showToast({ title: '后续开放', icon: 'none' })
+    const { hasPhone, hasEmail, hasPassword } = this.data.profile
+  
+    if (!hasPhone && !hasEmail) {
+      wx.showToast({
+        title: '请先绑定手机号或邮箱',
+        icon: 'none',
+      })
+      return
+    }
+  
+    wx.navigateTo({
+      url: `/pages/password/index?hasPassword=${hasPassword ? 1 : 0}`,
+    })
   },
 
   async handleLogout() {

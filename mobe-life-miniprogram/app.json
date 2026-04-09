@@ -4,7 +4,9 @@
     "pages/task/index",
     "pages/finance/index",
     "pages/mine/index",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/email/bind",
+    "pages/password/index"
   ],
   "window": {
     "navigationBarTitleText": "MoBe Life",

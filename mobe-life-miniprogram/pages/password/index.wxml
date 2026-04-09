@@ -1,0 +1,54 @@
+<view class="page">
+  <view class="card">
+    <view class="title">{{hasPassword ? '修改密码' : '设置密码'}}</view>
+    <view class="desc">
+      {{hasPassword ? '请输入原密码并设置新的密码' : '为了方便后续通过邮箱或手机号登录，请先设置密码'}}
+    </view>
+
+    <view wx:if="{{hasPassword}}" class="form-item">
+      <view class="label">原密码</view>
+      <input
+        class="input"
+        password
+        placeholder="请输入原密码"
+        value="{{oldPassword}}"
+        bindinput="handleOldPasswordInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="label">新密码</view>
+      <input
+        class="input"
+        password
+        placeholder="请输入新密码"
+        value="{{newPassword}}"
+        bindinput="handleNewPasswordInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="label">确认密码</view>
+      <input
+        class="input"
+        password
+        placeholder="请再次输入新密码"
+        value="{{confirmPassword}}"
+        bindinput="handleConfirmPasswordInput"
+      />
+    </view>
+
+    <view class="tips">
+      密码长度不少于 6 位，请妥善保管账号密码。
+    </view>
+
+    <button
+      class="submit-btn"
+      bindtap="handleSubmit"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+    >
+      {{hasPassword ? '确认修改' : '立即设置'}}
+    </button>
+  </view>
+</view>

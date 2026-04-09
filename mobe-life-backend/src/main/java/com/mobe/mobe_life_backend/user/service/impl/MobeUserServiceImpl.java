@@ -32,6 +32,9 @@ public class MobeUserServiceImpl extends ServiceImpl<MobeUserMapper, MobeUser> i
     if (user.getBirthday() != null) {
       currentUserVO.setBirthday(user.getBirthday().toString());
     }
+    currentUserVO.setHasPassword(user.getPassword() != null && !user.getPassword().isBlank());
+    currentUserVO.setHasPhone(user.getPhone() != null && !user.getPhone().isBlank());
+    currentUserVO.setHasEmail(user.getEmail() != null && !user.getEmail().isBlank());
 
     return currentUserVO;
   }

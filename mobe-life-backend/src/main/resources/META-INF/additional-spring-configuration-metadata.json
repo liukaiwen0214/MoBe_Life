@@ -9,6 +9,46 @@
       "name": "wechat.miniapp.app-secret",
       "type": "java.lang.String",
       "description": "微信小程序 AppSecret"
+    },
+    {
+      "name": "file.upload.path",
+      "type": "java.lang.String",
+      "description": "本地文件上传根目录"
+    },
+    {
+      "name": "file.upload.access-url-prefix",
+      "type": "java.lang.String",
+      "description": "本地文件访问前缀"
+    },
+    {
+      "name": "tencent.ses.secret-id",
+      "type": "java.lang.String",
+      "description": "腾讯云 SES SecretId"
+    },
+    {
+      "name": "tencent.ses.secret-key",
+      "type": "java.lang.String",
+      "description": "腾讯云 SES SecretKey"
+    },
+    {
+      "name": "tencent.ses.region",
+      "type": "java.lang.String",
+      "description": "腾讯云 SES 地域"
+    },
+    {
+      "name": "tencent.ses.from-email",
+      "type": "java.lang.String",
+      "description": "腾讯云 SES 发信邮箱地址"
+    },
+    {
+      "name": "tencent.ses.from-name",
+      "type": "java.lang.String",
+      "description": "腾讯云 SES 发件人名称"
+    },
+    {
+      "name": "tencent.ses.template-id",
+      "type": "java.lang.String",
+      "description": "腾讯云 SES 模板 ID"
     }
   ]
 }

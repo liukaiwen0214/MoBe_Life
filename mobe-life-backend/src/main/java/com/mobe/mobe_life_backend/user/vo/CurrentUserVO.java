@@ -20,5 +20,12 @@ public class CurrentUserVO {
   private Integer gender;
 
   private Integer status;
+
   private String birthday;
+
+  private Boolean hasPassword;
+
+  private Boolean hasPhone;
+
+  private Boolean hasEmail;
 }

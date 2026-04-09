@@ -41,3 +41,11 @@ wechat:
   miniapp:
     app-id: wx5992d0bb44379dea
     app-secret: d8989a5e2d77e9d74fae0f5ec76d3fd1
+tencent:
+  ses:
+    secret-id: ${TENCENT_SES_SECRET_ID:}
+    secret-key: ${TENCENT_SES_SECRET_KEY:}
+    region: ap-hongkong
+    from-email: code@triaura.icu
+    from-name: MoBe 验证中心
+    template-id: 172524

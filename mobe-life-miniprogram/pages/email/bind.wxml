@@ -1,0 +1,75 @@
+<view class="page">
+  <view class="card">
+    <view class="title">{{hasEmail ? '更换邮箱' : '绑定邮箱'}}</view>
+    <view class="desc">
+      {{hasEmail ? '请验证新邮箱后完成变更' : '请完善常用联系方式，以便保障账号安全'}}
+    </view>
+
+    <view wx:if="{{hasEmail}}" class="form-item">
+      <view class="label">当前绑定邮箱</view>
+      <view class="readonly-box">
+        <image class="field-icon" src="/assets/icons/email.svg" mode="aspectFit"></image>
+        <text class="readonly-text">{{maskedCurrentEmail}}</text>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="label">{{hasEmail ? '新邮箱地址' : '邮箱地址'}}</view>
+      <view class="input-wrap">
+        <image class="field-icon" src="/assets/icons/email.svg" mode="aspectFit"></image>
+        <input
+          class="input"
+          type="text"
+          placeholder="{{hasEmail ? '请输入新的邮箱地址' : '请输入常用邮箱地址'}}"
+          value="{{email}}"
+          bindinput="handleEmailInput"
+        />
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="label">验证码</view>
+      <view class="code-row">
+        <view class="input-wrap code-input-wrap">
+          <image class="field-icon" src="/assets/icons/captcha.svg" mode="aspectFit"></image>
+          <input
+            class="input"
+            type="number"
+            placeholder="请输入验证码"
+            value="{{code}}"
+            bindinput="handleCodeInput"
+          />
+        </view>
+
+        <button
+          class="code-btn"
+          bindtap="handleSendCode"
+          disabled="{{countdown > 0 || sendingCode}}"
+        >
+          {{countdown > 0 ? countdown + 's' : '获取验证码'}}
+        </button>
+      </view>
+    </view>
+
+    <view class="tips">
+      {{hasEmail ? '变更后，原邮箱将不再接收账号安全通知。' : '绑定后，可通过邮箱接收重要通知与安全验证。'}}
+    </view>
+
+    <button
+      class="submit-btn"
+      bindtap="handleBindEmail"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+    >
+      {{hasEmail ? '确认更换' : '立即绑定'}}
+    </button>
+
+    <view wx:if="{{hasEmail}}" class="cancel-wrap" bindtap="handleCancel">
+      <text class="cancel-text">取消</text>
+    </view>
+  </view>
+
+  <view class="bottom-note">
+    邮箱绑定后可用于账号安全验证
+  </view>
+</view>
