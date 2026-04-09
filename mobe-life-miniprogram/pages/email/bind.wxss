@@ -1,3 +1,4 @@
+/* 核心职责：定义邮箱绑定页的表单样式，让账号安全相关操作保持清晰、克制、低干扰。 */
 .page {
   min-height: 100vh;
   background: #ffffff;
@@ -54,6 +55,7 @@
 }
 
 .readonly-box {
+  /* 已绑定邮箱不允许直接编辑，所以视觉上故意弱化成只读容器。 */
   background: #f7f9f5;
 }
 

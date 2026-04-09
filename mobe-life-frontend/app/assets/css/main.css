@@ -1,3 +1,4 @@
+/* 核心职责：定义 Web 端全局样式基线、品牌字体和主题变量。 */
 @import "tailwindcss";
 @import "@nuxt/ui";
 
@@ -10,6 +11,7 @@
 }
 
 :root {
+  /* 这组变量决定了当前产品的温和纸面感，不只是换色方便，更是统一三端视觉语义的根。 */
   --mobe-primary: #9caf88;
   --mobe-primary-hover: #899f78;
   --mobe-bg: #f6f8f4;

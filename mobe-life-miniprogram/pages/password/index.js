@@ -1,3 +1,8 @@
+/**
+ * 核心职责：处理首次设密和已有密码后的改密流程。
+ * 所属业务模块：小程序业务层 / 账号安全。
+ * 重要依赖关系或外部约束：`hasPassword` 由上一页传入，决定当前提交应该调用“设密”还是“改密”接口。
+ */
 import { setPassword, changePassword } from '../../api/profile'
 
 Page({
@@ -79,7 +84,6 @@ Page({
 
     try {
       this.setData({ submitting: true })
-      console.log('before await submit', { hasPassword, oldPassword, newPassword, confirmPassword })
 
       if (hasPassword) {
         await changePassword({
@@ -94,8 +98,6 @@ Page({
         })
       }
 
-      console.log('after await submit success')
-
       wx.showToast({
         title: hasPassword ? '修改成功' : '设置成功',
         icon: 'success',
@@ -105,7 +107,7 @@ Page({
         wx.navigateBack()
       }, 500)
     } catch (error) {
-      console.log('submit catch =>', error)
+      console.error('password submit error:', error)
       wx.showToast({
         title: error?.message || '操作失败',
         icon: 'none',

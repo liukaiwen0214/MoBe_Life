@@ -1,3 +1,4 @@
+<!-- 核心职责：渲染个人中心资料卡片与账号安全入口。 -->
 <view class="page">
   <view wx:if="{{loading}}" class="loading-wrap">
     <text class="loading-text">加载中...</text>
@@ -25,6 +26,7 @@
         </view>
       </view>
 
+      <!-- 出生日期使用 picker 包裹整行，而不是额外放一个按钮，是为了保持资料卡片的交互一致性。 -->
       <picker mode="date" value="{{birthdayPickerValue}}" bindchange="handleBirthdayChange">
         <view class="info-item">
           <view class="info-left">
@@ -50,6 +52,7 @@
           </view>
         </view>
 
+        <!-- 透明按钮覆盖整行，是为了复用微信官方手机号授权能力，同时不破坏卡片式 UI。 -->
         <button class="phone-overlay-btn" open-type="getPhoneNumber" bindgetphonenumber="handleGetPhoneNumber"></button>
       </view>
 

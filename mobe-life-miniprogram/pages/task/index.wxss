@@ -1,1 +1,17 @@
-/* pages/task/index.wxss */
+/* 核心职责：定义任务占位页的基础视觉样式。 */
+.page {
+  padding: 32rpx;
+}
+
+.title {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #243024;
+  margin-bottom: 16rpx;
+}
+
+.desc {
+  font-size: 28rpx;
+  color: #5f6f5f;
+  line-height: 1.6;
+}

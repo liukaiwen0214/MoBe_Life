@@ -1,5 +1,7 @@
 {
-  // https://nuxt.com/docs/guide/concepts/typescript
+  // 核心职责：把 TypeScript 配置委托给 Nuxt 生成的分层 tsconfig，避免手工复制框架默认配置。
+  // 所属业务模块：前端工程化 / TypeScript 配置。
+  // 重要外部约束：这里是“入口配置”而不是完整配置源，真正的路径别名和环境类型声明由 .nuxt 产物生成。
   "files": [],
   "references": [
     {
@@ -16,6 +18,7 @@
     }
   ],
   "compilerOptions": {
+    // 明确引入 Node 类型，是为了让 Nuxt 配置文件和构建期脚本能正确识别 Node 全局对象。
     "types": ["node"]
   }
 }

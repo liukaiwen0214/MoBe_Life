@@ -1,3 +1,7 @@
+/**
+ * 核心职责：封装个人资料与账号安全相关接口。
+ * 所属业务模块：小程序业务层 / 资料与安全 API。
+ */
 import request from '../utils/request'
 
 export const updateUserProfile = (data) => {

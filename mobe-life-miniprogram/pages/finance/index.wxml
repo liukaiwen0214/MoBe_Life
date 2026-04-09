@@ -1,2 +1,5 @@
-<!--pages/finance/index.wxml-->
-<text>pages/finance/index.wxml</text>
+<!-- 核心职责：保留财务模块页面入口，当前先用明确文案占住路由位置。 -->
+<view class="page">
+  <view class="title">财务</view>
+  <view class="desc">财务模块建设中，后续会在这里接入账本与统计能力。</view>
+</view>

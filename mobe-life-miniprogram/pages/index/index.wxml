@@ -1,3 +1,4 @@
+<!-- 核心职责：作为小程序首页的最小展示层，承接登录成功后的欢迎与状态反馈。 -->
 <view wx:if="{{loading}}" class="page">
   <view class="desc">加载中...</view>
 </view>

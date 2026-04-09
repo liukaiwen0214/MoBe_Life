@@ -1,2 +1,5 @@
-<!--pages/task/index.wxml-->
-<text>pages/task/index.wxml</text>
+<!-- 核心职责：保留任务模块页面入口，当前先用占位内容稳定路由与导航。 -->
+<view class="page">
+  <view class="title">任务</view>
+  <view class="desc">任务模块建设中，后续会在这里接入清单、计划与提醒能力。</view>
+</view>

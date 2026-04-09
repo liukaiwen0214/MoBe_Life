@@ -1,3 +1,4 @@
+/* 核心职责：定义小程序全局样式基线，让所有页面默认继承同一套字体和基础视觉语义。 */
 page,
 view,
 text,
@@ -9,7 +10,9 @@ navigator {
   font-family: 'MoBeFont', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   color: #243024;
 }
+
 .container {
+  /* 这是微信模板默认容器样式的延续，当前虽未被业务页重度使用，但保留它能减少后续脚手架页重复写样式。 */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -17,4 +20,4 @@ navigator {
   justify-content: space-between;
   padding: 200rpx 0;
   box-sizing: border-box;
-} 
+}

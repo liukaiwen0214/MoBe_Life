@@ -1,3 +1,4 @@
+/* 核心职责：定义个人中心的卡片式布局，强化“资料管理”和“账号安全”两个阅读层次。 */
 .page {
   min-height: 100vh;
   background: #ffffff;
@@ -37,6 +38,7 @@
   margin: 0 auto 24rpx;
   background: #f6f8f4;
 }
+
 .avatar-btn {
   width: 148rpx;
   height: 148rpx;
@@ -129,6 +131,7 @@
   color: #b8b8b8;
   padding: 0 64rpx;
 }
+
 .info-value {
   font-size: 26rpx;
   color: #5f6f5f;
@@ -143,7 +146,7 @@
   margin-left: 4rpx;
 }
 
-.logout-btn{
+.logout-btn {
   width: 100%;
   height: 92rpx;
   border-radius: 20rpx;
@@ -156,6 +159,7 @@
   background: #ebebeb;
   color: #243024;
 }
+
 .info-right {
   display: flex;
   align-items: center;
@@ -166,6 +170,7 @@
 .logout-btn::after {
   border: none;
 }
+
 .phone-row-wrap {
   position: relative;
 }

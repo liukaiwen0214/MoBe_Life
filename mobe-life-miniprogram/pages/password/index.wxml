@@ -1,3 +1,4 @@
+<!-- 核心职责：承载首次设密和改密的统一表单。 -->
 <view class="page">
   <view class="card">
     <view class="title">{{hasPassword ? '修改密码' : '设置密码'}}</view>

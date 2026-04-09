@@ -1,3 +1,4 @@
+<!-- 核心职责：提供微信登录的单一入口，尽量减少首次进入应用时的决策成本。 -->
 <view class="page">
   <view class="title">欢迎来到 MoBe Life</view>
   <view class="desc">使用微信登录后即可同步你的个人数据</view>

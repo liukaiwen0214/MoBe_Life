@@ -1,3 +1,8 @@
+/**
+ * 核心职责：处理绑定邮箱与更换邮箱流程。
+ * 所属业务模块：小程序业务层 / 账号安全。
+ * 重要依赖关系或外部约束：验证码频控由后端控制，但前端倒计时仍然必要，用于减少用户重复点击和降低无效请求。
+ */
 import { sendEmailCode, bindEmail } from '../../api/profile'
 
 Page({
@@ -90,7 +95,6 @@ Page({
 
     try {
       this.setData({ sendingCode: true })
-
       await sendEmailCode({ email })
 
       wx.showToast({
