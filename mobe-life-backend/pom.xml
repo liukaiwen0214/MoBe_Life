@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.5</version>
+		<version>3.5.13</version>
 		<relativePath />
 	</parent>
 
@@ -22,6 +22,7 @@
 		<mybatis-plus.version>3.5.15</mybatis-plus.version>
 		<jjwt.version>0.12.7</jjwt.version>
 		<hutool.version>5.8.44</hutool.version>
+		<jackson.version>2.21.2</jackson.version>
 	</properties>
 
 	<dependencyManagement>
@@ -34,13 +35,7 @@
 				<scope>import</scope>
 			</dependency>
 
-			<dependency>
-				<groupId>io.jsonwebtoken</groupId>
-				<artifactId>jjwt-bom</artifactId>
-				<version>${jjwt.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -55,7 +50,7 @@
 		<!-- Spring MVC -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
 		<!-- 参数校验 -->
@@ -67,13 +62,13 @@
 		<!-- AOP：后面做请求日志切面会用到 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-aspectj</artifactId>
+			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 
 		<!-- MyBatis-Plus：Spring Boot 4 对应 starter -->
 		<dependency>
 			<groupId>com.baomidou</groupId>
-			<artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+			<artifactId>mybatis-plus-spring-boot3-starter</artifactId>
 		</dependency>
 
 		<!-- MySQL -->
@@ -105,26 +100,30 @@
 			<version>${hutool.version}</version>
 		</dependency>
 
-		<!-- JJWT -->
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-impl</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
+		<!-- JJWT -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-orgjson</artifactId>
+			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -138,6 +137,23 @@
 			<groupId>com.tencentcloudapi</groupId>
 			<artifactId>tencentcloud-sdk-java-ses</artifactId>
 			<version>3.1.600</version>
+		</dependency>
+
+		<!-- Knife4j API 文档 -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.13</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.xiaoymin</groupId>
+			<artifactId>knife4j-openapi3-ui</artifactId>
+			<version>4.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>1.6.15</version>
 		</dependency>
 
 		<!-- 测试 -->

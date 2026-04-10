@@ -1,21 +1,15 @@
-/**
- * 核心职责：向客户端返回上传成功后的文件信息。
- * 所属业务模块：文件服务 / 上传响应。
- * 重要依赖关系或外部约束：字段结构需兼容前端头像上传后的预览与提交逻辑。
- */
 package com.mobe.mobe_life_backend.file.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-/**
- * 文件上传结果。
- */
+@Schema(description = "文件上传响应对象，用于返回上传后的文件名称与访问地址")
 @Data
 public class UploadFileVO {
 
-  /** 服务端生成的文件名。 */
+  @Schema(description = "服务端生成的文件名", example = "avatar_20260410100000.png")
   private String fileName;
 
-  /** 对外可访问的文件 URL。 */
+  @Schema(description = "文件访问地址", example = "https://cdn.mobe.com/upload/avatar_20260410100000.png")
   private String url;
 }

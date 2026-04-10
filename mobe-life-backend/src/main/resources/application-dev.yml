@@ -49,3 +49,9 @@ tencent:
     from-email: code@triaura.icu
     from-name: MoBe 验证中心
     template-id: 172524
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html

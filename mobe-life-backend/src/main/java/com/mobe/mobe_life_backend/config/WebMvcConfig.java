@@ -6,11 +6,13 @@
 package com.mobe.mobe_life_backend.config;
 
 import com.mobe.mobe_life_backend.file.config.FileUploadProperties;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.lang.NonNull;
 
 /**
  * MVC 配置类。
@@ -37,7 +39,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
    * @implNote 当前默认保护 `/api/**`，只对白名单接口放行。
    */
   @Override
-  public void addInterceptors(InterceptorRegistry registry) {
+  public void addInterceptors(@NonNull InterceptorRegistry registry) {
+    assert jwtInterceptor != null : "jwtInterceptor must not be null";
     registry.addInterceptor(jwtInterceptor)
         .addPathPatterns("/api/**")
         .excludePathPatterns(
@@ -48,6 +51,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
             "/api/auth/email-login",
             "/api/auth/code-login",
             "/api/auth/send-login-email-code",
+            "/doc.html",
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/webjars/**",
             "/test",
             "/test/error");
   }
@@ -59,7 +67,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
    * @implNote 当前把本地上传目录暴露到 `/uploads/**`，这样头像 URL 可以直接被前端访问。
    */
   @Override
-  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+  public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
     registry.addResourceHandler("/uploads/**")
         .addResourceLocations("file:" + fileUploadProperties.getPath() + "/");
   }
