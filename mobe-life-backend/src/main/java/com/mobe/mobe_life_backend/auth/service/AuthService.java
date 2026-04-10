@@ -8,9 +8,12 @@ package com.mobe.mobe_life_backend.auth.service;
 import com.mobe.mobe_life_backend.auth.dto.BindEmailDTO;
 import com.mobe.mobe_life_backend.auth.dto.BindPhoneDTO;
 import com.mobe.mobe_life_backend.auth.dto.ChangePasswordDTO;
+import com.mobe.mobe_life_backend.auth.dto.CodeLoginDTO;
+import com.mobe.mobe_life_backend.auth.dto.PasswordLoginDTO;
 import com.mobe.mobe_life_backend.auth.dto.SendEmailCodeDTO;
 import com.mobe.mobe_life_backend.auth.dto.SetPasswordDTO;
 import com.mobe.mobe_life_backend.auth.dto.WxMiniLoginDTO;
+import com.mobe.mobe_life_backend.auth.vo.CaptchaVO;
 import com.mobe.mobe_life_backend.auth.vo.LoginUserVO;
 import com.mobe.mobe_life_backend.auth.vo.TokenVO;
 
@@ -120,4 +123,41 @@ public interface AuthService {
    * @implNote 该方法会修改用户状态为“已注销”，但不会删除数据库记录；未来可能引入数据清理或匿名化流程。
    */
   void cancelAccount();
+
+  /**
+   * 获取验证码图片和关联 Key。
+   * 
+   * @param request 当前 HTTP 请求，允许为 null；主要用于提取真实请求来源 IP 以支撑风控与审计。
+   * @return 验证码信息对象，包含验证码 Key 和 Base64 编码的图片字符串，不返回 null。
+   * @throws RuntimeException 当生成验证码失败或请求过于频繁时抛出。
+   * @implNote 该方法会生成验证码记录并发起图片生成逻辑，验证码 Key 用于后续校验时关联用户输入和验证码摘要。
+   */
+  CaptchaVO getCaptcha(HttpServletRequest request);
+
+  /**
+   * 使用账号密码登录。
+   *
+   * @param passwordLoginDTO 登录参数，不允许为 null；其中 `account` 可以是手机号或邮箱，`password`
+   *                         必须非空。
+   * @throws RuntimeException 当账号不存在、密码错误、验证码校验失败、账号被封禁或用户不存在时抛出。
+   * @implNote 该方法会校验账号密码，并且需要校验验证码的正确性以防止暴力破解；成功登录后会返回用户信息和 JWT。
+   * @return 登录结果，不返回 null。
+   */
+  LoginUserVO passwordLogin(PasswordLoginDTO passwordLoginDTO);
+
+  /**
+   * 使用验证码登录。
+   * 
+   * @param codeLoginDTO 登录参数，不允许为 null；其中 `account` 可以是手机号或邮箱，`code`
+   *                     必须非空且与最近发送的验证码匹配。
+   * @throws RuntimeException 当账号不存在、验证码无效、过期或错误、账号被封禁或用户不存在时抛出。
+   * @implNote 该方法会校验账号和验证码的正确性；成功登录后会返回用户信息和
+   *           JWT。该登录方式适用于用户忘记密码但已绑定手机号/邮箱的场景，或者作为无密码登录的补充方式。
+   * @return 登录结果，不返回 null。
+   */
+  LoginUserVO codeLogin(CodeLoginDTO codeLoginDTO);
+
+  void sendLoginEmailCode(SendEmailCodeDTO sendEmailCodeDTO, HttpServletRequest request);
+
+  void sendUnbindEmailCode(jakarta.servlet.http.HttpServletRequest request);
 }

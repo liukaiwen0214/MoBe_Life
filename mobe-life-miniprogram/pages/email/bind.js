@@ -3,7 +3,7 @@
  * 所属业务模块：小程序业务层 / 账号安全。
  * 重要依赖关系或外部约束：验证码频控由后端控制，但前端倒计时仍然必要，用于减少用户重复点击和降低无效请求。
  */
-import { sendEmailCode, bindEmail } from '../../api/profile'
+import { sendEmailCode, bindEmail, sendUnbindEmailCode, unbindEmail } from '../../api/profile'
 
 Page({
   data: {
@@ -16,6 +16,13 @@ Page({
     timer: null,
     sendingCode: false,
     submitting: false,
+
+    showUnbindConfirm: false,
+    unbindCode: '',
+    sendingUnbindCode: false,
+    unbindSubmitting: false,
+    unbindCountdown: 0,
+    unbindTimer: null,
   },
 
   onLoad(options) {
@@ -31,8 +38,8 @@ Page({
 
   onUnload() {
     this.clearTimer()
+    this.clearUnbindTimer()
   },
-
   maskEmail(email) {
     if (!email || !email.includes('@')) return email
     const [name, domain] = email.split('@')
@@ -44,7 +51,11 @@ Page({
 
     return `${name.slice(0, 3)}***@${domain}`
   },
-
+  handleUnbindCodeInput(e) {
+    this.setData({
+      unbindCode: (e.detail.value || '').trim(),
+    })
+  },
   handleEmailInput(e) {
     this.setData({
       email: (e.detail.value || '').trim(),
@@ -200,4 +211,156 @@ Page({
       this.setData({ submitting: false })
     }
   },
+  handleUnbindEmail() {
+    const { sendingUnbindCode, unbindCountdown, showUnbindConfirm } = this.data
+    console.log('handleUnbindEmail triggered', {
+      sendingUnbindCode,
+      unbindCountdown,
+      showUnbindConfirm,
+    })
+  
+    if (showUnbindConfirm) return
+    if (sendingUnbindCode || unbindCountdown > 0) return
+  
+    console.log('before showModal')
+  
+    wx.showModal({
+      title: '解绑邮箱',
+      content: '将向当前绑定邮箱发送验证码，验证通过后才会解绑。',
+      confirmText: '发送',
+      cancelText: '取消',
+      success: async (res) => {
+        console.log('showModal success', res)
+  
+        if (!res.confirm) return
+  
+        try {
+          this.setData({ sendingUnbindCode: true })
+  
+          await sendUnbindEmailCode()
+  
+          wx.showToast({
+            title: '验证码已发送',
+            icon: 'success',
+          })
+  
+          this.setData({
+            showUnbindConfirm: true,
+          })
+  
+          this.startUnbindCountdown()
+        } catch (error) {
+          console.error('send unbind email code error:', error)
+          wx.showToast({
+            title: error?.message || '发送失败',
+            icon: 'none',
+          })
+        } finally {
+          this.setData({ sendingUnbindCode: false })
+        }
+      },
+      fail: (err) => {
+        console.error('showModal fail', err)
+      },
+      complete: (res) => {
+        console.log('showModal complete', res)
+      },
+    })
+  
+    console.log('after showModal')
+  },
+
+  startUnbindCountdown() {
+    this.clearUnbindTimer()
+    this.setData({ unbindCountdown: 60 })
+
+    const timer = setInterval(() => {
+      const next = this.data.unbindCountdown - 1
+      if (next <= 0) {
+        this.clearUnbindTimer()
+        this.setData({ unbindCountdown: 0 })
+        return
+      }
+      this.setData({ unbindCountdown: next })
+    }, 1000)
+
+    this.setData({ unbindTimer: timer })
+  },
+
+  clearUnbindTimer() {
+    if (this.data.unbindTimer) {
+      clearInterval(this.data.unbindTimer)
+      this.setData({ unbindTimer: null })
+    }
+  },
+
+  async handleConfirmUnbindEmail() {
+    const { unbindCode, unbindSubmitting } = this.data
+    if (unbindSubmitting) return
+  
+    if (!unbindCode) {
+      wx.showToast({
+        title: '请输入验证码',
+        icon: 'none',
+      })
+      return
+    }
+  
+    try {
+      this.setData({ unbindSubmitting: true })
+  
+      await unbindEmail({
+        code: unbindCode,
+      })
+  
+      wx.showToast({
+        title: '解绑成功',
+        icon: 'success',
+      })
+  
+      setTimeout(() => {
+        wx.navigateBack()
+      }, 500)
+    } catch (error) {
+      console.error('unbind email error:', error)
+      wx.showToast({
+        title: error?.message || '解绑失败',
+        icon: 'none',
+      })
+    } finally {
+      this.setData({ unbindSubmitting: false })
+    }
+  },
+  handleCancelUnbind() {
+    this.setData({
+      showUnbindConfirm: false,
+      unbindCode: '',
+    })
+  },
+  async handleResendUnbindCode() {
+    const { sendingUnbindCode, unbindCountdown } = this.data
+    if (sendingUnbindCode || unbindCountdown > 0) return
+  
+    try {
+      this.setData({ sendingUnbindCode: true })
+  
+      await sendUnbindEmailCode()
+  
+      wx.showToast({
+        title: '验证码已发送',
+        icon: 'success',
+      })
+  
+      this.startUnbindCountdown()
+    } catch (error) {
+      console.error('resend unbind email code error:', error)
+      wx.showToast({
+        title: error?.message || '发送失败',
+        icon: 'none',
+      })
+    } finally {
+      this.setData({ sendingUnbindCode: false })
+    }
+  },
+  noop() {},
 })

@@ -12,6 +12,8 @@ import com.mobe.mobe_life_backend.auth.config.TencentSesProperties;
 import com.mobe.mobe_life_backend.auth.dto.BindEmailDTO;
 import com.mobe.mobe_life_backend.auth.dto.BindPhoneDTO;
 import com.mobe.mobe_life_backend.auth.dto.ChangePasswordDTO;
+import com.mobe.mobe_life_backend.auth.dto.CodeLoginDTO;
+import com.mobe.mobe_life_backend.auth.dto.PasswordLoginDTO;
 import com.mobe.mobe_life_backend.auth.dto.SendEmailCodeDTO;
 import com.mobe.mobe_life_backend.auth.dto.SetPasswordDTO;
 import com.mobe.mobe_life_backend.auth.dto.WxMiniLoginDTO;
@@ -22,6 +24,7 @@ import com.mobe.mobe_life_backend.auth.mapper.VerificationCodeMapper;
 import com.mobe.mobe_life_backend.auth.service.AuthService;
 import com.mobe.mobe_life_backend.auth.service.EmailService;
 import com.mobe.mobe_life_backend.auth.service.WechatMiniAppService;
+import com.mobe.mobe_life_backend.auth.vo.CaptchaVO;
 import com.mobe.mobe_life_backend.auth.vo.EmailSendResult;
 import com.mobe.mobe_life_backend.auth.vo.LoginUserVO;
 import com.mobe.mobe_life_backend.auth.vo.TokenVO;
@@ -33,6 +36,9 @@ import com.mobe.mobe_life_backend.common.utils.JwtUtils;
 import com.mobe.mobe_life_backend.common.utils.VerificationCodeUtils;
 import com.mobe.mobe_life_backend.user.entity.MobeUser;
 import com.mobe.mobe_life_backend.user.service.MobeUserService;
+
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.LineCaptcha;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -127,6 +133,23 @@ public class AuthServiceImpl implements AuthService {
    * 采用 BCrypt 是为了让同一明文在每次加密时都生成不同密文，降低撞库风险。
    */
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+  /**
+   * 登录验证码业务类型。
+   * 虽然当前版本未实现登录验证码，但预留常量以便未来扩展。
+   */
+  private static final String BIZ_TYPE_LOGIN_CAPTCHA = "LOGIN_CAPTCHA";
+  /**
+   * 登录验证码目标类型。
+   * 与 `verification_code.target_type` 的历史约定保持一致。
+   */
+  private static final Integer TARGET_TYPE_CAPTCHA = 3;
+
+  private static final String BIZ_TYPE_LOGIN_EMAIL = "LOGIN_EMAIL";
+  private static final String BIZ_TYPE_LOGIN_PHONE = "LOGIN_PHONE";
+  private static final Integer TARGET_TYPE_PHONE = 1;
+
+  private static final String BIZ_TYPE_UNBIND_EMAIL = "UNBIND_EMAIL";
 
   /**
    * 微信小程序登录。
@@ -576,5 +599,459 @@ public class AuthServiceImpl implements AuthService {
 
     currentUser.setIsDeleted(1);
     mobeUserService.updateById(currentUser);
+  }
+
+  /**
+   * 获取验证码。
+   *
+   * @param request 当前请求，允许为 null；用于记录请求来源 IP。
+   * @return 验证码结果，不返回 null；包含验证码键和验证码图片（Base64 编码）。
+   * @throws BusinessException 当生成验证码失败时抛出。
+   * @implNote 该方法会创建验证码记录，并可能触发内存缓存更新以支持后续校验。
+   */
+  @Override
+  public CaptchaVO getCaptcha(HttpServletRequest request) {
+    String captchaKey = VerificationCodeUtils.generateCaptchaKey();
+
+    LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(130, 44, 4, 40);
+    String captchaCode = lineCaptcha.getCode();
+
+    String codeHash = VerificationCodeUtils.hashCode(
+        captchaKey,
+        BIZ_TYPE_LOGIN_CAPTCHA,
+        captchaCode.toLowerCase());
+    LocalDateTime now = LocalDateTime.now();
+
+    // 理论上 captchaKey 每次唯一，这段更多是兜底
+    verificationCodeMapper.update(
+        null,
+        new LambdaUpdateWrapper<VerificationCode>()
+            .eq(VerificationCode::getTarget, captchaKey)
+            .eq(VerificationCode::getTargetType, TARGET_TYPE_CAPTCHA)
+            .eq(VerificationCode::getBizType, BIZ_TYPE_LOGIN_CAPTCHA)
+            .eq(VerificationCode::getStatus, 0)
+            .eq(VerificationCode::getIsDeleted, 0)
+            .set(VerificationCode::getStatus, 3)
+            .set(VerificationCode::getRemark, "生成新图形验证码后作废旧记录"));
+
+    VerificationCode verificationCode = new VerificationCode();
+    verificationCode.setTarget(captchaKey);
+    verificationCode.setTargetType(TARGET_TYPE_CAPTCHA);
+    verificationCode.setBizType(BIZ_TYPE_LOGIN_CAPTCHA);
+    verificationCode.setCodeHash(codeHash);
+    verificationCode.setCodePreview(captchaCode.substring(0, 1) + "***");
+    verificationCode.setStatus(0);
+    verificationCode.setExpireTime(now.plusMinutes(5));
+    verificationCode.setSendTime(now);
+    verificationCode.setPlatform("h5");
+    verificationCode.setRequestIp(getRequestIp(request));
+    verificationCode.setFailCount(0);
+    verificationCode.setRemark("登录图形验证码生成成功");
+    verificationCode.setIsDeleted(0);
+    verificationCodeMapper.insert(verificationCode);
+
+    String captchaImage = lineCaptcha.getImageBase64Data();
+
+    CaptchaVO captchaVO = new CaptchaVO();
+    captchaVO.setCaptchaKey(captchaKey);
+    captchaVO.setCaptchaImage(captchaImage);
+    return captchaVO;
+  }
+
+  /**
+   * 校验登录验证码。
+   * 
+   * @param captchaKey  验证码标识，不允许为 null；必须与生成时返回的 `captchaKey` 一致。
+   * @param captchaCode 验证码输入，不允许为 null；会被统一转小写后与存储的 hash 进行比对。
+   * @throws BusinessException 当验证码标识或输入无效、验证码不存在、过期或错误时抛出。
+   * @implNote 该方法会更新验证码记录的状态和失败次数，成功时标记为已使用，失败时增加失败计数
+   */
+  private void validateLoginCaptcha(String captchaKey, String captchaCode) {
+    if (captchaKey == null || captchaKey.isBlank()) {
+      throw new BusinessException("验证码标识不能为空");
+    }
+    if (captchaCode == null || captchaCode.isBlank()) {
+      throw new BusinessException("验证码不能为空");
+    }
+
+    VerificationCode verificationCode = verificationCodeMapper.selectOne(
+        new LambdaQueryWrapper<VerificationCode>()
+            .eq(VerificationCode::getTarget, captchaKey)
+            .eq(VerificationCode::getTargetType, TARGET_TYPE_CAPTCHA)
+            .eq(VerificationCode::getBizType, BIZ_TYPE_LOGIN_CAPTCHA)
+            .eq(VerificationCode::getStatus, 0)
+            .eq(VerificationCode::getIsDeleted, 0)
+            .orderByDesc(VerificationCode::getId)
+            .last("limit 1"));
+
+    if (verificationCode == null) {
+      throw new BusinessException("验证码不存在或已失效");
+    }
+
+    if (verificationCode.getExpireTime() == null || verificationCode.getExpireTime().isBefore(LocalDateTime.now())) {
+      verificationCode.setStatus(2);
+      verificationCode.setRemark("图形验证码已过期");
+      verificationCodeMapper.updateById(verificationCode);
+      throw new BusinessException("验证码已过期");
+    }
+
+    String inputCodeHash = VerificationCodeUtils.hashCode(
+        captchaKey,
+        BIZ_TYPE_LOGIN_CAPTCHA,
+        captchaCode.trim().toLowerCase());
+
+    // 生成时也统一转小写再 hash，避免大小写问题
+    String storedCodeHash = verificationCode.getCodeHash();
+    if (!inputCodeHash.equals(storedCodeHash)) {
+      verificationCode
+          .setFailCount((verificationCode.getFailCount() == null ? 0 : verificationCode.getFailCount()) + 1);
+      verificationCodeMapper.updateById(verificationCode);
+      throw new BusinessException("验证码错误");
+    }
+
+    verificationCode.setStatus(1);
+    verificationCode.setUsedTime(LocalDateTime.now());
+    verificationCode.setRemark("图形验证码校验成功");
+    verificationCodeMapper.updateById(verificationCode);
+  }
+
+  /**
+   * 判断账号输入是邮箱还是手机号。
+   * 
+   * @param account 账号输入，允许为 null；如果包含 '@' 则视为邮箱，否则视为手机号。
+   * @return 如果输入包含 '@' 则返回 true，表示是邮箱账号；否则返回 false，表示是手机号账号。
+   * @implNote 该方法的设计初衷是为了在登录时根据用户输入的账号自动识别是邮箱还是手机号，从而查询对应的字段进行登录验证。
+   */
+  private boolean isEmailAccount(String account) {
+    return account != null && account.contains("@");
+  }
+
+  /**
+   * 账号密码登录。
+   */
+  @Override
+  public LoginUserVO passwordLogin(PasswordLoginDTO passwordLoginDTO) {
+    validateLoginCaptcha(passwordLoginDTO.getCaptchaKey(), passwordLoginDTO.getCaptchaCode());
+
+    String account = passwordLoginDTO.getAccount().trim();
+    String password = passwordLoginDTO.getPassword();
+
+    LambdaQueryWrapper<MobeUser> queryWrapper = new LambdaQueryWrapper<MobeUser>()
+        .eq(MobeUser::getIsDeleted, 0);
+
+    if (isEmailAccount(account)) {
+      queryWrapper.eq(MobeUser::getEmail, account.toLowerCase());
+    } else {
+      queryWrapper.eq(MobeUser::getPhone, account);
+    }
+
+    MobeUser user = mobeUserService.getOne(queryWrapper);
+    if (user == null) {
+      throw new BusinessException("账号或密码错误");
+    }
+
+    String dbPassword = user.getPassword();
+    if (dbPassword == null || dbPassword.isBlank()) {
+      throw new BusinessException("当前账号尚未设置密码");
+    }
+
+    if (!passwordEncoder.matches(password, dbPassword)) {
+      throw new BusinessException("账号或密码错误");
+    }
+
+    String token = JwtUtils.createToken(user.getId());
+
+    LoginUserVO loginUserVO = new LoginUserVO();
+    loginUserVO.setUserId(user.getId());
+    loginUserVO.setNickname(user.getNickname());
+    loginUserVO.setAvatar(user.getAvatar());
+    loginUserVO.setToken(token);
+    return loginUserVO;
+  }
+
+  private boolean isEmailFormat(String account) {
+    return account != null && account.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+  }
+
+  private boolean isPhoneFormat(String account) {
+    return account != null && account.matches("^1\\d{10}$");
+  }
+
+  private void validateVerificationCode(String target, Integer targetType, String bizType, String code) {
+    VerificationCode verificationCode = verificationCodeMapper.selectOne(
+        new LambdaQueryWrapper<VerificationCode>()
+            .eq(VerificationCode::getTarget, target)
+            .eq(VerificationCode::getTargetType, targetType)
+            .eq(VerificationCode::getBizType, bizType)
+            .eq(VerificationCode::getStatus, 0)
+            .eq(VerificationCode::getIsDeleted, 0)
+            .orderByDesc(VerificationCode::getId)
+            .last("limit 1"));
+
+    if (verificationCode == null) {
+      throw new BusinessException("验证码不存在或已失效");
+    }
+
+    if (verificationCode.getExpireTime() == null || verificationCode.getExpireTime().isBefore(LocalDateTime.now())) {
+      verificationCode.setStatus(2);
+      verificationCode.setRemark("验证码已过期");
+      verificationCodeMapper.updateById(verificationCode);
+      throw new BusinessException("验证码已过期");
+    }
+
+    String inputCodeHash = VerificationCodeUtils.hashCode(target, bizType, code.trim());
+    if (!inputCodeHash.equals(verificationCode.getCodeHash())) {
+      verificationCode
+          .setFailCount((verificationCode.getFailCount() == null ? 0 : verificationCode.getFailCount()) + 1);
+      verificationCodeMapper.updateById(verificationCode);
+      throw new BusinessException("验证码错误");
+    }
+
+    verificationCode.setStatus(1);
+    verificationCode.setUsedTime(LocalDateTime.now());
+    verificationCode.setRemark("验证码校验成功");
+    verificationCodeMapper.updateById(verificationCode);
+  }
+
+  @Override
+  public LoginUserVO codeLogin(CodeLoginDTO codeLoginDTO) {
+    String account = codeLoginDTO.getAccount().trim();
+    String code = codeLoginDTO.getCode().trim();
+
+    MobeUser user;
+    if (isEmailFormat(account)) {
+      validateVerificationCode(account.toLowerCase(), TARGET_TYPE_EMAIL, BIZ_TYPE_LOGIN_EMAIL, code);
+
+      user = mobeUserService.getOne(
+          new LambdaQueryWrapper<MobeUser>()
+              .eq(MobeUser::getEmail, account.toLowerCase())
+              .eq(MobeUser::getIsDeleted, 0));
+    } else if (isPhoneFormat(account)) {
+      validateVerificationCode(account, TARGET_TYPE_PHONE, BIZ_TYPE_LOGIN_PHONE, code);
+
+      user = mobeUserService.getOne(
+          new LambdaQueryWrapper<MobeUser>()
+              .eq(MobeUser::getPhone, account)
+              .eq(MobeUser::getIsDeleted, 0));
+    } else {
+      throw new BusinessException("请输入正确的手机号或邮箱");
+    }
+
+    if (user == null) {
+      throw new BusinessException("该账号未注册");
+    }
+
+    String token = JwtUtils.createToken(user.getId());
+
+    LoginUserVO loginUserVO = new LoginUserVO();
+    loginUserVO.setUserId(user.getId());
+    loginUserVO.setNickname(user.getNickname());
+    loginUserVO.setAvatar(user.getAvatar());
+    loginUserVO.setToken(token);
+    return loginUserVO;
+  }
+
+  @Override
+  public void sendLoginEmailCode(SendEmailCodeDTO sendEmailCodeDTO, HttpServletRequest request) {
+    String email = sendEmailCodeDTO.getEmail().trim().toLowerCase();
+
+    MobeUser exist = mobeUserService.getOne(
+        new LambdaQueryWrapper<MobeUser>()
+            .eq(MobeUser::getEmail, email)
+            .eq(MobeUser::getIsDeleted, 0));
+    if (exist == null) {
+      throw new BusinessException("该邮箱未注册");
+    }
+
+    VerificationCode latestCode = verificationCodeMapper.selectOne(
+        new LambdaQueryWrapper<VerificationCode>()
+            .eq(VerificationCode::getTarget, email)
+            .eq(VerificationCode::getTargetType, TARGET_TYPE_EMAIL)
+            .eq(VerificationCode::getBizType, BIZ_TYPE_LOGIN_EMAIL)
+            .eq(VerificationCode::getStatus, 0)
+            .eq(VerificationCode::getIsDeleted, 0)
+            .orderByDesc(VerificationCode::getId)
+            .last("limit 1"));
+
+    if (latestCode != null && latestCode.getSendTime() != null
+        && latestCode.getSendTime().plusSeconds(60).isAfter(LocalDateTime.now())) {
+      throw new BusinessException("发送过于频繁，请稍后再试");
+    }
+
+    verificationCodeMapper.update(
+        null,
+        new LambdaUpdateWrapper<VerificationCode>()
+            .eq(VerificationCode::getTarget, email)
+            .eq(VerificationCode::getTargetType, TARGET_TYPE_EMAIL)
+            .eq(VerificationCode::getBizType, BIZ_TYPE_LOGIN_EMAIL)
+            .eq(VerificationCode::getStatus, 0)
+            .eq(VerificationCode::getIsDeleted, 0)
+            .set(VerificationCode::getStatus, 3)
+            .set(VerificationCode::getRemark, "新验证码发送后作废旧验证码"));
+
+    String code = VerificationCodeUtils.generateCode();
+    String codeHash = VerificationCodeUtils.hashCode(email, BIZ_TYPE_LOGIN_EMAIL, code);
+    LocalDateTime now = LocalDateTime.now();
+    String requestIp = getRequestIp(request);
+
+    MessageSendLog messageSendLog = new MessageSendLog();
+    messageSendLog.setChannel(CHANNEL_EMAIL);
+    messageSendLog.setBizType(BIZ_TYPE_LOGIN_EMAIL);
+    messageSendLog.setTarget(email);
+    messageSendLog.setTemplateCode(String.valueOf(tencentSesProperties.getTemplateId()));
+    messageSendLog.setProvider("TencentCloudSES");
+    messageSendLog.setSendStatus(0);
+    messageSendLog.setRetryCount(0);
+    messageSendLog.setRequestIp(requestIp);
+    messageSendLog.setPlatform("h5");
+    messageSendLog.setRequestContent("send login email code to " + email);
+    messageSendLog.setRemark("登录邮箱验证码待发送");
+    messageSendLog.setIsDeleted(0);
+    messageSendLogMapper.insert(messageSendLog);
+
+    VerificationCode verificationCode = new VerificationCode();
+    verificationCode.setTarget(email);
+    verificationCode.setTargetType(TARGET_TYPE_EMAIL);
+    verificationCode.setBizType(BIZ_TYPE_LOGIN_EMAIL);
+    verificationCode.setCodeHash(codeHash);
+    verificationCode.setCodePreview(code.substring(0, 2) + "****");
+    verificationCode.setStatus(0);
+    verificationCode.setExpireTime(now.plusMinutes(10));
+    verificationCode.setSendTime(now);
+    verificationCode.setPlatform("h5");
+    verificationCode.setRequestIp(requestIp);
+    verificationCode.setFailCount(0);
+    verificationCode.setMessageLogId(messageSendLog.getId());
+    verificationCode.setRemark("登录邮箱验证码生成成功");
+    verificationCode.setIsDeleted(0);
+    verificationCodeMapper.insert(verificationCode);
+
+    try {
+      EmailSendResult sendResult = emailService.sendBindEmailCode(email, code);
+
+      messageSendLog.setSendStatus(1);
+      messageSendLog.setSendTime(LocalDateTime.now());
+      messageSendLog.setProviderMessageId(sendResult.getProviderMessageId());
+      messageSendLog.setResponseContent(sendResult.getResponseContent());
+      messageSendLog.setFailReason(null);
+      messageSendLog.setRemark("登录邮箱验证码发送成功");
+      messageSendLogMapper.updateById(messageSendLog);
+    } catch (Exception e) {
+      messageSendLog.setSendStatus(2);
+      messageSendLog.setProviderMessageId(null);
+      messageSendLog.setFailReason(e.getMessage());
+      messageSendLog.setResponseContent(e.getMessage());
+      messageSendLog.setRemark("登录邮箱验证码发送失败");
+      messageSendLogMapper.updateById(messageSendLog);
+
+      throw new BusinessException("发送验证码失败：" + e.getMessage());
+    }
+  }
+
+  @Override
+  public void sendUnbindEmailCode(HttpServletRequest request) {
+    Long userId = UserContext.getCurrentUserId();
+    if (userId == null) {
+      throw new BusinessException("当前用户未登录");
+    }
+
+    MobeUser currentUser = mobeUserService.getById(userId);
+    if (currentUser == null || Integer.valueOf(1).equals(currentUser.getIsDeleted())) {
+      throw new BusinessException("用户不存在");
+    }
+
+    String email = currentUser.getEmail();
+    if (email == null || email.isBlank()) {
+      throw new BusinessException("当前账号未绑定邮箱");
+    }
+
+    boolean hasPhone = currentUser.getPhone() != null && !currentUser.getPhone().isBlank();
+    if (!hasPhone) {
+      throw new BusinessException("请先绑定手机号后再解绑邮箱");
+    }
+
+    VerificationCode latestCode = verificationCodeMapper.selectOne(
+        new LambdaQueryWrapper<VerificationCode>()
+            .eq(VerificationCode::getTarget, email)
+            .eq(VerificationCode::getTargetType, TARGET_TYPE_EMAIL)
+            .eq(VerificationCode::getBizType, BIZ_TYPE_UNBIND_EMAIL)
+            .eq(VerificationCode::getStatus, 0)
+            .eq(VerificationCode::getIsDeleted, 0)
+            .orderByDesc(VerificationCode::getId)
+            .last("limit 1"));
+
+    if (latestCode != null && latestCode.getSendTime() != null
+        && latestCode.getSendTime().plusSeconds(60).isAfter(LocalDateTime.now())) {
+      throw new BusinessException("发送过于频繁，请稍后再试");
+    }
+
+    verificationCodeMapper.update(
+        null,
+        new LambdaUpdateWrapper<VerificationCode>()
+            .eq(VerificationCode::getTarget, email)
+            .eq(VerificationCode::getTargetType, TARGET_TYPE_EMAIL)
+            .eq(VerificationCode::getBizType, BIZ_TYPE_UNBIND_EMAIL)
+            .eq(VerificationCode::getStatus, 0)
+            .eq(VerificationCode::getIsDeleted, 0)
+            .set(VerificationCode::getStatus, 3)
+            .set(VerificationCode::getRemark, "新验证码发送后作废旧验证码"));
+
+    String code = VerificationCodeUtils.generateCode();
+    String codeHash = VerificationCodeUtils.hashCode(email, BIZ_TYPE_UNBIND_EMAIL, code);
+    LocalDateTime now = LocalDateTime.now();
+    String requestIp = getRequestIp(request);
+
+    MessageSendLog messageSendLog = new MessageSendLog();
+    messageSendLog.setChannel(CHANNEL_EMAIL);
+    messageSendLog.setBizType(BIZ_TYPE_UNBIND_EMAIL);
+    messageSendLog.setTarget(email);
+    messageSendLog.setTemplateCode(String.valueOf(tencentSesProperties.getTemplateId()));
+    messageSendLog.setProvider("TencentCloudSES");
+    messageSendLog.setSendStatus(0);
+    messageSendLog.setRetryCount(0);
+    messageSendLog.setRequestIp(requestIp);
+    messageSendLog.setPlatform("miniapp");
+    messageSendLog.setRequestContent("send unbind email code to " + email);
+    messageSendLog.setRemark("解绑邮箱验证码待发送");
+    messageSendLog.setIsDeleted(0);
+    messageSendLogMapper.insert(messageSendLog);
+
+    VerificationCode verificationCode = new VerificationCode();
+    verificationCode.setTarget(email);
+    verificationCode.setTargetType(TARGET_TYPE_EMAIL);
+    verificationCode.setBizType(BIZ_TYPE_UNBIND_EMAIL);
+    verificationCode.setCodeHash(codeHash);
+    verificationCode.setCodePreview(code.substring(0, 2) + "****");
+    verificationCode.setStatus(0);
+    verificationCode.setExpireTime(now.plusMinutes(10));
+    verificationCode.setSendTime(now);
+    verificationCode.setPlatform("miniapp");
+    verificationCode.setRequestIp(requestIp);
+    verificationCode.setFailCount(0);
+    verificationCode.setMessageLogId(messageSendLog.getId());
+    verificationCode.setRemark("解绑邮箱验证码生成成功");
+    verificationCode.setIsDeleted(0);
+    verificationCodeMapper.insert(verificationCode);
+
+    try {
+      EmailSendResult sendResult = emailService.sendBindEmailCode(email, code);
+
+      messageSendLog.setSendStatus(1);
+      messageSendLog.setSendTime(LocalDateTime.now());
+      messageSendLog.setProviderMessageId(sendResult.getProviderMessageId());
+      messageSendLog.setResponseContent(sendResult.getResponseContent());
+      messageSendLog.setFailReason(null);
+      messageSendLog.setRemark("解绑邮箱验证码发送成功");
+      messageSendLogMapper.updateById(messageSendLog);
+    } catch (Exception e) {
+      messageSendLog.setSendStatus(2);
+      messageSendLog.setProviderMessageId(null);
+      messageSendLog.setFailReason(e.getMessage());
+      messageSendLog.setResponseContent(e.getMessage());
+      messageSendLog.setRemark("解绑邮箱验证码发送失败");
+      messageSendLogMapper.updateById(messageSendLog);
+
+      throw new BusinessException("发送验证码失败：" + e.getMessage());
+    }
   }
 }

@@ -15,8 +15,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * MVC 配置类。
  *
- * <p>设计初衷是把“请求如何进入业务”和“本地文件如何对外暴露”集中定义，
- * 避免相关配置散落在多个配置类中难以维护。</p>
+ * <p>
+ * 设计初衷是把“请求如何进入业务”和“本地文件如何对外暴露”集中定义，
+ * 避免相关配置散落在多个配置类中难以维护。
+ * </p>
  */
 @Configuration
 @RequiredArgsConstructor
@@ -41,6 +43,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         .excludePathPatterns(
             "/api/auth/wx-mini-login",
             "/api/auth/refresh-token",
+            "/api/auth/captcha",
+            "/api/auth/password-login",
+            "/api/auth/email-login",
+            "/api/auth/code-login",
+            "/api/auth/send-login-email-code",
             "/test",
             "/test/error");
   }

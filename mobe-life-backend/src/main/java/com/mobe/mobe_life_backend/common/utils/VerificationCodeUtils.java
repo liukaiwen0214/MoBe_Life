@@ -5,15 +5,20 @@
  */
 package com.mobe.mobe_life_backend.common.utils;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 
 /**
  * 验证码工具类。
  *
- * <p>设计初衷是统一验证码格式和摘要策略，避免不同业务场景各自实现导致校验口径不一致。</p>
+ * <p>
+ * 设计初衷是统一验证码格式和摘要策略，避免不同业务场景各自实现导致校验口径不一致。
+ * </p>
  *
- * <p>线程安全性：纯静态无状态工具类，线程安全。</p>
+ * <p>
+ * 线程安全性：纯静态无状态工具类，线程安全。
+ * </p>
  */
 public class VerificationCodeUtils {
 
@@ -37,11 +42,21 @@ public class VerificationCodeUtils {
   }
 
   /**
+   * * 生成验证码 Key。
+   * 
+   * @return 验证码 Key，不返回 null。
+   * @implNote 验证码 Key 用于关联验证码图片和验证码摘要，必须保证唯一性和不可预测性。
+   */
+  public static String generateCaptchaKey() {
+    return IdUtil.fastSimpleUUID();
+  }
+
+  /**
    * 计算验证码摘要。
    *
-   * @param target 验证目标，不允许为 null；如邮箱地址。
+   * @param target  验证目标，不允许为 null；如邮箱地址。
    * @param bizType 业务场景，不允许为 null；如 `BIND_EMAIL`。
-   * @param code 验证明文，不允许为 null。
+   * @param code    验证明文，不允许为 null。
    * @return SHA-256 摘要，不返回 null。
    * @implNote 把目标和业务场景一起纳入摘要，是为了防止同一验证码跨场景复用。
    */

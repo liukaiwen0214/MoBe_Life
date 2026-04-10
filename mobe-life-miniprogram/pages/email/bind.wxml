@@ -18,13 +18,7 @@
       <view class="label">{{hasEmail ? '新邮箱地址' : '邮箱地址'}}</view>
       <view class="input-wrap">
         <image class="field-icon" src="/assets/icons/email.svg" mode="aspectFit"></image>
-        <input
-          class="input"
-          type="text"
-          placeholder="{{hasEmail ? '请输入新的邮箱地址' : '请输入常用邮箱地址'}}"
-          value="{{email}}"
-          bindinput="handleEmailInput"
-        />
+        <input class="input" type="text" placeholder="{{hasEmail ? '请输入新的邮箱地址' : '请输入常用邮箱地址'}}" value="{{email}}" bindinput="handleEmailInput" />
       </view>
     </view>
 
@@ -33,21 +27,11 @@
       <view class="code-row">
         <view class="input-wrap code-input-wrap">
           <image class="field-icon" src="/assets/icons/captcha.svg" mode="aspectFit"></image>
-          <input
-            class="input"
-            type="number"
-            placeholder="请输入验证码"
-            value="{{code}}"
-            bindinput="handleCodeInput"
-          />
+          <input class="input" type="number" placeholder="请输入验证码" value="{{code}}" bindinput="handleCodeInput" />
         </view>
 
         <!-- 倒计时按钮保留在表单右侧，是为了把“输入验证码”和“获取验证码”收拢在一个视线区域。 -->
-        <button
-          class="code-btn"
-          bindtap="handleSendCode"
-          disabled="{{countdown > 0 || sendingCode}}"
-        >
+        <button class="code-btn" bindtap="handleSendCode" disabled="{{countdown > 0 || sendingCode}}">
           {{countdown > 0 ? countdown + 's' : '获取验证码'}}
         </button>
       </view>
@@ -57,12 +41,7 @@
       {{hasEmail ? '变更后，原邮箱将不再接收账号安全通知。' : '绑定后，可通过邮箱接收重要通知与安全验证。'}}
     </view>
 
-    <button
-      class="submit-btn"
-      bindtap="handleBindEmail"
-      loading="{{submitting}}"
-      disabled="{{submitting}}"
-    >
+    <button class="submit-btn" bindtap="handleBindEmail" loading="{{submitting}}" disabled="{{submitting}}">
       {{hasEmail ? '确认更换' : '立即绑定'}}
     </button>
 
@@ -71,7 +50,32 @@
     </view>
   </view>
 
-  <view class="bottom-note">
-    邮箱绑定后可用于账号安全验证
+
+  <view wx:if="{{hasEmail}}" class="danger-wrap">
+    <view class="danger-click" bindtap="handleUnbindEmail">
+      <view class="danger-top">
+        <text class="danger-text">解绑邮箱</text>
+      </view>
+      <view class="danger-desc">
+        解绑后将无法通过该邮箱接收验证码和通知。
+      </view>
+    </view>
+
+    <view wx:if="{{showUnbindConfirm}}" class="unbind-confirm-wrap" catchtap="noop">
+      <view class="unbind-code-row">
+        <input class="unbind-input" type="number" placeholder="请输入解绑验证码" value="{{unbindCode}}" bindinput="handleUnbindCodeInput" />
+        <button class="unbind-code-btn" bindtap="handleResendUnbindCode" disabled="{{unbindCountdown > 0 || sendingUnbindCode}}">
+          {{unbindCountdown > 0 ? unbindCountdown + 's' : '重新发送'}}
+        </button>
+      </view>
+
+      <button class="unbind-confirm-btn" bindtap="handleConfirmUnbindEmail" loading="{{unbindSubmitting}}" disabled="{{unbindSubmitting}}">
+        确认解绑
+      </button>
+
+      <view class="unbind-cancel-wrap" bindtap="handleCancelUnbind">
+        <text class="unbind-cancel-text">取消</text>
+      </view>
+    </view>
   </view>
 </view>

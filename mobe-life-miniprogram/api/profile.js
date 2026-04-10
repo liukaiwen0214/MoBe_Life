@@ -51,3 +51,17 @@ export const changePassword = (data) => {
     data,
   })
 }
+export const sendUnbindEmailCode = () => {
+  return request({
+    url: '/api/auth/send-unbind-email-code',
+    method: 'POST',
+  })
+}
+
+export const unbindEmail = (data) => {
+  return request({
+    url: '/api/user/unbind-email',
+    method: 'POST',
+    data,
+  })
+}

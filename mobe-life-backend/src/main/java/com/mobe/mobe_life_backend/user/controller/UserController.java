@@ -6,10 +6,14 @@
 package com.mobe.mobe_life_backend.user.controller;
 
 import com.mobe.mobe_life_backend.common.response.Result;
+import com.mobe.mobe_life_backend.user.dto.UnbindEmailDTO;
 import com.mobe.mobe_life_backend.user.dto.UpdateUserProfileDTO;
 import com.mobe.mobe_life_backend.user.service.MobeUserService;
 import com.mobe.mobe_life_backend.user.vo.CurrentUserVO;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,9 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 用户控制器。
  *
- * <p>设计初衷是把“当前登录用户自己能做的事情”收敛到独立入口，避免把用户中心接口做成管理员和普通用户共用的混合式 API。</p>
+ * <p>
+ * 设计初衷是把“当前登录用户自己能做的事情”收敛到独立入口，避免把用户中心接口做成管理员和普通用户共用的混合式 API。
+ * </p>
  *
- * <p>线程安全性：仅持有不可变依赖，线程安全。</p>
+ * <p>
+ * 线程安全性：仅持有不可变依赖，线程安全。
+ * </p>
  */
 @RestController
 @RequestMapping("/api/user")
@@ -53,6 +61,12 @@ public class UserController {
   @PostMapping("/profile/update")
   public Result<Boolean> updateCurrentUserProfile(@RequestBody UpdateUserProfileDTO updateUserProfileDTO) {
     mobeUserService.updateCurrentUserProfile(updateUserProfileDTO);
+    return Result.success(true);
+  }
+
+  @PostMapping("/unbind-email")
+  public Result<Boolean> unbindEmail(@RequestBody @Valid UnbindEmailDTO unbindEmailDTO) {
+    mobeUserService.unbindEmail(unbindEmailDTO);
     return Result.success(true);
   }
 }

@@ -13,8 +13,10 @@ import com.mobe.mobe_life_backend.user.vo.CurrentUserVO;
 /**
  * 用户服务接口。
  *
- * <p>设计初衷是区分“通用用户数据操作”和“围绕当前登录用户的业务动作”，
- * 让控制层无需直接理解 `UserContext` 或实体转换细节。</p>
+ * <p>
+ * 设计初衷是区分“通用用户数据操作”和“围绕当前登录用户的业务动作”，
+ * 让控制层无需直接理解 `UserContext` 或实体转换细节。
+ * </p>
  */
 public interface MobeUserService extends IService<MobeUser> {
 
@@ -33,4 +35,6 @@ public interface MobeUserService extends IService<MobeUser> {
    * @throws RuntimeException 当当前请求未登录、用户不存在或数据不满足业务约束时抛出。
    */
   void updateCurrentUserProfile(UpdateUserProfileDTO updateUserProfileDTO);
+
+  void unbindEmail(com.mobe.mobe_life_backend.user.dto.UnbindEmailDTO unbindEmailDTO);
 }

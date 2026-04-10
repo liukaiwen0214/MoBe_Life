@@ -8,10 +8,13 @@ package com.mobe.mobe_life_backend.auth.controller;
 import com.mobe.mobe_life_backend.auth.dto.BindEmailDTO;
 import com.mobe.mobe_life_backend.auth.dto.BindPhoneDTO;
 import com.mobe.mobe_life_backend.auth.dto.ChangePasswordDTO;
+import com.mobe.mobe_life_backend.auth.dto.CodeLoginDTO;
+import com.mobe.mobe_life_backend.auth.dto.PasswordLoginDTO;
 import com.mobe.mobe_life_backend.auth.dto.SendEmailCodeDTO;
 import com.mobe.mobe_life_backend.auth.dto.SetPasswordDTO;
 import com.mobe.mobe_life_backend.auth.dto.WxMiniLoginDTO;
 import com.mobe.mobe_life_backend.auth.service.AuthService;
+import com.mobe.mobe_life_backend.auth.vo.CaptchaVO;
 import com.mobe.mobe_life_backend.auth.vo.LoginUserVO;
 import com.mobe.mobe_life_backend.auth.vo.TokenVO;
 import com.mobe.mobe_life_backend.common.response.Result;
@@ -165,4 +168,60 @@ public class AuthController {
     authService.cancelAccount();
     return Result.success(true);
   }
+
+  /**
+   * 获取验证码。
+   * 
+   * @param request 当前 HTTP 请求，不允许为 null；服务层会尝试提取真实来源 IP。
+   * @return 验证码结果，不返回 null；包含验证码键和验证码图片（Base64 编码）。
+   * @throws RuntimeException 当生成验证码失败或请求过于频繁时抛出。
+   * @implNote 该接口会写验证码表，并可能触发内存缓存更新
+   */
+  @GetMapping("/captcha")
+  public Result<CaptchaVO> getCaptcha(HttpServletRequest request) {
+    return Result.success(authService.getCaptcha(request));
+  }
+
+  /**
+   * 账号密码登录。
+   * 
+   * @param passwordLoginDTO 请求体，不允许为 null；其中 `account` 可以是手机号或邮箱，`password` 必须非空。
+   * @throws RuntimeException 当账号不存在、密码错误、验证码校验失败、账号被封禁或用户不存在时抛出，由全局异常处理器统一转成响应。
+   * @return 登录结果，不返回 null；成功后返回用户信息和 JWT。
+   * @implNote 该接口会校验账号密码，并且需要校验验证码的正确性以防止暴力破解；成功登录后会返回用户信息和 JWT。
+   *           该接口可能触发账号状态检查和登录日志记录。
+   */
+  @PostMapping("/password-login")
+  public Result<LoginUserVO> passwordLogin(@RequestBody @Valid PasswordLoginDTO passwordLoginDTO) {
+    return Result.success(authService.passwordLogin(passwordLoginDTO));
+  }
+
+  /**
+   * 验证码登录。
+   * 
+   * @param codeLoginDTO 请求体，不允许为 null；其中 `account` 可以是手机号或邮箱，`code`
+   *                     必须非空且与最近发送的验证码匹配。
+   * @throws RuntimeException 当账号不存在、验证码无效、过期或错误、账号被封禁或用户不存在时抛出，由全局异常处理器统一转成响应
+   * @return 登录结果，不返回 null；成功后返回用户信息和 JWT。
+   * @implNote 该接口会校验账号和验证码的正确性；成功登录后会返回用户信息和
+   *           JWT。该登录方式适用于用户忘记密码但已绑定手机号/邮箱的场景，或者作为无密码登录的补充方式。该接口可能触发账号状态检查和登录日志记录。
+   */
+  @PostMapping("/code-login")
+  public Result<LoginUserVO> codeLogin(@RequestBody @Valid CodeLoginDTO codeLoginDTO) {
+    return Result.success(authService.codeLogin(codeLoginDTO));
+  }
+
+  @PostMapping("/send-login-email-code")
+  public Result<Boolean> sendLoginEmailCode(@RequestBody @Valid SendEmailCodeDTO sendEmailCodeDTO,
+      HttpServletRequest request) {
+    authService.sendLoginEmailCode(sendEmailCodeDTO, request);
+    return Result.success(true);
+  }
+
+  @PostMapping("/send-unbind-email-code")
+  public Result<Boolean> sendUnbindEmailCode(HttpServletRequest request) {
+    authService.sendUnbindEmailCode(request);
+    return Result.success(true);
+  }
+
 }
