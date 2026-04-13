@@ -1,9 +1,69 @@
-<!-- 核心职责：作为小程序首页的最小展示层，承接登录成功后的欢迎与状态反馈。 -->
+<!-- 核心职责：作为小程序首页的最小展示层，承接登录成功后的欢迎、每日一句、天气与首页聚焦反馈。 -->
 <view wx:if="{{loading}}" class="page">
-  <view class="desc">加载中...</view>
+  <view class="loading-wrap">
+    <view class="loading-text">加载中...</view>
+  </view>
 </view>
 
 <view wx:else class="page">
-  <view class="title">MoBe Life</view>
-  <view class="desc">欢迎回来，{{userInfo.nickname || '微信用户'}}</view>
+  <!-- 顶部轻头部 -->
+  <view class="hero-wrap">
+    <view class="hero-main">
+      <view class="hero-left">
+        <view class="hero-title">{{greetingText}}，{{userInfo.nickname || '微信用户'}}</view>
+        <view class="hero-quote">{{quoteCard.text}}</view>
+        <view class="hero-from">{{quoteCard.from}}</view>
+      </view>
+
+      <view class="hero-weather">
+        <view class="hero-weather-city">{{weatherCard.city}}</view>
+        <view class="hero-weather-temp">{{weatherCard.temperature}}</view>
+        <view class="hero-weather-text">{{weatherCard.weatherText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 今日聚焦 -->
+  <view class="section-wrap">
+    <view class="section-title">今日聚焦</view>
+    <view class="section-desc">先看一眼，此刻最值得推进的事</view>
+
+    <view class="focus-grid">
+      <view wx:for="{{focusCards}}" wx:key="key" class="focus-card" data-key="{{item.key}}" bindtap="handleFocusCardTap">
+        <view class="focus-card-title">{{item.title}}</view>
+        <view class="focus-card-value">{{item.value}}</view>
+        <view class="focus-card-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 流水统计 -->
+  <view class="section-wrap">
+    <view class="section-title">流水统计</view>
+    <view class="section-desc">用很轻的方式，看清最近的流动</view>
+
+    <view class="flow-grid">
+      <view class="flow-card">
+        <view class="flow-card-label">本月收入</view>
+        <view class="flow-card-value">{{flowStats.income}}</view>
+      </view>
+
+      <view class="flow-card">
+        <view class="flow-card-label">本月支出</view>
+        <view class="flow-card-value">{{flowStats.expense}}</view>
+      </view>
+
+      <view class="flow-card">
+        <view class="flow-card-label">当前结余</view>
+        <view class="flow-card-value">{{flowStats.balance}}</view>
+      </view>
+
+      <view class="flow-card">
+        <view class="flow-card-label">最近记录</view>
+        <view class="flow-card-text">{{flowStats.latestRecord}}</view>
+      </view>
+    </view>
+  </view>
 </view>
+
+<mobe-tabbar current="now"></mobe-tabbar>

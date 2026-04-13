@@ -11,8 +11,15 @@ navigator {
   color: #243024;
 }
 
+page {
+  background: #ffffff;
+}
+
+button::after {
+  border: none;
+}
+
 .container {
-  /* 这是微信模板默认容器样式的延续，当前虽未被业务页重度使用，但保留它能减少后续脚手架页重复写样式。 */
   height: 100%;
   display: flex;
   flex-direction: column;

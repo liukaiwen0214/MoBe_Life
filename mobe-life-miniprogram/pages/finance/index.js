@@ -1,17 +1,33 @@
-/**
- * 核心职责：作为财务模块占位页，保留页面路由和生命周期扩展点。
- * 所属业务模块：小程序业务层 / 财务管理。
- * 重要依赖关系或外部约束：当前无实际业务逻辑，但页面入口已固定，便于后续平滑接入账本和统计能力。
- */
-Page({
-  data: {},
+const SUB_MAP = {
+  flow: {
+    title: '流水',
+    desc: '这里先放收支明细，后面接账单列表、日期筛选和分类。',
+  },
+  budget: {
+    title: '筹码',
+    desc: '这里先放预算或账户总览，后面再接预算池和账户结构。',
+  },
+  echo: {
+    title: '回声',
+    desc: '这里先放统计复盘，后面可以接月度趋势和分类占比。',
+  },
+}
 
-  onLoad() {},
-  onReady() {},
-  onShow() {},
-  onHide() {},
-  onUnload() {},
-  onPullDownRefresh() {},
-  onReachBottom() {},
-  onShareAppMessage() {},
+Page({
+  data: {
+    subKey: 'flow',
+    currentInfo: SUB_MAP.flow,
+  },
+
+  onLoad(options) {
+    this.applySubKey(options?.subKey)
+  },
+
+  applySubKey(subKey) {
+    const nextKey = SUB_MAP[subKey] ? subKey : 'flow'
+    this.setData({
+      subKey: nextKey,
+      currentInfo: SUB_MAP[nextKey],
+    })
+  },
 })

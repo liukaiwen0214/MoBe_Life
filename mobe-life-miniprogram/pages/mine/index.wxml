@@ -17,7 +17,7 @@
     <view class="info-card">
       <view class="info-item" bindtap="handleGender">
         <view class="info-left">
-          <image class="item-icon" src="/assets/icons/gender.png" mode="aspectFit"></image>
+          <image class="item-icon" src="/assets/icons/mine/gender.png" mode="aspectFit"></image>
           <text class="info-label">性别</text>
         </view>
         <view class="info-right">
@@ -30,7 +30,7 @@
       <picker mode="date" value="{{birthdayPickerValue}}" bindchange="handleBirthdayChange">
         <view class="info-item">
           <view class="info-left">
-            <image class="item-icon" src="/assets/icons/birthday.png" mode="aspectFit"></image>
+            <image class="item-icon" src="/assets/icons/mine/birthday.png" mode="aspectFit"></image>
             <text class="info-label">出生日期</text>
           </view>
           <view class="info-right">
@@ -43,7 +43,7 @@
       <view class="phone-row-wrap">
         <view class="info-item">
           <view class="info-left">
-            <image class="item-icon" src="/assets/icons/phone.png" mode="aspectFit"></image>
+            <image class="item-icon" src="/assets/icons/mine/phone.png" mode="aspectFit"></image>
             <text class="info-label">手机号</text>
           </view>
           <view class="info-right">
@@ -58,7 +58,7 @@
 
       <view class="info-item" bindtap="handleEmail">
         <view class="info-left">
-          <image class="item-icon" src="/assets/icons/email.png" mode="aspectFit"></image>
+          <image class="item-icon" src="/assets/icons/mine/email.png" mode="aspectFit"></image>
           <text class="info-label">邮箱</text>
         </view>
         <view class="info-right">
@@ -69,7 +69,7 @@
 
       <view class="info-item no-border" bindtap="handlePassword">
         <view class="info-left">
-          <image class="item-icon" src="/assets/icons/password.png" mode="aspectFit"></image>
+          <image class="item-icon" src="/assets/icons/mine/password.png" mode="aspectFit"></image>
           <text class="info-label">修改密码</text>
         </view>
         <view class="info-right">
@@ -85,7 +85,7 @@
 
     <view class="danger-wrap" bindtap="handleCancelAccount">
       <view class="danger-top">
-        <image class="danger-icon" src="/assets/icons/cancel-account.svg" mode="aspectFit"></image>
+        <image class="danger-icon" src="/assets/icons/mine/cancel-account.svg" mode="aspectFit"></image>
         <text class="danger-text">注销账号</text>
       </view>
       <view class="danger-desc">
@@ -94,3 +94,4 @@
     </view>
   </view>
 </view>
+<mobe-tabbar current="base"></mobe-tabbar>

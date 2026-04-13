@@ -1,0 +1,52 @@
+<view class="mobe-tabbar-shell">
+  <view wx:if="{{expandedKey}}" class="drawer-mask" bindtap="handleMaskTap"></view>
+
+  <block wx:if="{{expandedKey}}">
+    <block wx:for="{{navItems}}" wx:for-item="nav" wx:key="key">
+      <view wx:if="{{nav.key === expandedKey}}" class="drawer-panel">
+        <view class="drawer-title">{{nav.label}}</view>
+
+        <view class="drawer-grid">
+          <view
+            wx:for="{{nav.children}}"
+            wx:for-item="child"
+            wx:key="key"
+            class="drawer-item {{current === nav.key && currentSub === child.key ? 'drawer-item--active' : ''}}"
+            data-parent-key="{{nav.key}}"
+            data-sub-key="{{child.key}}"
+            bindtap="handleChildTap"
+          >
+            <text class="drawer-item-title">{{child.label}}</text>
+            <text class="drawer-item-desc">{{child.desc}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+  </block>
+
+  <view class="mobe-tabbar">
+    <view
+      wx:for="{{navItems}}"
+      wx:for-item="nav"
+      wx:key="key"
+      class="tab-item"
+      data-key="{{nav.key}}"
+      bindtap="handleNavTap"
+    >
+      <image
+        class="tab-icon {{current === nav.key ? 'tab-icon--active' : ''}}"
+        src="{{nav.icon}}"
+        mode="aspectFit"
+      ></image>
+
+      <view class="tab-label-row">
+        <text class="tab-item-label {{current === nav.key ? 'tab-item-label--active' : ''}}">
+          {{nav.label}}
+        </text>
+        <text wx:if="{{nav.type === 'parent'}}" class="tab-item-caret">
+          {{expandedKey === nav.key ? '⌃' : '⌄'}}
+        </text>
+      </view>
+    </view>
+  </view>
+</view>

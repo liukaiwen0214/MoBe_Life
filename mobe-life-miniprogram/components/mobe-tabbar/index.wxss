@@ -1,0 +1,125 @@
+:host {
+  display: block;
+}
+
+.mobe-tabbar-shell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+}
+
+.drawer-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(36, 48, 36, 0.08);
+}
+
+.drawer-panel {
+  position: fixed;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: calc(108rpx + env(safe-area-inset-bottom));
+  padding: 24rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1rpx solid #edf2e8;
+  box-shadow: 0 8rpx 20rpx rgba(36, 48, 36, 0.05);
+  box-sizing: border-box;
+}
+
+.drawer-title {
+  font-size: 22rpx;
+  color: #8a9884;
+  margin-bottom: 16rpx;
+}
+
+.drawer-grid {
+  display: flex;
+  gap: 14rpx;
+}
+
+.drawer-item {
+  flex: 1;
+  min-height: 100rpx;
+  border-radius: 18rpx;
+  background: #f8f8f8;
+  border: 1rpx solid #edf2e8;
+  padding: 18rpx 16rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6rpx;
+}
+
+.drawer-item--active {
+  background: #f1f6eb;
+  border-color: #d9e5cc;
+}
+
+.drawer-item-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #243024;
+}
+
+.drawer-item-desc {
+  font-size: 20rpx;
+  color: #a8a8a8;
+}
+.mobe-tabbar {
+  height: calc(108rpx + env(safe-area-inset-bottom));
+  padding: 20rpx 18rpx env(safe-area-inset-bottom);
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1rpx solid #edf2e8;
+}
+
+.tab-item {
+  flex: 1;
+  min-width: 0;
+  height: 90rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+}
+
+.tab-icon {
+  width: 42rpx;
+  height: 42rpx;
+  display: block;
+}
+
+.tab-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  min-width: 0;
+}
+
+.tab-item-label {
+  font-size: 22rpx;
+  line-height: 1;
+  color: #9a9ca8;
+  font-weight: 500;
+}
+
+.tab-item-label--active {
+  color: #35c86a;
+  font-weight: 600;
+}
+
+.tab-item-caret {
+  font-size: 12rpx;
+  line-height: 1;
+  color: #b7bac4;
+  margin-top: 2rpx;
+}

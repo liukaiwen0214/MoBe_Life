@@ -1,17 +1,33 @@
-/**
- * 核心职责：作为任务模块占位页，保留页面路由和生命周期扩展点。
- * 所属业务模块：小程序业务层 / 任务管理。
- * 重要依赖关系或外部约束：当前无实际业务逻辑，保留空生命周期是为了后续接入任务列表时不需要重新创建页面骨架。
- */
-Page({
-  data: {},
+const SUB_MAP = {
+  brush: {
+    title: '笔触',
+    desc: '这里先放待办主内容，后面再接你的任务列表和快速创建。',
+  },
+  trace: {
+    title: '刻痕',
+    desc: '这里先放完成记录，后面可以接已完成清单与完成时间轴。',
+  },
+  collect: {
+    title: '拾遗',
+    desc: '这里先放收集箱，后面适合承接临时想法和未归类事项。',
+  },
+}
 
-  onLoad() {},
-  onReady() {},
-  onShow() {},
-  onHide() {},
-  onUnload() {},
-  onPullDownRefresh() {},
-  onReachBottom() {},
-  onShareAppMessage() {},
+Page({
+  data: {
+    subKey: 'brush',
+    currentInfo: SUB_MAP.brush,
+  },
+
+  onLoad(options) {
+    this.applySubKey(options?.subKey)
+  },
+
+  applySubKey(subKey) {
+    const nextKey = SUB_MAP[subKey] ? subKey : 'brush'
+    this.setData({
+      subKey: nextKey,
+      currentInfo: SUB_MAP[nextKey],
+    })
+  },
 })

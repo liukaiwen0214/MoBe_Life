@@ -9,7 +9,7 @@
     <view wx:if="{{hasEmail}}" class="form-item">
       <view class="label">当前绑定邮箱</view>
       <view class="readonly-box">
-        <image class="field-icon" src="/assets/icons/email.svg" mode="aspectFit"></image>
+        <image class="field-icon" src="/assets/icons/email/email.svg" mode="aspectFit"></image>
         <text class="readonly-text">{{maskedCurrentEmail}}</text>
       </view>
     </view>
@@ -17,7 +17,7 @@
     <view class="form-item">
       <view class="label">{{hasEmail ? '新邮箱地址' : '邮箱地址'}}</view>
       <view class="input-wrap">
-        <image class="field-icon" src="/assets/icons/email.svg" mode="aspectFit"></image>
+        <image class="field-icon" src="/assets/icons/email/email.svg" mode="aspectFit"></image>
         <input class="input" type="text" placeholder="{{hasEmail ? '请输入新的邮箱地址' : '请输入常用邮箱地址'}}" value="{{email}}" bindinput="handleEmailInput" />
       </view>
     </view>
@@ -26,7 +26,7 @@
       <view class="label">验证码</view>
       <view class="code-row">
         <view class="input-wrap code-input-wrap">
-          <image class="field-icon" src="/assets/icons/captcha.svg" mode="aspectFit"></image>
+          <image class="field-icon" src="/assets/icons/email/captcha.svg" mode="aspectFit"></image>
           <input class="input" type="number" placeholder="请输入验证码" value="{{code}}" bindinput="handleCodeInput" />
         </view>
 

@@ -3,10 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/mobe_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 148632
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jmx:
     enabled: false
   servlet:
@@ -55,3 +54,6 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
+qweather:
+  api-host: https://ng6apxvu47.re.qweatherapi.com
+  api-key: c3c21ab925fa4cbcb9546be600153926

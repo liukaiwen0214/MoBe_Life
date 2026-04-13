@@ -1,9 +1,9 @@
 <view class="page">
   <view class="panel">
-    <view class="panel-tag">刻度</view>
+    <view class="panel-tag">牵引</view>
     <view class="panel-title">{{currentInfo.title}}</view>
     <view class="panel-desc">{{currentInfo.desc}}</view>
   </view>
 </view>
 
-<mobe-tabbar current="scale" current-sub="{{subKey}}"></mobe-tabbar>
+<mobe-tabbar current="guide" current-sub="{{subKey}}"></mobe-tabbar>

@@ -3,6 +3,7 @@
     "pages/index/index",
     "pages/task/index",
     "pages/finance/index",
+    "pages/goal/index",
     "pages/mine/index",
     "pages/login/login",
     "pages/email/bind",
@@ -15,30 +16,14 @@
     "backgroundColor": "#f6f8f4",
     "backgroundTextStyle": "light"
   },
-  "tabBar": {
-    "color": "#7d8b7d",
-    "selectedColor": "#9caf88",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "首页"
-      },
-      {
-        "pagePath": "pages/task/index",
-        "text": "任务"
-      },
-      {
-        "pagePath": "pages/finance/index",
-        "text": "财务"
-      },
-      {
-        "pagePath": "pages/mine/index",
-        "text": "我的"
-      }
-    ]
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于获取你所在城市的天气信息"
+    }
   },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }

@@ -1,23 +1,193 @@
-/* 核心职责：定义首页的极简欢迎样式，优先保证登录态切换后的反馈清晰可见。 */
+/* 核心职责：定义首页“此刻”页的轻量信息布局，强调问候、聚焦和流水统计三层结构。 */
 .page {
-  padding: 32rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 28rpx 24rpx 150rpx;
+  background: #ffffff;
 }
 
-.title {
-  font-size: 44rpx;
-  font-weight: 600;
-  color: #243024;
-  margin-bottom: 16rpx;
+.loading-wrap {
+  padding-top: 220rpx;
+  text-align: center;
 }
 
-.desc {
+.loading-text {
   font-size: 28rpx;
-  color: #5f6f5f;
-  margin-bottom: 32rpx;
+  color: #8e938c;
 }
 
-.go-btn {
-  background: #9caf88;
-  color: #ffffff;
-  border-radius: 16rpx;
+/* 顶部轻头部 */
+.hero-wrap {
+  margin-bottom: 52rpx;
+}
+
+.hero-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28rpx;
+}
+
+.hero-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-title {
+  font-size: 38rpx;
+  font-weight: 600;
+  color: #222222;
+  line-height: 1.42;
+  margin-bottom: 14rpx;
+}
+
+.hero-quote {
+  font-size: 24rpx;
+  line-height: 1.9;
+  color: #747870;
+  margin-bottom: 8rpx;
+}
+
+.hero-from {
+  font-size: 20rpx;
+  color: #b5b8b1;
+  line-height: 1.6;
+  letter-spacing: 1rpx;
+}
+
+.hero-weather {
+  width: 156rpx;
+  flex-shrink: 0;
+  text-align: right;
+  padding-top: 6rpx;
+}
+
+.hero-weather-city {
+  font-size: 20rpx;
+  color: #c2c5be;
+  line-height: 1.5;
+  margin-bottom: 8rpx;
+}
+
+.hero-weather-temp {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #2a2a2a;
+  line-height: 1.15;
+  margin-bottom: 8rpx;
+}
+
+.hero-weather-text {
+  font-size: 20rpx;
+  color: #c2c5be;
+  line-height: 1.6;
+}
+
+/* 通用分区 */
+.section-wrap {
+  margin-bottom: 44rpx;
+}
+
+.section-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #222222;
+  line-height: 1.35;
+  margin-bottom: 8rpx;
+}
+
+.section-desc {
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #a3a79f;
+  margin-bottom: 20rpx;
+}
+
+/* 今日聚焦 */
+.focus-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18rpx;
+}
+
+.focus-card {
+  background: #ffffff87;
+  border: 1rpx solid #f2f2ee;
+  border-radius: 24rpx;
+  padding: 22rpx 20rpx;
+  box-sizing: border-box;
+  min-height: 154rpx;
+}
+
+.focus-card:active {
+  opacity: 0.88;
+  transform: scale(0.985);
+}
+
+.focus-card-title {
+  font-size: 20rpx;
+  color: #b2b6ae;
+  line-height: 1.5;
+  margin-bottom: 10rpx;
+}
+
+.focus-card-value {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222222;
+  line-height: 1.35;
+  margin-bottom: 10rpx;
+  word-break: break-word;
+}
+
+.focus-card-desc {
+  font-size: 20rpx;
+  line-height: 1.75;
+  color: #8a8f87;
+}
+
+/* 流水统计 */
+.flow-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18rpx;
+}
+
+.flow-card {
+  background: #ffffff87;
+  border: 1rpx solid #f3f3ef;
+  border-radius: 24rpx;
+  padding: 20rpx 20rpx 22rpx;
+  box-sizing: border-box;
+  min-height: 132rpx;
+}
+
+.flow-card-label {
+  font-size: 20rpx;
+  color: #b3b7af;
+  line-height: 1.5;
+  margin-bottom: 10rpx;
+}
+
+.flow-card-value {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #2a2a2a;
+  line-height: 1.35;
+}
+
+.flow-card-text {
+  font-size: 20rpx;
+  line-height: 1.7;
+  color: #8e938c;
+}
+
+/* 适当给最后一个统计卡更多可读性 */
+.flow-card:last-child .flow-card-text {
+  margin-top: 2rpx;
+}
+
+/* 防止底部导航压住内容 */
+.section-wrap:last-of-type {
+  margin-bottom: 20rpx;
 }
