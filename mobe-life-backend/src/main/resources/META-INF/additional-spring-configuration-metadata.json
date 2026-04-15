@@ -59,6 +59,11 @@
       "name": "qweather.api-key",
       "type": "java.lang.String",
       "description": "和风天气 API 密钥"
+    },
+    {
+      "name": "one.api-url",
+      "type": "java.lang.String",
+      "description": "ONE API URL"
     }
   ]
 }

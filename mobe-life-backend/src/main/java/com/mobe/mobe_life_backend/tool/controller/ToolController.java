@@ -11,6 +11,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.mobe.mobe_life_backend.integration.quote.service.QuoteService;
+import com.mobe.mobe_life_backend.integration.quote.vo.QuoteInfoVO;
+import com.mobe.mobe_life_backend.tool.vo.DailyQuoteVO;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ToolController {
 
   private final WeatherService weatherService;
+  private final QuoteService quoteService;
 
   @GetMapping("/api/tool/weather")
   @Operation(summary = "根据经纬度获取天气", description = "用于首页天气展示")
@@ -63,5 +67,18 @@ public class ToolController {
       return "风有点明显，出门多留意一下";
     }
     return "愿你今天也有一点轻松的呼吸感";
+  }
+
+  @GetMapping("/api/tool/daily-quote")
+  @Operation(summary = "获取每日一句", description = "用于首页每日一句展示")
+  public Result<DailyQuoteVO> getDailyQuote() {
+    QuoteInfoVO quoteInfo = quoteService.getDailyQuote();
+
+    DailyQuoteVO vo = new DailyQuoteVO();
+    vo.setText(quoteInfo.getText());
+    vo.setFrom(quoteInfo.getFrom());
+    vo.setImageUrl(quoteInfo.getImageUrl());
+
+    return Result.success(vo);
   }
 }

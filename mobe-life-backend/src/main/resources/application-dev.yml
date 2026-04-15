@@ -57,3 +57,5 @@ springdoc:
 qweather:
   api-host: https://ng6apxvu47.re.qweatherapi.com
   api-key: c3c21ab925fa4cbcb9546be600153926
+one:
+  api-url: http://v3.wufazhuce.com:8000/api/channel/one/0/0

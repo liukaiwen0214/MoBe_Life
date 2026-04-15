@@ -56,6 +56,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/webjars/**",
+            "/api/tool/daily-quote",
             "/test",
             "/test/error");
   }

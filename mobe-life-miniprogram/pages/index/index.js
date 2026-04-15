@@ -30,7 +30,7 @@ Page({
     focusCards: [
       {
         key: 'writing',
-        title: '落笔',
+        title: '待办',
         value: '0 项',
         desc: '今天待办还没有开始',
       },
@@ -123,23 +123,32 @@ Page({
    * 每日一句：
    * 第一版直接请求 ONE，失败则保留默认文案。
    * 后续你也可以把这段迁到自己后端的首页聚合接口里。
+   *   baseUrl: 'http://127.0.0.1:8080',
+  // baseUrl: 'http://119.91.216.175:8080',
    */
   loadDailyQuote() {
     return new Promise((resolve) => {
       wx.request({
-        url: 'http://v3.wufazhuce.com:8000/api/channel/one/0/0',
+        // 本地联调用这个
+        url: 'http://127.0.0.1:8080/api/tool/daily-quote',
+        // 服务器联调用这个
+        // url: 'http://119.91.216.175:8080/api/tool/daily-quote',
         method: 'GET',
         success: (res) => {
           try {
-            const data = res.data || {}
-            const firstItem = data?.data?.content_list?.[0] || {}
-
+            const result = res.data || {}
+            const quote = result.data || {}
+  
+            if (res.statusCode !== 200 || result.code !== 0 || !quote) {
+              resolve()
+              return
+            }
+  
             this.setData({
               quoteCard: {
-                text:
-                  firstItem.forward || '把今天最重要的一件事，轻轻落下来。',
-                from: firstItem.words_info || firstItem.title || 'ONE',
-                imageUrl: firstItem.img_url || '',
+                text: quote.text || '把今天最重要的一件事，轻轻落下来。',
+                from: quote.from || 'ONE',
+                imageUrl: quote.imageUrl || '',
               },
             })
           } catch (error) {
@@ -236,8 +245,8 @@ Page({
       const token = storage.getToken()
   
       wx.request({
-        // url: 'http://127.0.0.1:8080/api/tool/weather',
-        url: 'http://119.91.216.175:8080/api/tool/weather',
+        url: 'http://127.0.0.1:8080/api/tool/weather',
+        // url: 'http://119.91.216.175:8080/api/tool/weather',
         method: 'GET',
         data: {
           latitude,
@@ -285,7 +294,7 @@ Page({
       focusCards: [
         {
           key: 'writing',
-          title: '落笔',
+          title: '待办',
           value: '3 项',
           desc: '今天还有 2 件事值得先处理',
         },

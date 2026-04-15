@@ -8,8 +8,8 @@ const config = {
    * 后端 API 根地址。
    * 当前保留本地开发地址，方便小程序与本机后端联调。
    */
-  // baseUrl: 'http://127.0.0.1:8080',
-  baseUrl: 'http://119.91.216.175:8080',
+  baseUrl: 'http://127.0.0.1:8080',
+  // baseUrl: 'http://119.91.216.175:8080',
 }
 
 export default config

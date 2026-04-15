@@ -1,53 +1,71 @@
-const NAV_ITEMS = [
+const GLOBAL_NAV_ITEMS = [
   {
     key: 'writing',
-    label: '落笔',
+    label: '事项',
     type: 'parent',
-    pagePath: '/pages/task/index',
+    pagePath: '/pages/task/index?subKey=todo',
     icon: '/assets/icons/tabbar/writing.svg',
-    children: [
-      { key: 'brush', label: '笔触', desc: '待办' },
-      { key: 'trace', label: '刻痕', desc: '完成' },
-      { key: 'collect', label: '拾遗', desc: '收集' },
-    ],
   },
   {
     key: 'scale',
-    label: '刻度',
-    type: 'parent',
+    label: '财务',
+    type: 'fixed',
     pagePath: '/pages/finance/index',
     icon: '/assets/icons/tabbar/scale.svg',
-    children: [
-      { key: 'flow', label: '流水', desc: '明细' },
-      { key: 'budget', label: '筹码', desc: '预算' },
-      { key: 'echo', label: '回声', desc: '统计' },
-    ],
   },
   {
     key: 'now',
-    label: '此刻',
+    label: '主页',
     type: 'fixed',
     pagePath: '/pages/index/index',
     icon: '/assets/icons/tabbar/now.svg',
   },
   {
     key: 'guide',
-    label: '牵引',
-    type: 'parent',
+    label: '目标',
+    type: 'fixed',
     pagePath: '/pages/goal/index',
     icon: '/assets/icons/tabbar/guide.svg',
-    children: [
-      { key: 'mountain', label: '远山', desc: '目标' },
-      { key: 'outline', label: '轮廓', desc: '规划' },
-      { key: 'lead', label: '引线', desc: '推进' },
-    ],
   },
   {
     key: 'base',
-    label: '底色',
+    label: '个人',
     type: 'fixed',
     pagePath: '/pages/mine/index',
     icon: '/assets/icons/tabbar/base.svg',
+  },
+]
+
+const TASK_MODULE_NAV_ITEMS = [
+  {
+    key: 'todo',
+    label: '待办',
+    pagePath: '/pages/task/index?subKey=todo',
+    icon: '/assets/icons/tabbar/tasks/todo.svg',
+  },
+  {
+    key: 'node',
+    label: '节点',
+    pagePath: '/pages/task/index?subKey=node',
+    icon: '/assets/icons/tabbar/tasks/node.svg',
+  },
+  {
+    key: 'goal',
+    label: '目标',
+    pagePath: '/pages/task/index?subKey=goal',
+    icon: '/assets/icons/tabbar/tasks/goal.svg',
+  },
+  {
+    key: 'project',
+    label: '项目',
+    pagePath: '/pages/task/index?subKey=project',
+    icon: '/assets/icons/tabbar/tasks/project.svg',
+  },
+  {
+    key: 'home',
+    label: '主页',
+    pagePath: '/pages/index/index',
+    icon: '/assets/icons/tabbar/now.svg',
   },
 ]
 
@@ -64,51 +82,62 @@ Component({
   },
 
   data: {
-    navItems: NAV_ITEMS,
-    expandedKey: '',
+    globalNavItems: GLOBAL_NAV_ITEMS,
+    taskModuleNavItems: TASK_MODULE_NAV_ITEMS,
+    isTaskModule: false,
+  },
+
+  observers: {
+    'current'(current) {
+      this.setData({
+        isTaskModule: current === 'writing',
+      })
+    },
+  },
+
+  lifetimes: {
+    attached() {
+      this.setData({
+        isTaskModule: this.properties.current === 'writing',
+      })
+    },
   },
 
   methods: {
-    handleNavTap(e) {
+    handleGlobalNavTap(e) {
       const { key } = e.currentTarget.dataset
-      const nav = NAV_ITEMS.find((item) => item.key === key)
+      const nav = GLOBAL_NAV_ITEMS.find((item) => item.key === key)
 
       if (!nav) return
 
-      if (nav.type === 'fixed') {
-        this.setData({ expandedKey: '' })
+      if (this.properties.current === nav.key && nav.key !== 'writing') {
+        return
+      }
 
-        if (this.properties.current === nav.key) {
-          return
-        }
+      wx.reLaunch({
+        url: nav.pagePath,
+      })
+    },
 
+    handleTaskModuleNavTap(e) {
+      const { key } = e.currentTarget.dataset
+      const nav = TASK_MODULE_NAV_ITEMS.find((item) => item.key === key)
+
+      if (!nav) return
+
+      if (key === 'home') {
         wx.reLaunch({
           url: nav.pagePath,
         })
         return
       }
 
-      this.setData({
-        expandedKey: this.data.expandedKey === nav.key ? '' : nav.key,
-      })
-    },
-
-    handleMaskTap() {
-      this.setData({
-        expandedKey: '',
-      })
-    },
-
-    handleChildTap(e) {
-      const { parentKey, subKey } = e.currentTarget.dataset
-      const nav = NAV_ITEMS.find((item) => item.key === parentKey)
-
-      if (!nav) return
-
-      this.setData({ expandedKey: '' })
+      if (this.properties.currentSub === key) {
+        return
+      }
 
       wx.reLaunch({
-        url: `${nav.pagePath}?subKey=${subKey}`,
+        url: nav.pagePath,
       })
     },
   },
