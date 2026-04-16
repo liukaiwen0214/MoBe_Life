@@ -1,27 +1,8 @@
-const SUB_MAP = {
-  todo: {
-    title: '待办',
-    emptyText: '还没有待办，先记下一件想做的事吧',
-  },
-  node: {
-    title: '节点',
-    emptyText: '还没有节点，先创建一个阶段性事项吧',
-  },
-  goal: {
-    title: '目标',
-    emptyText: '还没有目标，先写下一个想完成的方向吧',
-  },
-  project: {
-    title: '项目',
-    emptyText: '还没有项目，先整理一个要推进的内容吧',
-  },
-}
-
 Page({
   data: {
     subKey: 'todo',
-    currentInfo: SUB_MAP.todo,
     summaryText: '今日待办有 10 个，其中 2 个延期，8 个正常',
+    nodeSummaryText: '共有 1 个项目，2 个待办；1 个目标，1 个待办',
 
     todoSections: [
       {
@@ -106,25 +87,48 @@ Page({
           },
         ],
       },
-    ]
+    ],
+    nodeSections: [
+      {
+        key: 'project',
+        title: '项目',
+        items: [
+          {
+            id: 'node_1',
+            title: '待办模块页面设计',
+            ownerName: 'MoBe Life 系统开发',
+            taskCount: 3,
+            updateText: '今天更新',
+          },
+          {
+            id: 'node_2',
+            title: '登录注册联调',
+            ownerName: 'MoBe Life 系统开发',
+            taskCount: 2,
+            updateText: '2 天前更新',
+          },
+        ],
+      },
+      {
+        key: 'goal',
+        title: '目标',
+        items: [
+          {
+            id: 'node_3',
+            title: '科目二准备',
+            ownerName: '拿到驾驶证',
+            taskCount: 2,
+            updateText: '昨天更新',
+          },
+        ],
+      },
+    ],
   },
 
   onLoad(options) {
-    this.applySubKey(options?.subKey)
+   
   },
 
-  applySubKey(subKey) {
-    const nextKey = SUB_MAP[subKey] ? subKey : 'todo'
-    this.setData({
-      subKey: nextKey,
-      currentInfo: SUB_MAP[nextKey],
-    })
-  },
-
-  handleSubChange(e) {
-    const { subKey } = e.detail
-    this.applySubKey(subKey)
-  },
 
   handleToggleSection(e) {
     const { key } = e.currentTarget.dataset
@@ -164,12 +168,10 @@ Page({
       },
     })
   },
-
   handleTaskTap(e) {
     const { taskId } = e.currentTarget.dataset
-    wx.showToast({
-      title: `进入待办 ${taskId} 详情`,
-      icon: 'none',
+    wx.navigateTo({
+      url: `/pages/task/detail/detail?id=${taskId}`,
     })
   },
 
@@ -177,6 +179,12 @@ Page({
     wx.showToast({
       title: '进入新建待办',
       icon: 'none',
+    })
+  },
+  handleNodeTap(e) {
+    const { nodeId } = e.currentTarget.dataset
+    wx.navigateTo({
+      url: `/pages/node/detail/detail?id=${nodeId}`,
     })
   },
 })

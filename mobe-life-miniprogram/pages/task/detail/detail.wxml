@@ -1,0 +1,17 @@
+<view class="page">
+  <view class="detail-card">
+    <view class="detail-tag">待办详情</view>
+    <view class="detail-title">{{detail.title}}</view>
+
+    <view class="detail-meta">
+      <text class="detail-status">{{detail.statusText}}</text>
+      <text class="detail-time">{{detail.timeText}}</text>
+    </view>
+
+    <view wx:if="{{detail.nodeName}}" class="detail-node">
+      所属节点：{{detail.nodeName}}
+    </view>
+
+    <view class="detail-desc">{{detail.desc}}</view>
+  </view>
+</view>

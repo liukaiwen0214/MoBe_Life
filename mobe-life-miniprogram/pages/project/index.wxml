@@ -1,11 +1,11 @@
 <view class="page">
   <view class="todo-header-card">
-    <view class="todo-header-title">目标</view>
+    <view class="todo-header-title">项目</view>
     <view class="todo-header-desc">{{summaryText}}</view>
   </view>
 
-  <block wx:for="{{goalList}}" wx:key="id" wx:for-item="item">
-    <view class="project-card" data-goal-id="{{item.id}}" bindtap="handleGoalTap">
+  <block wx:for="{{projectList}}" wx:key="id" wx:for-item="item">
+    <view class="project-card" data-project-id="{{item.id}}" bindtap="handleProjectTap">
       <view class="project-title">{{item.title}}</view>
 
       <view class="project-meta">
@@ -21,7 +21,7 @@
     </view>
   </block>
 
-  <view class="fab" bindtap="handleCreateGoal">+</view>
+  <view class="fab" bindtap="handleCreateProject">+</view>
 </view>
 
-<mobe-tabbar current="writing" current-sub="goal"></mobe-tabbar>
+<mobe-tabbar current="writing" current-sub="project"></mobe-tabbar>

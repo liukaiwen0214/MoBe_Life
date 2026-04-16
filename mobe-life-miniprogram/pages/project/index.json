@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "目标",
+  "navigationBarTitleText": "项目",
   "usingComponents": {
     "mobe-tabbar": "/components/mobe-tabbar/index"
   }

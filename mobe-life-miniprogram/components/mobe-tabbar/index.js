@@ -40,25 +40,25 @@ const TASK_MODULE_NAV_ITEMS = [
   {
     key: 'todo',
     label: '待办',
-    pagePath: '/pages/task/index?subKey=todo',
+    pagePath: '/pages/task/index',
     icon: '/assets/icons/tabbar/tasks/todo.svg',
   },
   {
     key: 'node',
     label: '节点',
-    pagePath: '/pages/task/index?subKey=node',
+    pagePath: '/pages/node/index',
     icon: '/assets/icons/tabbar/tasks/node.svg',
   },
   {
     key: 'goal',
     label: '目标',
-    pagePath: '/pages/task/index?subKey=goal',
+    pagePath: '/pages/goal/index',
     icon: '/assets/icons/tabbar/tasks/goal.svg',
   },
   {
     key: 'project',
     label: '项目',
-    pagePath: '/pages/task/index?subKey=project',
+    pagePath: '/pages/project/index',
     icon: '/assets/icons/tabbar/tasks/project.svg',
   },
   {

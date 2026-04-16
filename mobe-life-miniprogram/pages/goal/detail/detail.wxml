@@ -1,0 +1,80 @@
+<view class="page">
+  <!-- 概览区 -->
+  <view class="detail-card">
+    <view class="detail-title">{{detail.title}}</view>
+    <view class="detail-desc">{{detail.desc}}</view>
+
+    <view class="detail-meta">
+      <text class="detail-status">{{detail.statusText}}</text>
+      <text class="detail-mode">{{detail.executionMode}}</text>
+      <text class="detail-progress">{{detail.progressText}}</text>
+    </view>
+
+    <view class="detail-summary">
+      <text class="detail-summary-item">{{detail.nodeCount}} 个节点</text>
+      <text class="detail-summary-item">{{detail.taskCount}} 个待办</text>
+    </view>
+  </view>
+
+  <!-- 节点与待办区 -->
+  <view class="detail-card">
+    <view class="section-title">节点与待办</view>
+
+    <view class="subsection-title">节点</view>
+    <block wx:for="{{detail.nodes}}" wx:key="id" wx:for-item="node">
+      <view class="list-row" data-node-id="{{node.id}}" bindtap="handleNodeTap">
+        <view class="list-row-main">
+          <view class="list-row-title">{{node.title}}</view>
+          <view class="list-row-desc">{{node.taskCount}} 个待办</view>
+        </view>
+        <text class="list-row-arrow">›</text>
+      </view>
+    </block>
+
+    <view class="subsection-title subsection-title--spacing">待办</view>
+    <block wx:for="{{detail.tasks}}" wx:key="id" wx:for-item="task">
+      <view class="list-row" data-task-id="{{task.id}}" bindtap="handleTaskTap">
+        <view class="list-row-main">
+          <view class="list-row-title">{{task.title}}</view>
+          <view class="list-row-desc">{{task.statusText}} · {{task.timeText}}</view>
+        </view>
+        <text class="list-row-arrow">›</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 状态流程区 -->
+  <view class="detail-card">
+    <view class="section-title">状态流程</view>
+    <view class="flow-template">当前模板：{{detail.templateName}}</view>
+    <view class="flow-preview">{{detail.flowPreviewText}}</view>
+    <view class="flow-extra">
+      <text class="flow-extra-item">执行模式：{{detail.executionMode}}</text>
+      <text class="flow-extra-item">状态停用：后续补功能</text>
+    </view>
+  </view>
+
+  <!-- 状态列表区 -->
+  <view class="detail-card">
+    <view class="section-title">状态列表</view>
+    <block wx:for="{{detail.statusList}}" wx:key="id" wx:for-item="status">
+      <view class="list-row list-row--plain">
+        <view class="list-row-main">
+          <view class="list-row-title">{{status.name}}</view>
+          <view class="list-row-desc">{{status.attrs}}</view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 执行日志区 -->
+  <view class="detail-card">
+    <view class="section-title">执行日志</view>
+    <block wx:for="{{detail.logs}}" wx:key="id" wx:for-item="log">
+      <view class="log-row">
+        <view class="log-text">{{log.text}}</view>
+        <view class="log-time">{{log.timeText}}</view>
+      </view>
+    </block>
+  </view>
+</view>

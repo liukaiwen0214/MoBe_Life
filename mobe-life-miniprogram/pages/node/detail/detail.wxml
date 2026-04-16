@@ -1,0 +1,30 @@
+<view class="page">
+  <view class="detail-card">
+    <view class="detail-header">
+      <view class="detail-header-left">
+        <view class="detail-tag">{{detail.ownerType}}</view>
+        <view class="detail-title">{{detail.title}}</view>
+      </view>
+    </view>
+
+    <view class="detail-owner">所属{{detail.ownerType}}：{{detail.ownerName}}</view>
+    <view class="detail-summary">{{detail.summaryText}}</view>
+  </view>
+
+  <view class="task-list-card">
+    <view class="task-list-title">节点下待办</view>
+
+    <block wx:for="{{detail.tasks}}" wx:key="id" wx:for-item="task">
+      <view class="task-row" data-task-id="{{task.id}}" bindtap="handleTaskTap">
+        <view class="task-content">
+          <view class="task-title">{{task.title}}</view>
+          <view class="task-meta">
+            <text class="task-status">{{task.statusText}}</text>
+            <text class="task-time">{{task.timeText}}</text>
+          </view>
+        </view>
+        <text class="task-arrow">›</text>
+      </view>
+    </block>
+  </view>
+</view> 

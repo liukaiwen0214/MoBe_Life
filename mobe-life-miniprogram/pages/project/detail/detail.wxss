@@ -1,0 +1,176 @@
+.page {
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.detail-card {
+  background: #ffffff;
+  border: 1rpx solid #edf2e8;
+  border-radius: 32rpx;
+  padding: 32rpx 28rpx;
+  margin-bottom: 20rpx;
+}
+
+.detail-title {
+  font-size: 40rpx;
+  line-height: 1.5;
+  font-weight: 700;
+  color: #243024;
+  margin-bottom: 12rpx;
+}
+
+.detail-desc {
+  font-size: 24rpx;
+  line-height: 1.8;
+  color: #708070;
+  margin-bottom: 18rpx;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-wrap: wrap;
+  margin-bottom: 16rpx;
+}
+
+.detail-status {
+  font-size: 22rpx;
+  color: #35c86a;
+  font-weight: 600;
+}
+
+.detail-mode {
+  font-size: 22rpx;
+  color: #708070;
+}
+
+.detail-progress {
+  font-size: 22rpx;
+  color: #35c86a;
+  font-weight: 700;
+}
+
+.detail-summary {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+
+.detail-summary-item {
+  font-size: 22rpx;
+  color: #8c988c;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #243024;
+  margin-bottom: 18rpx;
+}
+
+.subsection-title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #4f614f;
+  margin-bottom: 12rpx;
+}
+
+.subsection-title--spacing {
+  margin-top: 20rpx;
+}
+
+.list-row {
+  min-height: 92rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f3f5f1;
+}
+
+.list-row:last-child {
+  border-bottom: none;
+}
+
+.list-row--plain {
+  min-height: 76rpx;
+}
+
+.list-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-row-title {
+  font-size: 28rpx;
+  line-height: 1.5;
+  font-weight: 600;
+  color: #243024;
+  margin-bottom: 8rpx;
+  word-break: break-word;
+}
+
+.list-row-desc {
+  font-size: 22rpx;
+  color: #708070;
+  line-height: 1.6;
+}
+
+.list-row-arrow {
+  font-size: 34rpx;
+  line-height: 1;
+  color: #b7c0b3;
+  flex-shrink: 0;
+}
+
+.flow-template {
+  font-size: 24rpx;
+  color: #4f614f;
+  margin-bottom: 14rpx;
+}
+
+.flow-preview {
+  font-size: 24rpx;
+  line-height: 1.8;
+  color: #708070;
+  padding: 20rpx 22rpx;
+  border-radius: 20rpx;
+  background: #f8fbf5;
+  border: 1rpx solid #edf2e8;
+  margin-bottom: 14rpx;
+}
+
+.flow-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.flow-extra-item {
+  font-size: 22rpx;
+  color: #8c988c;
+}
+
+.log-row {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f3f5f1;
+}
+
+.log-row:last-child {
+  border-bottom: none;
+}
+
+.log-text {
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: #243024;
+  margin-bottom: 8rpx;
+}
+
+.log-time {
+  font-size: 22rpx;
+  color: #9aa49a;
+}

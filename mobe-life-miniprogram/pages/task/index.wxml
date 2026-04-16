@@ -1,71 +1,57 @@
 <view class="page">
-  <block wx:if="{{subKey === 'todo'}}">
-    <view class="todo-header-card">
-      <view class="todo-header-title">待办</view>
-      <view class="todo-header-desc">{{summaryText}}</view>
-    </view>
+  <view class="todo-header-card">
+    <view class="todo-header-title">待办</view>
+    <view class="todo-header-desc">{{summaryText}}</view>
+  </view>
 
-    <block wx:for="{{todoSections}}" wx:key="key" wx:for-item="section">
-      <view class="group-card">
-        <view class="group-header" data-key="{{section.key}}" bindtap="handleToggleSection">
-          <view class="group-header-left">
-            <text class="group-title">{{section.title}}</text>
-            <text class="group-count">({{section.count}})</text>
-          </view>
-
-          <view class="group-header-right">
-            <text wx:if="{{section.type}}" class="group-tag">{{section.type}}</text>
-            <text class="group-arrow">{{section.collapsed ? '⌄' : '⌃'}}</text>
-          </view>
+  <block wx:for="{{todoSections}}" wx:key="key" wx:for-item="section">
+    <view class="group-card">
+      <view class="group-header" data-key="{{section.key}}" bindtap="handleToggleSection">
+        <view class="group-header-left">
+          <text class="group-title">{{section.title}}</text>
+          <text class="group-count">({{section.count}})</text>
         </view>
 
-        <view wx:if="{{!section.collapsed}}" class="group-body">
-          <block wx:if="{{section.tasks}}">
-            <block wx:for="{{section.tasks}}" wx:key="id" wx:for-item="task">
-              <view class="task-row">
-                <view
-                  class="task-action-box"
-                  data-task-id="{{task.id}}"
-                  data-flow-mode="{{task.flowMode}}"
-                  bindtap="handleTaskAction"
-                ></view>
-
-                <view
-                  class="task-content"
-                  data-task-id="{{task.id}}"
-                  bindtap="handleTaskTap"
-                >
-                  <view class="task-title">{{task.title}}</view>
-                  <view class="task-meta">
-                    <text class="task-status">{{task.statusText}}</text>
-                    <text class="task-time">{{task.timeText}}</text>
-                  </view>
-
-                  <view wx:if="{{task.nodeName}}" class="task-node-row">
-                    <text class="task-node">{{task.nodeName}}</text>
-                  </view>
-                </view>
-              </view>
-            </block>
-          </block>
+        <view class="group-header-right">
+          <text wx:if="{{section.type}}" class="group-tag">{{section.type}}</text>
+          <text class="group-arrow">{{section.collapsed ? '⌄' : '⌃'}}</text>
         </view>
       </view>
-    </block>
 
-    <view class="fab" bindtap="handleCreateTask">+</view>
-  </block>
+      <view wx:if="{{!section.collapsed}}" class="group-body">
+        <block wx:if="{{section.tasks}}">
+          <block wx:for="{{section.tasks}}" wx:key="id" wx:for-item="task">
+            <view class="task-row">
+              <view
+                class="task-action-box"
+                data-task-id="{{task.id}}"
+                data-flow-mode="{{task.flowMode}}"
+                bindtap="handleTaskAction"
+              ></view>
 
-  <block wx:else>
-    <view class="panel">
-      <view class="panel-tag">{{currentInfo.title}}</view>
-      <view class="panel-title">{{currentInfo.title}}</view>
-      <view class="panel-desc">{{currentInfo.emptyText}}</view>
+              <view
+                class="task-content"
+                data-task-id="{{task.id}}"
+                bindtap="handleTaskTap"
+              >
+                <view class="task-title">{{task.title}}</view>
+                <view class="task-meta">
+                  <text class="task-status">{{task.statusText}}</text>
+                  <text class="task-time">{{task.timeText}}</text>
+                </view>
+
+                <view wx:if="{{task.nodeName}}" class="task-node-row">
+                  <text class="task-node">{{task.nodeName}}</text>
+                </view>
+              </view>
+            </view>
+          </block>
+        </block>
+      </view>
     </view>
   </block>
+
+  <view class="fab" bindtap="handleCreateTask">+</view>
 </view>
 
-<mobe-tabbar
-  current="writing"
-  current-sub="{{subKey}}"
-  bind:subchange="handleSubChange"
-></mobe-tabbar>
+<mobe-tabbar current="writing" current-sub="todo"></mobe-tabbar>

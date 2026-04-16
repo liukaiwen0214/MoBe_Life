@@ -1,0 +1,101 @@
+.page {
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.detail-card,
+.task-list-card {
+  background: #ffffff;
+  border: 1rpx solid #edf2e8;
+  border-radius: 32rpx;
+  padding: 32rpx 28rpx;
+  margin-bottom: 20rpx;
+}
+
+.detail-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
+  background: #f1f6eb;
+  color: #6f8d66;
+  font-size: 20rpx;
+  line-height: 1;
+  margin-bottom: 16rpx;
+}
+
+.detail-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #243024;
+  line-height: 1.5;
+  margin-bottom: 14rpx;
+}
+
+.detail-owner,
+.detail-summary {
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: #708070;
+}
+
+.task-list-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #243024;
+  margin-bottom: 16rpx;
+}
+
+.task-row {
+  min-height: 92rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f3f5f1;
+}
+
+.task-row:last-child {
+  border-bottom: none;
+}
+
+.task-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #243024;
+  line-height: 1.5;
+  margin-bottom: 8rpx;
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+
+.task-status {
+  font-size: 22rpx;
+  color: #35c86a;
+  font-weight: 600;
+}
+
+.task-time {
+  font-size: 22rpx;
+  color: #8c988c;
+}
+
+.task-arrow {
+  font-size: 34rpx;
+  line-height: 1;
+  color: #b7c0b3;
+  flex-shrink: 0;
+}

@@ -4,10 +4,16 @@
     "pages/task/index",
     "pages/finance/index",
     "pages/goal/index",
+    "pages/goal/detail/detail",
     "pages/mine/index",
     "pages/login/login",
     "pages/email/bind",
-    "pages/password/index"
+    "pages/password/index",
+    "pages/task/detail/detail",
+    "pages/node/detail/detail",
+    "pages/node/index",
+    "pages/project/index",
+    "pages/project/detail/detail"
   ],
   "window": {
     "navigationBarTitleText": "MoBe Life",
