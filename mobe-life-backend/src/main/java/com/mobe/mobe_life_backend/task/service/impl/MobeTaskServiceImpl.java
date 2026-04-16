@@ -5,6 +5,8 @@ import com.mobe.mobe_life_backend.task.service.MobeTaskService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
+import com.mobe.mobe_life_backend.common.exception.TaskErrorCode;
 import com.mobe.mobe_life_backend.common.response.PageResult;
 import com.mobe.mobe_life_backend.task.dto.TaskListQueryDTO;
 import com.mobe.mobe_life_backend.task.entity.MobeTaskOperationLog;
@@ -41,7 +43,7 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   public PageResult<TaskListItemVO> getTaskList(TaskListQueryDTO queryDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     int pageNum = queryDTO.getPageNum() == null || queryDTO.getPageNum() < 1 ? 1 : queryDTO.getPageNum();
@@ -73,12 +75,12 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   public TaskDetailVO getTaskDetail(Long id) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     TaskDetailVO detailVO = mobeTaskItemMapper.selectTaskBaseDetail(id, userId);
     if (detailVO == null) {
-      throw new BusinessException("待办不存在");
+      throw new BusinessException(TaskErrorCode.TASK_NOT_FOUND);
     }
 
     // 1. 查状态列表（按待办绑定模板）

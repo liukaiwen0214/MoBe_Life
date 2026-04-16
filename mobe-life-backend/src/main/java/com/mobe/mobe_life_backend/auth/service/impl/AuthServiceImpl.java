@@ -32,6 +32,8 @@ import com.mobe.mobe_life_backend.auth.vo.WxCode2SessionVO;
 import com.mobe.mobe_life_backend.auth.vo.WxPhoneNumberVO;
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
+import com.mobe.mobe_life_backend.common.exception.CommonErrorCode;
 import com.mobe.mobe_life_backend.common.utils.JwtUtils;
 import com.mobe.mobe_life_backend.common.utils.VerificationCodeUtils;
 import com.mobe.mobe_life_backend.user.entity.MobeUser;
@@ -208,7 +210,7 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public TokenVO refreshToken(String authorization) {
     if (authorization == null || authorization.isBlank()) {
-      throw new BusinessException("未登录或token为空");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     String token = authorization;
@@ -217,7 +219,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     if (!JwtUtils.isValid(token)) {
-      throw new BusinessException("token无效或已过期");
+      throw new BusinessException(AuthErrorCode.TOKEN_EXPIRED);
     }
 
     Long userId = JwtUtils.getUserId(token);
@@ -249,24 +251,24 @@ public class AuthServiceImpl implements AuthService {
   public void bindPhone(BindPhoneDTO bindPhoneDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     WxPhoneNumberVO phoneInfo = wechatMiniAppService.getPhoneNumber(bindPhoneDTO.getCode());
     String phone = phoneInfo.getPurePhoneNumber();
     if (phone == null || phone.isBlank()) {
-      throw new BusinessException("获取手机号失败");
+      throw new BusinessException(CommonErrorCode.PARAM_FORMAT_ERROR, "获取手机号失败");
     }
 
     MobeUser exist = mobeUserService.getOne(
         new LambdaQueryWrapper<MobeUser>().eq(MobeUser::getPhone, phone));
     if (exist != null && !exist.getId().equals(userId)) {
-      throw new BusinessException("该手机号已绑定其他账号");
+      throw new BusinessException(AuthErrorCode.PHONE_BINDED_OTHER_ACCOUNT);
     }
 
     MobeUser currentUser = mobeUserService.getById(userId);
     if (currentUser == null) {
-      throw new BusinessException("用户不存在");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
     }
 
     currentUser.setPhone(phone);
@@ -285,7 +287,7 @@ public class AuthServiceImpl implements AuthService {
   public void sendBindEmailCode(SendEmailCodeDTO sendEmailCodeDTO, HttpServletRequest request) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     String email = sendEmailCodeDTO.getEmail().trim().toLowerCase();
@@ -294,7 +296,7 @@ public class AuthServiceImpl implements AuthService {
         new LambdaQueryWrapper<MobeUser>()
             .eq(MobeUser::getEmail, email));
     if (exist != null && !exist.getId().equals(userId)) {
-      throw new BusinessException("该邮箱已被其他账号绑定");
+      throw new BusinessException(AuthErrorCode.EMAIL_BINDED_OTHER_ACCOUNT);
     }
 
     VerificationCode latestCode = verificationCodeMapper.selectOne(
@@ -309,7 +311,7 @@ public class AuthServiceImpl implements AuthService {
 
     if (latestCode != null && latestCode.getSendTime() != null
         && latestCode.getSendTime().plusSeconds(60).isAfter(LocalDateTime.now())) {
-      throw new BusinessException("发送过于频繁，请稍后再试");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "发送过于频繁，请稍后再试");
     }
 
     verificationCodeMapper.update(
@@ -379,7 +381,7 @@ public class AuthServiceImpl implements AuthService {
       messageSendLog.setRemark("邮箱验证码发送失败");
       messageSendLogMapper.updateById(messageSendLog);
 
-      throw new BusinessException("发送验证码失败：" + e.getMessage());
+      throw new BusinessException(CommonErrorCode.SERVICE_UNAVAILABLE, "发送验证码失败：" + e.getMessage());
     }
   }
 
@@ -394,7 +396,7 @@ public class AuthServiceImpl implements AuthService {
   public void bindEmail(BindEmailDTO bindEmailDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     String email = bindEmailDTO.getEmail().trim().toLowerCase();
@@ -404,7 +406,7 @@ public class AuthServiceImpl implements AuthService {
         new LambdaQueryWrapper<MobeUser>()
             .eq(MobeUser::getEmail, email));
     if (exist != null && !exist.getId().equals(userId)) {
-      throw new BusinessException("该邮箱已被其他账号绑定");
+      throw new BusinessException(AuthErrorCode.EMAIL_BINDED_OTHER_ACCOUNT);
     }
 
     VerificationCode verificationCode = verificationCodeMapper.selectOne(
@@ -418,14 +420,14 @@ public class AuthServiceImpl implements AuthService {
             .last("limit 1"));
 
     if (verificationCode == null) {
-      throw new BusinessException("验证码不存在或已失效");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_ERROR, "验证码不存在或已失效");
     }
 
     if (verificationCode.getExpireTime() == null || verificationCode.getExpireTime().isBefore(LocalDateTime.now())) {
       verificationCode.setStatus(2);
       verificationCode.setRemark("验证码已过期");
       verificationCodeMapper.updateById(verificationCode);
-      throw new BusinessException("验证码已过期");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_EXPIRED);
     }
 
     String inputCodeHash = VerificationCodeUtils.hashCode(email, BIZ_TYPE_BIND_EMAIL, code);
@@ -433,12 +435,12 @@ public class AuthServiceImpl implements AuthService {
       verificationCode
           .setFailCount((verificationCode.getFailCount() == null ? 0 : verificationCode.getFailCount()) + 1);
       verificationCodeMapper.updateById(verificationCode);
-      throw new BusinessException("验证码错误");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_ERROR);
     }
 
     MobeUser currentUser = mobeUserService.getById(userId);
     if (currentUser == null) {
-      throw new BusinessException("用户不存在");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
     }
 
     currentUser.setEmail(email);
@@ -461,7 +463,7 @@ public class AuthServiceImpl implements AuthService {
   public void changePassword(ChangePasswordDTO changePasswordDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     MobeUser currentUser = mobeUserService.getById(userId);
@@ -472,24 +474,24 @@ public class AuthServiceImpl implements AuthService {
     String confirmPassword = changePasswordDTO.getConfirmPassword();
 
     if (!newPassword.equals(confirmPassword)) {
-      throw new BusinessException("两次输入的新密码不一致");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "两次输入的新密码不一致");
     }
 
     if (newPassword.length() < 6) {
-      throw new BusinessException("新密码长度不能少于6位");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "新密码长度不能少于6位");
     }
 
     String dbPassword = currentUser.getPassword();
     if (dbPassword == null || dbPassword.isBlank()) {
-      throw new BusinessException("当前账号尚未设置密码");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "当前账号尚未设置密码");
     }
 
     if (!passwordEncoder.matches(oldPassword, dbPassword)) {
-      throw new BusinessException("原密码错误");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "原密码错误");
     }
 
     if (passwordEncoder.matches(newPassword, dbPassword)) {
-      throw new BusinessException("新密码不能与原密码相同");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "新密码不能与原密码相同");
     }
 
     currentUser.setPassword(passwordEncoder.encode(newPassword));
@@ -505,14 +507,14 @@ public class AuthServiceImpl implements AuthService {
    */
   private void validatePasswordOperationAllowed(MobeUser user) {
     if (user == null || Integer.valueOf(1).equals(user.getIsDeleted())) {
-      throw new BusinessException("用户不存在");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
     }
 
     boolean hasPhone = user.getPhone() != null && !user.getPhone().isBlank();
     boolean hasEmail = user.getEmail() != null && !user.getEmail().isBlank();
 
     if (!hasPhone && !hasEmail) {
-      throw new BusinessException("请先绑定手机号或邮箱");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "请先绑定手机号或邮箱");
     }
   }
 
@@ -527,7 +529,7 @@ public class AuthServiceImpl implements AuthService {
   public void setPassword(SetPasswordDTO setPasswordDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     MobeUser currentUser = mobeUserService.getById(userId);
@@ -537,15 +539,15 @@ public class AuthServiceImpl implements AuthService {
     String confirmPassword = setPasswordDTO.getConfirmPassword();
 
     if (!newPassword.equals(confirmPassword)) {
-      throw new BusinessException("两次输入的新密码不一致");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "两次输入的新密码不一致");
     }
 
     if (newPassword.length() < 6) {
-      throw new BusinessException("新密码长度不能少于6位");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "新密码长度不能少于6位");
     }
 
     if (currentUser.getPassword() != null && !currentUser.getPassword().isBlank()) {
-      throw new BusinessException("当前账号已设置密码");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "当前账号已设置密码");
     }
 
     currentUser.setPassword(passwordEncoder.encode(newPassword));
@@ -589,12 +591,12 @@ public class AuthServiceImpl implements AuthService {
   public void cancelAccount() {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     MobeUser currentUser = mobeUserService.getById(userId);
     if (currentUser == null || Integer.valueOf(1).equals(currentUser.getIsDeleted())) {
-      throw new BusinessException("用户不存在");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
     }
 
     currentUser.setIsDeleted(1);
@@ -668,10 +670,10 @@ public class AuthServiceImpl implements AuthService {
    */
   private void validateLoginCaptcha(String captchaKey, String captchaCode) {
     if (captchaKey == null || captchaKey.isBlank()) {
-      throw new BusinessException("验证码标识不能为空");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "验证码标识不能为空");
     }
     if (captchaCode == null || captchaCode.isBlank()) {
-      throw new BusinessException("验证码不能为空");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "验证码不能为空");
     }
 
     VerificationCode verificationCode = verificationCodeMapper.selectOne(
@@ -685,14 +687,14 @@ public class AuthServiceImpl implements AuthService {
             .last("limit 1"));
 
     if (verificationCode == null) {
-      throw new BusinessException("验证码不存在或已失效");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_ERROR, "验证码不存在或已失效");
     }
 
     if (verificationCode.getExpireTime() == null || verificationCode.getExpireTime().isBefore(LocalDateTime.now())) {
       verificationCode.setStatus(2);
       verificationCode.setRemark("图形验证码已过期");
       verificationCodeMapper.updateById(verificationCode);
-      throw new BusinessException("验证码已过期");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_EXPIRED);
     }
 
     String inputCodeHash = VerificationCodeUtils.hashCode(
@@ -706,7 +708,7 @@ public class AuthServiceImpl implements AuthService {
       verificationCode
           .setFailCount((verificationCode.getFailCount() == null ? 0 : verificationCode.getFailCount()) + 1);
       verificationCodeMapper.updateById(verificationCode);
-      throw new BusinessException("验证码错误");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_ERROR);
     }
 
     verificationCode.setStatus(1);
@@ -747,16 +749,16 @@ public class AuthServiceImpl implements AuthService {
 
     MobeUser user = mobeUserService.getOne(queryWrapper);
     if (user == null) {
-      throw new BusinessException("账号或密码错误");
+      throw new BusinessException(AuthErrorCode.ACCOUNT_PASSWORD_ERROR);
     }
 
     String dbPassword = user.getPassword();
     if (dbPassword == null || dbPassword.isBlank()) {
-      throw new BusinessException("当前账号尚未设置密码");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "当前账号尚未设置密码");
     }
 
     if (!passwordEncoder.matches(password, dbPassword)) {
-      throw new BusinessException("账号或密码错误");
+      throw new BusinessException(AuthErrorCode.ACCOUNT_PASSWORD_ERROR);
     }
 
     String token = JwtUtils.createToken(user.getId());
@@ -789,14 +791,14 @@ public class AuthServiceImpl implements AuthService {
             .last("limit 1"));
 
     if (verificationCode == null) {
-      throw new BusinessException("验证码不存在或已失效");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_ERROR, "验证码不存在或已失效");
     }
 
     if (verificationCode.getExpireTime() == null || verificationCode.getExpireTime().isBefore(LocalDateTime.now())) {
       verificationCode.setStatus(2);
       verificationCode.setRemark("验证码已过期");
       verificationCodeMapper.updateById(verificationCode);
-      throw new BusinessException("验证码已过期");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_EXPIRED);
     }
 
     String inputCodeHash = VerificationCodeUtils.hashCode(target, bizType, code.trim());
@@ -804,7 +806,7 @@ public class AuthServiceImpl implements AuthService {
       verificationCode
           .setFailCount((verificationCode.getFailCount() == null ? 0 : verificationCode.getFailCount()) + 1);
       verificationCodeMapper.updateById(verificationCode);
-      throw new BusinessException("验证码错误");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_ERROR);
     }
 
     verificationCode.setStatus(1);
@@ -834,11 +836,11 @@ public class AuthServiceImpl implements AuthService {
               .eq(MobeUser::getPhone, account)
               .eq(MobeUser::getIsDeleted, 0));
     } else {
-      throw new BusinessException("请输入正确的手机号或邮箱");
+      throw new BusinessException(CommonErrorCode.PARAM_FORMAT_ERROR, "请输入正确的手机号或邮箱");
     }
 
     if (user == null) {
-      throw new BusinessException("该账号未注册");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND, "该账号未注册");
     }
 
     String token = JwtUtils.createToken(user.getId());
@@ -860,7 +862,7 @@ public class AuthServiceImpl implements AuthService {
             .eq(MobeUser::getEmail, email)
             .eq(MobeUser::getIsDeleted, 0));
     if (exist == null) {
-      throw new BusinessException("该邮箱未注册");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND, "该邮箱未注册");
     }
 
     VerificationCode latestCode = verificationCodeMapper.selectOne(
@@ -875,7 +877,7 @@ public class AuthServiceImpl implements AuthService {
 
     if (latestCode != null && latestCode.getSendTime() != null
         && latestCode.getSendTime().plusSeconds(60).isAfter(LocalDateTime.now())) {
-      throw new BusinessException("发送过于频繁，请稍后再试");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "发送过于频繁，请稍后再试");
     }
 
     verificationCodeMapper.update(
@@ -944,7 +946,7 @@ public class AuthServiceImpl implements AuthService {
       messageSendLog.setRemark("登录邮箱验证码发送失败");
       messageSendLogMapper.updateById(messageSendLog);
 
-      throw new BusinessException("发送验证码失败：" + e.getMessage());
+      throw new BusinessException(CommonErrorCode.SERVICE_UNAVAILABLE, "发送验证码失败：" + e.getMessage());
     }
   }
 
@@ -952,22 +954,22 @@ public class AuthServiceImpl implements AuthService {
   public void sendUnbindEmailCode(HttpServletRequest request) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     MobeUser currentUser = mobeUserService.getById(userId);
     if (currentUser == null || Integer.valueOf(1).equals(currentUser.getIsDeleted())) {
-      throw new BusinessException("用户不存在");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
     }
 
     String email = currentUser.getEmail();
     if (email == null || email.isBlank()) {
-      throw new BusinessException("当前账号未绑定邮箱");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "当前账号未绑定邮箱");
     }
 
     boolean hasPhone = currentUser.getPhone() != null && !currentUser.getPhone().isBlank();
     if (!hasPhone) {
-      throw new BusinessException("请先绑定手机号后再解绑邮箱");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "请先绑定手机号后再解绑邮箱");
     }
 
     VerificationCode latestCode = verificationCodeMapper.selectOne(
@@ -982,7 +984,7 @@ public class AuthServiceImpl implements AuthService {
 
     if (latestCode != null && latestCode.getSendTime() != null
         && latestCode.getSendTime().plusSeconds(60).isAfter(LocalDateTime.now())) {
-      throw new BusinessException("发送过于频繁，请稍后再试");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "发送过于频繁，请稍后再试");
     }
 
     verificationCodeMapper.update(
@@ -1051,7 +1053,7 @@ public class AuthServiceImpl implements AuthService {
       messageSendLog.setRemark("解绑邮箱验证码发送失败");
       messageSendLogMapper.updateById(messageSendLog);
 
-      throw new BusinessException("发送验证码失败：" + e.getMessage());
+      throw new BusinessException(CommonErrorCode.SERVICE_UNAVAILABLE, "发送验证码失败：" + e.getMessage());
     }
   }
 }

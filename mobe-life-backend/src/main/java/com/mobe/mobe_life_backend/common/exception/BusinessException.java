@@ -22,6 +22,18 @@ public class BusinessException extends RuntimeException {
    * 不允许为 null；若调用方未指定则默认使用参数错误码，适合大多数校验失败场景。
    */
   private final Integer code;
+  
+  /**
+   * 错误码对象。
+   * 用于新的错误码体系，支持字符串格式的错误码。
+   */
+  private final BaseErrorCode errorCode;
+  
+  /**
+   * 自定义错误消息。
+   * 当指定时，优先使用自定义消息。
+   */
+  private final String customMessage;
 
   /**
    * 使用默认错误码创建业务异常。
@@ -31,6 +43,8 @@ public class BusinessException extends RuntimeException {
   public BusinessException(String message) {
     super(message);
     this.code = ErrorCode.PARAMS_ERROR;
+    this.errorCode = null;
+    this.customMessage = message;
   }
 
   /**
@@ -42,5 +56,32 @@ public class BusinessException extends RuntimeException {
   public BusinessException(Integer code, String message) {
     super(message);
     this.code = code;
+    this.errorCode = null;
+    this.customMessage = message;
+  }
+  
+  /**
+   * 使用错误码对象创建业务异常。
+   *
+   * @param errorCode 错误码对象，不允许为 null。
+   */
+  public BusinessException(BaseErrorCode errorCode) {
+    super(errorCode.getDefaultMessage());
+    this.code = null;
+    this.errorCode = errorCode;
+    this.customMessage = null;
+  }
+  
+  /**
+   * 使用错误码对象和自定义消息创建业务异常。
+   *
+   * @param errorCode 错误码对象，不允许为 null。
+   * @param customMessage 自定义错误消息，允许为 null。
+   */
+  public BusinessException(BaseErrorCode errorCode, String customMessage) {
+    super(customMessage != null && !customMessage.isBlank() ? customMessage : errorCode.getDefaultMessage());
+    this.code = null;
+    this.errorCode = errorCode;
+    this.customMessage = customMessage;
   }
 }

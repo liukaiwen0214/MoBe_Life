@@ -5,6 +5,8 @@ import com.mobe.mobe_life_backend.goal.service.MobeGoalService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
+import com.mobe.mobe_life_backend.common.exception.GoalErrorCode;
 import com.mobe.mobe_life_backend.common.response.PageResult;
 import com.mobe.mobe_life_backend.goal.dto.GoalListQueryDTO;
 import com.mobe.mobe_life_backend.goal.mapper.MobeGoalMapper;
@@ -54,7 +56,7 @@ public class MobeGoalServiceImpl implements MobeGoalService {
   public PageResult<GoalListItemVO> getGoalList(GoalListQueryDTO queryDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     int pageNum = queryDTO.getPageNum() == null || queryDTO.getPageNum() < 1 ? 1 : queryDTO.getPageNum();
@@ -84,12 +86,12 @@ public class MobeGoalServiceImpl implements MobeGoalService {
   public GoalDetailVO getGoalDetail(Long id) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     GoalDetailVO detailVO = mobeGoalMapper.selectGoalBaseDetail(id, userId);
     if (detailVO == null) {
-      throw new BusinessException("目标不存在");
+      throw new BusinessException(GoalErrorCode.GOAL_NOT_FOUND);
     }
 
     // 1. 查询目标下节点

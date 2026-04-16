@@ -12,6 +12,8 @@ import com.mobe.mobe_life_backend.auth.entity.VerificationCode;
 import com.mobe.mobe_life_backend.auth.mapper.VerificationCodeMapper;
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
+import com.mobe.mobe_life_backend.common.exception.CommonErrorCode;
 import com.mobe.mobe_life_backend.common.utils.VerificationCodeUtils;
 import com.mobe.mobe_life_backend.user.dto.UnbindEmailDTO;
 import com.mobe.mobe_life_backend.user.dto.UpdateUserProfileDTO;
@@ -59,12 +61,12 @@ public class MobeUserServiceImpl extends ServiceImpl<MobeUserMapper, MobeUser> i
   public CurrentUserVO getCurrentUser() {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     MobeUser user = this.getById(userId);
     if (user == null || Integer.valueOf(1).equals(user.getIsDeleted())) {
-      throw new BusinessException("用户不存在");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
     }
 
     CurrentUserVO currentUserVO = new CurrentUserVO();
@@ -91,12 +93,12 @@ public class MobeUserServiceImpl extends ServiceImpl<MobeUserMapper, MobeUser> i
   public void updateCurrentUserProfile(UpdateUserProfileDTO updateUserProfileDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     MobeUser user = this.getById(userId);
     if (user == null || Integer.valueOf(1).equals(user.getIsDeleted())) {
-      throw new BusinessException("用户不存在");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
     }
 
     if (updateUserProfileDTO.getNickname() != null) {
@@ -119,22 +121,22 @@ public class MobeUserServiceImpl extends ServiceImpl<MobeUserMapper, MobeUser> i
   public void unbindEmail(UnbindEmailDTO unbindEmailDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     MobeUser currentUser = this.getById(userId);
     if (currentUser == null || Integer.valueOf(1).equals(currentUser.getIsDeleted())) {
-      throw new BusinessException("用户不存在");
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
     }
 
     boolean hasPhone = currentUser.getPhone() != null && !currentUser.getPhone().isBlank();
     if (!hasPhone) {
-      throw new BusinessException("请先绑定手机号后再解绑邮箱");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "请先绑定手机号后再解绑邮箱");
     }
 
     String email = currentUser.getEmail();
     if (email == null || email.isBlank()) {
-      throw new BusinessException("当前账号未绑定邮箱");
+      throw new BusinessException(CommonErrorCode.PARAMS_VALIDATION_FAILED, "当前账号未绑定邮箱");
     }
 
     VerificationCode verificationCode = verificationCodeMapper.selectOne(
@@ -148,14 +150,14 @@ public class MobeUserServiceImpl extends ServiceImpl<MobeUserMapper, MobeUser> i
             .last("limit 1"));
 
     if (verificationCode == null) {
-      throw new BusinessException("验证码不存在或已失效");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_ERROR, "验证码不存在或已失效");
     }
 
     if (verificationCode.getExpireTime() == null || verificationCode.getExpireTime().isBefore(LocalDateTime.now())) {
       verificationCode.setStatus(2);
       verificationCode.setRemark("解绑邮箱验证码已过期");
       verificationCodeMapper.updateById(verificationCode);
-      throw new BusinessException("验证码已过期");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_EXPIRED);
     }
 
     String inputCodeHash = VerificationCodeUtils.hashCode(email, BIZ_TYPE_UNBIND_EMAIL,
@@ -164,7 +166,7 @@ public class MobeUserServiceImpl extends ServiceImpl<MobeUserMapper, MobeUser> i
       verificationCode
           .setFailCount((verificationCode.getFailCount() == null ? 0 : verificationCode.getFailCount()) + 1);
       verificationCodeMapper.updateById(verificationCode);
-      throw new BusinessException("验证码错误");
+      throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_ERROR);
     }
 
     this.update(

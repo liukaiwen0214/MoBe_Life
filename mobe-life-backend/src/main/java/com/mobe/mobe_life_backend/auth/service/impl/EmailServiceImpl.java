@@ -10,6 +10,7 @@ import com.mobe.mobe_life_backend.auth.config.TencentSesProperties;
 import com.mobe.mobe_life_backend.auth.service.EmailService;
 import com.mobe.mobe_life_backend.auth.vo.EmailSendResult;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.CommonErrorCode;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
@@ -86,7 +87,7 @@ public class EmailServiceImpl implements EmailService {
       return result;
     } catch (Exception e) {
       // 统一转换成业务异常，避免控制层暴露第三方 SDK 异常类型并把供应商实现细节泄漏到上层。
-      throw new BusinessException("发送邮件失败：" + e.getMessage());
+      throw new BusinessException(CommonErrorCode.SERVICE_UNAVAILABLE, "发送邮件失败：" + e.getMessage());
     }
   }
 }

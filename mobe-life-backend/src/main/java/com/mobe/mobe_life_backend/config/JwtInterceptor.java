@@ -7,6 +7,7 @@ package com.mobe.mobe_life_backend.config;
 
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
 import com.mobe.mobe_life_backend.common.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -49,7 +50,7 @@ public class JwtInterceptor implements HandlerInterceptor {
     String token = request.getHeader("Authorization");
 
     if (token == null || token.isBlank()) {
-      throw new BusinessException("未登录或token为空");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     if (token.startsWith(BEARER_PREFIX)) {
@@ -57,7 +58,7 @@ public class JwtInterceptor implements HandlerInterceptor {
     }
 
     if (!JwtUtils.isValid(token)) {
-      throw new BusinessException("token无效或已过期");
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
     }
 
     Long userId = JwtUtils.getUserId(token);

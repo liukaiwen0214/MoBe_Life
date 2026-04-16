@@ -12,17 +12,22 @@ import com.mobe.mobe_life_backend.auth.service.WechatMiniAppService;
 import com.mobe.mobe_life_backend.auth.vo.WxCode2SessionVO;
 import com.mobe.mobe_life_backend.auth.vo.WxPhoneNumberVO;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
  * 微信小程序服务实现。
  *
- * <p>设计初衷是把所有微信 HTTP 调用细节都限制在这个类里，
- * 这样认证主流程可以围绕业务语义编排，而不是混杂 URL、JSON 和错误码判断。</p>
+ * <p>
+ * 设计初衷是把所有微信 HTTP 调用细节都限制在这个类里，
+ * 这样认证主流程可以围绕业务语义编排，而不是混杂 URL、JSON 和错误码判断。
+ * </p>
  *
- * <p>线程安全性：实现类无可变共享状态，适合作为 Spring 单例 Bean 使用。
- * 需要注意的是该类依赖外部网络，不保证调用时延稳定。</p>
+ * <p>
+ * 线程安全性：实现类无可变共享状态，适合作为 Spring 单例 Bean 使用。
+ * 需要注意的是该类依赖外部网络，不保证调用时延稳定。
+ * </p>
  */
 @Service
 @RequiredArgsConstructor
@@ -54,12 +59,12 @@ public class WechatMiniAppServiceImpl implements WechatMiniAppService {
     WxCode2SessionVO result = JSONUtil.toBean(response, WxCode2SessionVO.class);
 
     if (result.getErrcode() != null && result.getErrcode() != 0) {
-      throw new BusinessException("微信登录失败：" + result.getErrmsg());
+      throw new BusinessException(AuthErrorCode.WECHAT_SERVICE_EXCEPTION, "微信登录失败：" + result.getErrmsg());
     }
 
     if (result.getOpenid() == null || result.getOpenid().isBlank()) {
       // openid 是后续建档和鉴权的锚点，缺失时不能继续走“弱成功”分支。
-      throw new BusinessException("微信登录失败：openid为空");
+      throw new BusinessException(AuthErrorCode.WECHAT_SERVICE_EXCEPTION, "微信登录失败：openid为空");
     }
 
     return result;
@@ -90,12 +95,13 @@ public class WechatMiniAppServiceImpl implements WechatMiniAppService {
     cn.hutool.json.JSONObject tokenJson = JSONUtil.parseObj(tokenResp);
     Integer tokenErrCode = tokenJson.getInt("errcode");
     if (tokenErrCode != null && tokenErrCode != 0) {
-      throw new BusinessException("获取微信access_token失败：" + tokenJson.getStr("errmsg"));
+      throw new BusinessException(AuthErrorCode.WECHAT_SERVICE_EXCEPTION,
+          "获取微信access_token失败：" + tokenJson.getStr("errmsg"));
     }
 
     String accessToken = tokenJson.getStr("access_token");
     if (accessToken == null || accessToken.isBlank()) {
-      throw new BusinessException("获取微信access_token失败");
+      throw new BusinessException(AuthErrorCode.WECHAT_SERVICE_EXCEPTION, "获取微信access_token失败");
     }
 
     String phoneUrl = "https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=" + accessToken;
@@ -109,13 +115,13 @@ public class WechatMiniAppServiceImpl implements WechatMiniAppService {
     cn.hutool.json.JSONObject phoneJson = JSONUtil.parseObj(phoneResp);
     Integer errCode = phoneJson.getInt("errcode");
     if (errCode != null && errCode != 0) {
-      throw new BusinessException("获取微信手机号失败：" + phoneJson.getStr("errmsg"));
+      throw new BusinessException(AuthErrorCode.WECHAT_SERVICE_EXCEPTION, "获取微信手机号失败：" + phoneJson.getStr("errmsg"));
     }
 
     cn.hutool.json.JSONObject phoneInfo = phoneJson.getJSONObject("phone_info");
     if (phoneInfo == null) {
       // 这里不默认为空对象，是为了避免把“微信接口异常”误判成“用户没有手机号”。
-      throw new BusinessException("获取微信手机号失败：phone_info为空");
+      throw new BusinessException(AuthErrorCode.WECHAT_SERVICE_EXCEPTION, "获取微信手机号失败：phone_info为空");
     }
 
     WxPhoneNumberVO result = new WxPhoneNumberVO();

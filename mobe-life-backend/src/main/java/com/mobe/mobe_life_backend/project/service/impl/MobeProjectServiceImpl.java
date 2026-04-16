@@ -3,6 +3,8 @@ package com.mobe.mobe_life_backend.project.service.impl;
 import com.mobe.mobe_life_backend.project.service.MobeProjectService;
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
+import com.mobe.mobe_life_backend.common.exception.ProjectErrorCode;
 import com.mobe.mobe_life_backend.common.response.PageResult;
 import com.mobe.mobe_life_backend.project.dto.ProjectListQueryDTO;
 import com.mobe.mobe_life_backend.project.vo.ProjectListItemVO;
@@ -53,7 +55,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
   public PageResult<ProjectListItemVO> getProjectList(ProjectListQueryDTO queryDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     int pageNum = queryDTO.getPageNum() == null || queryDTO.getPageNum() < 1 ? 1 : queryDTO.getPageNum();
@@ -83,12 +85,12 @@ public class MobeProjectServiceImpl implements MobeProjectService {
   public ProjectDetailVO getProjectDetail(Long id) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     ProjectDetailVO detailVO = mobeProjectMapper.selectProjectBaseDetail(id, userId);
     if (detailVO == null) {
-      throw new BusinessException("项目不存在");
+      throw new BusinessException(ProjectErrorCode.PROJECT_NOT_FOUND);
     }
 
     // 1. 查询项目下节点

@@ -5,6 +5,8 @@ import com.mobe.mobe_life_backend.node.service.MobeNodeService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
+import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
+import com.mobe.mobe_life_backend.common.exception.NodeErrorCode;
 import com.mobe.mobe_life_backend.common.response.PageResult;
 import com.mobe.mobe_life_backend.node.dto.NodeListQueryDTO;
 import com.mobe.mobe_life_backend.node.mapper.MobeNodeMapper;
@@ -42,7 +44,7 @@ public class MobeNodeServiceImpl implements MobeNodeService {
   public PageResult<NodeListItemVO> getNodeList(NodeListQueryDTO queryDTO) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     int pageNum = queryDTO.getPageNum() == null || queryDTO.getPageNum() < 1 ? 1 : queryDTO.getPageNum();
@@ -72,12 +74,12 @@ public class MobeNodeServiceImpl implements MobeNodeService {
   public NodeDetailVO getNodeDetail(Long id) {
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
-      throw new BusinessException("当前用户未登录");
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
     NodeDetailVO detailVO = mobeNodeMapper.selectNodeBaseDetail(id, userId);
     if (detailVO == null) {
-      throw new BusinessException("节点不存在");
+      throw new BusinessException(NodeErrorCode.NODE_NOT_FOUND);
     }
 
     // 1. 查询节点下待办
