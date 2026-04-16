@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mobe.mobe_life_backend.goal.mapper.MobeGoalMapper">
+
+  <select id="selectGoalList" resultType="com.mobe.mobe_life_backend.goal.vo.GoalListItemVO">
+    SELECT
+      g.id AS id,
+      g.title AS title,
+      COALESCE(COUNT(DISTINCT n.id), 0) AS nodeCount,
+      COALESCE(COUNT(DISTINCT t.id), 0) AS taskCount,
+      COALESCE(COUNT(DISTINCT CASE WHEN ts.is_terminal = 1 THEN t.id END), 0) AS completedCount,
+      COALESCE(COUNT(DISTINCT t.id), 0) AS totalCount,
+      cs.status_code AS statusCode,
+      cs.status_name AS statusText,
+      g.update_time AS updateTime
+    FROM mobe_goal g
+    LEFT JOIN mobe_node n
+      ON n.user_id = g.user_id
+      AND n.owner_type = 'GOAL'
+      AND n.owner_id = g.id
+      AND n.is_deleted = 0
+    LEFT JOIN mobe_task_item t
+      ON t.user_id = g.user_id
+      AND (
+        (t.direct_owner_type = 'GOAL' AND t.direct_owner_id = g.id)
+        OR (t.direct_owner_type = 'NODE' AND t.direct_owner_id = n.id)
+      )
+      AND t.is_deleted = 0
+    LEFT JOIN mobe_task_status cs
+      ON cs.id = g.current_status_id
+      AND cs.is_deleted = 0
+    LEFT JOIN mobe_task_status ts
+      ON ts.id = t.current_status_id
+      AND ts.is_deleted = 0
+    WHERE g.user_id = #{userId}
+      AND g.is_deleted = 0
+    <if test="keyword != null and keyword != ''">
+      AND g.title LIKE CONCAT('%', #{keyword}, '%')
+    </if>
+    <if test="statusCode != null and statusCode != ''">
+      AND cs.status_code = #{statusCode}
+    </if>
+    GROUP BY
+      g.id,
+      g.title,
+      cs.status_code,
+      cs.status_name,
+      g.update_time
+    ORDER BY g.update_time DESC
+    LIMIT #{offset}, #{pageSize}
+  </select>
+
+  <select id="countGoalList" resultType="java.lang.Long">
+    SELECT COUNT(1)
+    FROM mobe_goal g
+    LEFT JOIN mobe_task_status cs
+      ON cs.id = g.current_status_id
+      AND cs.is_deleted = 0
+    WHERE g.user_id = #{userId}
+      AND g.is_deleted = 0
+    <if test="keyword != null and keyword != ''">
+      AND g.title LIKE CONCAT('%', #{keyword}, '%')
+    </if>
+    <if test="statusCode != null and statusCode != ''">
+      AND cs.status_code = #{statusCode}
+    </if>
+  </select>
+
+  <select id="selectGoalBaseDetail" resultType="com.mobe.mobe_life_backend.goal.vo.GoalDetailVO">
+    SELECT
+      g.id AS id,
+      g.title AS title,
+      g.content AS content,
+      g.remark AS remark,
+      g.execution_mode AS executionMode,
+      g.status_template_id AS statusTemplateId,
+      g.current_status_id AS currentStatusId,
+      cs.status_code AS statusCode,
+      cs.status_name AS statusText,
+      COALESCE(COUNT(DISTINCT n.id), 0) AS nodeCount,
+      COALESCE(COUNT(DISTINCT t.id), 0) AS taskCount,
+      COALESCE(COUNT(DISTINCT CASE WHEN ts.is_terminal = 1 THEN t.id END), 0) AS completedCount,
+      COALESCE(COUNT(DISTINCT t.id), 0) AS totalCount,
+      g.update_time AS updateTime
+    FROM mobe_goal g
+    LEFT JOIN mobe_node n
+      ON n.user_id = g.user_id
+      AND n.owner_type = 'GOAL'
+      AND n.owner_id = g.id
+      AND n.is_deleted = 0
+    LEFT JOIN mobe_task_item t
+      ON t.user_id = g.user_id
+      AND (
+        (t.direct_owner_type = 'GOAL' AND t.direct_owner_id = g.id)
+        OR (t.direct_owner_type = 'NODE' AND t.direct_owner_id = n.id)
+      )
+      AND t.is_deleted = 0
+    LEFT JOIN mobe_task_status cs
+      ON cs.id = g.current_status_id
+      AND cs.is_deleted = 0
+    LEFT JOIN mobe_task_status ts
+      ON ts.id = t.current_status_id
+      AND ts.is_deleted = 0
+    WHERE g.id = #{id}
+      AND g.user_id = #{userId}
+      AND g.is_deleted = 0
+    GROUP BY
+      g.id,
+      g.title,
+      g.content,
+      g.remark,
+      g.execution_mode,
+      g.status_template_id,
+      g.current_status_id,
+      cs.status_code,
+      cs.status_name,
+      g.update_time
+  </select>
+
+</mapper>

@@ -1,0 +1,37 @@
+package com.mobe.mobe_life_backend.task.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
+import lombok.Data;
+
+@Data
+@Schema(description = "待办列表项")
+public class TaskListItemVO {
+
+  @Schema(description = "待办ID")
+  private Long id;
+
+  @Schema(description = "待办标题")
+  private String title;
+
+  @Schema(description = "归属类型")
+  private String directOwnerType;
+
+  @Schema(description = "归属对象ID")
+  private Long directOwnerId;
+
+  @Schema(description = "归属对象名称")
+  private String ownerName;
+
+  @Schema(description = "状态编码")
+  private String statusCode;
+
+  @Schema(description = "状态名称")
+  private String statusText;
+
+  @Schema(description = "截止时间")
+  private LocalDateTime deadlineTime;
+
+  @Schema(description = "更新时间")
+  private LocalDateTime updateTime;
+}

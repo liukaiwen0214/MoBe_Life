@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mobe.mobe_life_backend.node.mapper.MobeNodeMapper">
+
+  <select id="selectNodeList" resultType="com.mobe.mobe_life_backend.node.vo.NodeListItemVO">
+    SELECT
+      n.id AS id,
+      n.title AS title,
+      n.owner_type AS ownerType,
+      n.owner_id AS ownerId,
+      CASE
+        WHEN n.owner_type = 'PROJECT' THEN p.title
+        WHEN n.owner_type = 'GOAL' THEN g.title
+      END AS ownerName,
+      COALESCE(COUNT(DISTINCT t.id), 0) AS taskCount,
+      n.update_time AS updateTime
+    FROM mobe_node n
+    LEFT JOIN mobe_project p
+      ON n.owner_type = 'PROJECT'
+      AND p.id = n.owner_id
+      AND p.user_id = n.user_id
+      AND p.is_deleted = 0
+    LEFT JOIN mobe_goal g
+      ON n.owner_type = 'GOAL'
+      AND g.id = n.owner_id
+      AND g.user_id = n.user_id
+      AND g.is_deleted = 0
+    LEFT JOIN mobe_task_item t
+      ON t.user_id = n.user_id
+      AND t.direct_owner_type = 'NODE'
+      AND t.direct_owner_id = n.id
+      AND t.is_deleted = 0
+    WHERE n.user_id = #{userId}
+      AND n.is_deleted = 0
+    <if test="keyword != null and keyword != ''">
+      AND n.title LIKE CONCAT('%', #{keyword}, '%')
+    </if>
+    <if test="ownerType != null and ownerType != ''">
+      AND n.owner_type = #{ownerType}
+    </if>
+    GROUP BY
+      n.id,
+      n.title,
+      n.owner_type,
+      n.owner_id,
+      p.title,
+      g.title,
+      n.update_time
+    ORDER BY n.update_time DESC
+    LIMIT #{offset}, #{pageSize}
+  </select>
+
+  <select id="countNodeList" resultType="java.lang.Long">
+    SELECT COUNT(1)
+    FROM mobe_node n
+    WHERE n.user_id = #{userId}
+      AND n.is_deleted = 0
+    <if test="keyword != null and keyword != ''">
+      AND n.title LIKE CONCAT('%', #{keyword}, '%')
+    </if>
+    <if test="ownerType != null and ownerType != ''">
+      AND n.owner_type = #{ownerType}
+    </if>
+  </select>
+
+  <select id="selectNodeBaseDetail" resultType="com.mobe.mobe_life_backend.node.vo.NodeDetailVO">
+    SELECT
+      n.id AS id,
+      n.title AS title,
+      n.content AS content,
+      n.remark AS remark,
+      n.owner_type AS ownerType,
+      n.owner_id AS ownerId,
+      CASE
+        WHEN n.owner_type = 'PROJECT' THEN p.title
+        WHEN n.owner_type = 'GOAL' THEN g.title
+      END AS ownerName,
+      COALESCE(COUNT(DISTINCT t.id), 0) AS taskCount,
+      n.update_time AS updateTime
+    FROM mobe_node n
+    LEFT JOIN mobe_project p
+      ON n.owner_type = 'PROJECT'
+      AND p.id = n.owner_id
+      AND p.user_id = n.user_id
+      AND p.is_deleted = 0
+    LEFT JOIN mobe_goal g
+      ON n.owner_type = 'GOAL'
+      AND g.id = n.owner_id
+      AND g.user_id = n.user_id
+      AND g.is_deleted = 0
+    LEFT JOIN mobe_task_item t
+      ON t.user_id = n.user_id
+      AND t.direct_owner_type = 'NODE'
+      AND t.direct_owner_id = n.id
+      AND t.is_deleted = 0
+    WHERE n.id = #{id}
+      AND n.user_id = #{userId}
+      AND n.is_deleted = 0
+    GROUP BY
+      n.id,
+      n.title,
+      n.content,
+      n.remark,
+      n.owner_type,
+      n.owner_id,
+      p.title,
+      g.title,
+      n.update_time
+  </select>
+
+</mapper>

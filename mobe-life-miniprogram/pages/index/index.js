@@ -122,7 +122,7 @@ Page({
   /**
    * 每日一句：
    * 第一版直接请求 ONE，失败则保留默认文案。
-   * 后续你也可以把这段迁到自己后端的首页聚合接口里。
+   * 后续可以把这段迁到后端的首页聚合接口里。
    *   baseUrl: 'http://127.0.0.1:8080',
   // baseUrl: 'http://119.91.216.175:8080',
    */
@@ -138,12 +138,12 @@ Page({
           try {
             const result = res.data || {}
             const quote = result.data || {}
-  
+
             if (res.statusCode !== 200 || result.code !== 0 || !quote) {
               resolve()
               return
             }
-  
+
             this.setData({
               quoteCard: {
                 text: quote.text || '把今天最重要的一件事，轻轻落下来。',
@@ -168,34 +168,34 @@ Page({
   /**
    * 天气：
    * 第一版先走小程序定位，再把经纬度交给后端天气接口。
-   * 这里先写成接口占位，避免你后面接真实天气时再改页面结构。
+   * 接口占位，避免后面接真实天气时再改页面结构。
    */
   async loadWeather() {
     console.log('loadWeather start')
-  
+
     try {
       const location = await this.getUserLocation()
       console.log('location result:', location)
-  
+
       if (!location) {
         console.log('location is null, use fallback')
         this.setWeatherFallback('未开启定位', '天气暂不可用')
         return
       }
-  
+
       console.log('start fetch weather by location')
       const weather = await this.fetchWeatherByLocation({
         latitude: location.latitude,
         longitude: location.longitude,
       })
       console.log('weather result:', weather)
-  
+
       if (!weather) {
         console.log('weather is null, use fallback')
         this.setWeatherFallback('当前城市', '天气暂不可用')
         return
       }
-  
+
       this.setData({
         weatherCard: {
           city: weather.city || '当前城市',
@@ -231,8 +231,8 @@ Page({
   },
 
   /**
-   * 这里先约定你自己的后端接口返回结构。
-   * 后面你把后端天气代理接口做好后，直接按这个结构返回就行：
+   * 这里先约定后端天气接口返回结构。
+   * 后面把后端天气代理接口做好后，直接按这个结构返回就行：
    * {
    *   city: '济南',
    *   weatherText: '多云',
@@ -243,7 +243,7 @@ Page({
   fetchWeatherByLocation({ latitude, longitude }) {
     return new Promise((resolve) => {
       const token = storage.getToken()
-  
+
       wx.request({
         url: 'http://127.0.0.1:8080/api/tool/weather',
         // url: 'http://119.91.216.175:8080/api/tool/weather',
@@ -257,12 +257,12 @@ Page({
         },
         success: (res) => {
           const result = res.data || {}
-  
+
           if (res.statusCode !== 200 || result.code !== 0 || !result.data) {
             resolve(null)
             return
           }
-  
+
           resolve(result.data)
         },
         fail: (error) => {
@@ -287,7 +287,7 @@ Page({
 
   /**
    * 首页聚焦和流水统计先用占位数据。
-   * 等你后面 task / finance / goal 真正接起来，再替换成真实接口。
+   * 等后面 task / finance / goal 真正接起来，再替换成真实接口。
    */
   async loadHomeFocusData() {
     this.setData({

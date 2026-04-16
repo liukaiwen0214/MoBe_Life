@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mobe.mobe_life_backend.project.mapper.MobeProjectMapper">
+
+        <select id="selectProjectList" resultType="com.mobe.mobe_life_backend.project.vo.ProjectListItemVO">
+        SELECT p.id              AS id,
+               p.title           AS title,
+               COALESCE(COUNT(DISTINCT n.id), 0)                     AS nodeCount,
+               COALESCE(COUNT(DISTINCT t.id), 0)                     AS taskCount,
+               COALESCE(COUNT(DISTINCT CASE
+                                          WHEN ts.is_terminal = 1 THEN t.id
+                   END), 0)                                          AS completedCount,
+               COALESCE(COUNT(DISTINCT t.id), 0)                     AS totalCount,
+               cs.status_code    AS statusCode,
+               cs.status_name    AS statusText,
+               p.update_time     AS updateTime
+        FROM mobe_project p
+                 LEFT JOIN mobe_node n
+                           ON n.user_id = p.user_id AND n.owner_type = 'PROJECT' AND n.owner_id = p.id AND
+                              n.is_deleted = 0
+                 LEFT JOIN mobe_task_item t
+                           ON t.user_id = p.user_id AND ( (t.direct_owner_type = 'PROJECT' AND t.direct_owner_id = p.id) OR
+                                                          (t.direct_owner_type = 'NODE' AND t.direct_owner_id = n.id) ) AND
+                              t.is_deleted = 0
+                 LEFT JOIN mobe_task_status cs ON cs.id = p.current_status_id AND cs.is_deleted = 0
+                 LEFT JOIN mobe_task_status ts ON ts.id = t.current_status_id AND ts.is_deleted = 0
+        WHERE p.user_id = #{userId}
+          AND p.is_deleted = 0
+                <if test="keyword != null and keyword != ''">
+            AND p.title LIKE CONCAT('%', #{keyword}, '%')
+                </if>
+                <if test="statusCode != null and statusCode != ''">
+            AND cs.status_code = #{statusCode}
+                </if>
+        GROUP BY p.id, p.title, cs.status_code, cs.status_name, p.update_time
+        ORDER BY p.update_time DESC
+        LIMIT #{offset}, #{pageSize}
+        </select>
+
+        <select id="countProjectList" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM mobe_project p
+                 LEFT JOIN mobe_task_status cs ON cs.id = p.current_status_id AND cs.is_deleted = 0
+        WHERE p.user_id = #{userId}
+          AND p.is_deleted = 0
+                <if test="keyword != null and keyword != ''">
+            AND p.title LIKE CONCAT('%', #{keyword}, '%')
+                </if>
+                <if test="statusCode != null and statusCode != ''">
+            AND cs.status_code = #{statusCode}
+                </if>
+        </select>
+        <select id="selectProjectBaseDetail" resultType="com.mobe.mobe_life_backend.project.vo.ProjectDetailVO">
+  SELECT
+    p.id AS id,
+    p.title AS title,
+    p.content AS content,
+    p.remark AS remark,
+    p.execution_mode AS executionMode,
+    p.status_template_id AS statusTemplateId,
+    p.current_status_id AS currentStatusId,
+    cs.status_code AS statusCode,
+    cs.status_name AS statusText,
+    COALESCE(COUNT(DISTINCT n.id), 0) AS nodeCount,
+    COALESCE(COUNT(DISTINCT t.id), 0) AS taskCount,
+    COALESCE(COUNT(DISTINCT CASE WHEN ts.is_terminal = 1 THEN t.id END), 0) AS completedCount,
+    COALESCE(COUNT(DISTINCT t.id), 0) AS totalCount,
+    p.update_time AS updateTime
+  FROM mobe_project p
+  LEFT JOIN mobe_node n
+    ON n.user_id = p.user_id
+    AND n.owner_type = 'PROJECT'
+    AND n.owner_id = p.id
+    AND n.is_deleted = 0
+  LEFT JOIN mobe_task_item t
+    ON t.user_id = p.user_id
+    AND (
+      (t.direct_owner_type = 'PROJECT' AND t.direct_owner_id = p.id)
+      OR (t.direct_owner_type = 'NODE' AND t.direct_owner_id = n.id)
+    )
+    AND t.is_deleted = 0
+  LEFT JOIN mobe_task_status cs
+    ON cs.id = p.current_status_id
+    AND cs.is_deleted = 0
+  LEFT JOIN mobe_task_status ts
+    ON ts.id = t.current_status_id
+    AND ts.is_deleted = 0
+  WHERE p.id = #{id}
+    AND p.user_id = #{userId}
+    AND p.is_deleted = 0
+  GROUP BY
+    p.id,
+    p.title,
+    p.content,
+    p.remark,
+    p.execution_mode,
+    p.status_template_id,
+    p.current_status_id,
+    cs.status_code,
+    cs.status_name,
+    p.update_time
+        </select>
+</mapper>

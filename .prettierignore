@@ -10,3 +10,4 @@ logs
 *.jar
 app.pid
 .DS_Store
+**/*.xml
