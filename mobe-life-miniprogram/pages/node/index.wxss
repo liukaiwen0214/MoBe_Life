@@ -60,27 +60,6 @@
   box-sizing: border-box;
 }
 
-.todo-header-card {
-  background: #ffffff;
-  border: 1rpx solid #edf2e8;
-  border-radius: 28rpx;
-  padding: 32rpx 28rpx;
-  margin-bottom: 20rpx;
-}
-
-.todo-header-title {
-  font-size: 38rpx;
-  font-weight: 700;
-  color: #243024;
-  margin-bottom: 12rpx;
-}
-
-.todo-header-desc {
-  font-size: 24rpx;
-  line-height: 1.7;
-  color: #708070;
-}
-
 .group-card {
   background: #ffffff;
   border: 1rpx solid #edf2e8;

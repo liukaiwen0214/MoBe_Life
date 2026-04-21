@@ -1,30 +1,55 @@
 <view class="page">
   <view class="detail-card">
-    <view class="detail-header">
-      <view class="detail-header-left">
-        <view class="detail-tag">{{detail.ownerType}}</view>
-        <view class="detail-title">{{detail.title}}</view>
-      </view>
+    <view class="detail-tag">{{detail.ownerType}}</view>
+    <view class="detail-title">{{detail.title}}</view>
+
+    <view wx:if="{{detail.ownerName}}" class="detail-line">
+      <text class="detail-label">所属{{detail.ownerType}}</text>
+      <text class="detail-value">{{detail.ownerName}}</text>
     </view>
 
-    <view class="detail-owner">所属{{detail.ownerType}}：{{detail.ownerName}}</view>
-    <view class="detail-summary">{{detail.summaryText}}</view>
-  </view>
+    <view class="detail-line">
+      <text class="detail-label">更新时间</text>
+      <text class="detail-value">{{detail.updateText}}</text>
+    </view>
 
-  <view class="task-list-card">
-    <view class="task-list-title">节点下待办</view>
+    <view wx:if="{{detail.summaryText}}" class="detail-summary">
+      {{detail.summaryText}}
+    </view>
 
-    <block wx:for="{{detail.tasks}}" wx:key="id" wx:for-item="task">
-      <view class="task-row" data-task-id="{{task.id}}" bindtap="handleTaskTap">
-        <view class="task-content">
-          <view class="task-title">{{task.title}}</view>
-          <view class="task-meta">
-            <text class="task-status">{{task.statusText}}</text>
-            <text class="task-time">{{task.timeText}}</text>
+    <view wx:if="{{detail.contentText}}" class="detail-divider"></view>
+    <view wx:if="{{detail.contentText}}" class="detail-text-group">
+      <view class="detail-subtitle">说明</view>
+      <view class="detail-text">{{detail.contentText}}</view>
+    </view>
+
+    <view wx:if="{{detail.remarkText}}" class="detail-text-group">
+      <view class="detail-subtitle">备注</view>
+      <view class="detail-text">{{detail.remarkText}}</view>
+    </view>
+
+    <view wx:if="{{detail.tasks && detail.tasks.length}}" class="detail-divider"></view>
+
+    <view wx:if="{{detail.tasks && detail.tasks.length}}" class="task-list">
+      <view class="detail-subtitle">节点下待办</view>
+
+      <block wx:for="{{detail.tasks}}" wx:key="id" wx:for-item="task">
+        <view class="task-row" data-task-id="{{task.id}}" bindtap="handleTaskTap">
+          <view class="task-content">
+            <view class="task-title">{{task.title}}</view>
+            <view class="task-meta">
+              <text class="task-status">{{task.statusText}}</text>
+              <text class="task-time">{{task.timeText}}</text>
+            </view>
           </view>
+          <text class="task-arrow">›</text>
         </view>
-        <text class="task-arrow">›</text>
-      </view>
-    </block>
+      </block>
+    </view>
   </view>
-</view> 
+  <view class="detail-action-bar">
+    <view class="detail-action-btn" bindtap="handleCompleteNode">
+      赋予完成态
+    </view>
+  </view>
+</view>

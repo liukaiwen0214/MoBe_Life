@@ -3,78 +3,142 @@
   box-sizing: border-box;
 }
 
-.todo-header-card {
+.goal-overview-card {
   background: #ffffff;
   border: 1rpx solid #edf2e8;
-  border-radius: 28rpx;
+  border-radius: 32rpx;
   padding: 32rpx 28rpx;
   margin-bottom: 20rpx;
 }
 
-.todo-header-title {
-  font-size: 38rpx;
+.goal-overview-highlight {
+  font-size: 34rpx;
+  line-height: 1.5;
   font-weight: 700;
   color: #243024;
   margin-bottom: 12rpx;
 }
 
-.todo-header-desc {
+.goal-overview-summary {
   font-size: 24rpx;
-  line-height: 1.7;
-  color: #708070;
+  line-height: 1.8;
+  color: #7a867a;
 }
 
-.project-card {
+.goal-section-card {
   background: #ffffff;
   border: 1rpx solid #edf2e8;
-  border-radius: 28rpx;
-  padding: 28rpx 24rpx;
+  border-radius: 32rpx;
+  padding: 12rpx 20rpx 18rpx;
   margin-bottom: 20rpx;
 }
 
-.project-title {
-  font-size: 30rpx;
-  line-height: 1.5;
-  font-weight: 700;
-  color: #243024;
-  margin-bottom: 14rpx;
+.goal-section-card--completed {
+  background: #fcfdfb;
 }
 
-.project-meta {
+.goal-section-title {
+  min-height: 72rpx;
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #243024;
+}
+
+.goal-row {
+  min-height: 120rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 24rpx 8rpx;
+  border-bottom: 1rpx solid #f3f5f1;
+}
+
+.goal-row:last-child {
+  border-bottom: none;
+}
+
+.goal-row--completed {
+  opacity: 0.92;
+}
+
+.goal-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-row-title {
+  font-size: 32rpx;
+  line-height: 1.45;
+  font-weight: 700;
+  color: #243024;
+  margin-bottom: 12rpx;
+  word-break: break-word;
+}
+
+.goal-row-title--completed {
+  color: #425042;
+}
+
+.goal-row-meta {
   display: flex;
   align-items: center;
   gap: 16rpx;
   flex-wrap: wrap;
-  margin-bottom: 14rpx;
+  margin-bottom: 12rpx;
 }
 
-.project-meta-item {
+.goal-row-meta-item {
   font-size: 22rpx;
   color: #708070;
 }
 
-.project-progress {
-  font-size: 22rpx;
+.goal-row-progress {
+  font-size: 24rpx;
   color: #35c86a;
   font-weight: 700;
 }
 
-.project-footer {
+.goal-row-progress--completed {
+  color: #6c8f74;
+}
+
+.goal-row-footer {
   display: flex;
   align-items: center;
   gap: 16rpx;
   flex-wrap: wrap;
 }
 
-.project-status {
+.goal-row-status {
   font-size: 22rpx;
   color: #35c86a;
   font-weight: 600;
 }
 
-.project-update {
+.goal-row-status--completed {
+  color: #6c8f74;
+}
+
+.goal-row-update {
   font-size: 22rpx;
   color: #8c988c;
+}
+
+.goal-row-arrow {
+  font-size: 34rpx;
+  line-height: 1;
+  color: #b7c0b3;
+  flex-shrink: 0;
+}
+
+.goal-empty {
+  padding: 20rpx 8rpx 12rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: #9aa49a;
 }
 
 .fab {

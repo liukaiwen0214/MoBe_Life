@@ -1,25 +1,69 @@
 <view class="page">
-  <view class="todo-header-card">
-    <view class="todo-header-title">项目</view>
-    <view class="todo-header-desc">{{summaryText}}</view>
+  <view class="goal-overview-card">
+    <view class="goal-overview-highlight">
+      当前有 {{statCards[0].activeCount}} 个项目在推进
+    </view>
+
+    <view class="goal-overview-summary">
+      已完成 {{statCards[0].completedCount}} 个项目 ·
+      进行中 {{statCards[1].activeCount}} 个节点 ·
+      进行中 {{statCards[2].activeCount}} 个待办
+    </view>
   </view>
 
-  <block wx:for="{{projectList}}" wx:key="id" wx:for-item="item">
-    <view class="project-card" data-project-id="{{item.id}}" bindtap="handleProjectTap">
-      <view class="project-title">{{item.title}}</view>
+  <view class="goal-section-card">
+    <view class="goal-section-title">进行中项目</view>
 
-      <view class="project-meta">
-        <text class="project-meta-item">{{item.nodeCount}} 个节点</text>
-        <text class="project-meta-item">{{item.taskCount}} 个待办</text>
-        <text class="project-progress">{{item.progressText}}</text>
-      </view>
+    <block wx:if="{{activeProjectList.length}}">
+      <block wx:for="{{activeProjectList}}" wx:key="id" wx:for-item="item">
+        <view class="goal-row" data-project-id="{{item.id}}" bindtap="handleProjectTap">
+          <view class="goal-row-main">
+            <view class="goal-row-title">{{item.title}}</view>
 
-      <view class="project-footer">
-        <text class="project-status">{{item.statusText}}</text>
-        <text class="project-update">{{item.updateText}}</text>
-      </view>
+            <view class="goal-row-meta">
+              <view class="goal-row-meta-item">{{item.nodeCount}} 个节点</view>
+              <view class="goal-row-meta-item">{{item.taskCount}} 个待办</view>
+              <view class="goal-row-progress">{{item.progressText}}</view>
+            </view>
+
+            <view class="goal-row-footer">
+              <view class="goal-row-status">{{item.statusText}}</view>
+              <view class="goal-row-update">{{item.updateText}}</view>
+            </view>
+          </view>
+          <view class="goal-row-arrow">›</view>
+        </view>
+      </block>
+    </block>
+
+    <view wx:else class="goal-empty">
+      当前没有进行中的项目
     </view>
-  </block>
+  </view>
+
+  <view wx:if="{{completedProjectList.length}}" class="goal-section-card goal-section-card--completed">
+    <view class="goal-section-title">已完成项目</view>
+
+    <block wx:for="{{completedProjectList}}" wx:key="id" wx:for-item="item">
+      <view class="goal-row goal-row--completed" data-project-id="{{item.id}}" bindtap="handleProjectTap">
+        <view class="goal-row-main">
+          <view class="goal-row-title goal-row-title--completed">{{item.title}}</view>
+
+          <view class="goal-row-meta">
+            <view class="goal-row-meta-item">{{item.nodeCount}} 个节点</view>
+            <view class="goal-row-meta-item">{{item.taskCount}} 个待办</view>
+            <view class="goal-row-progress goal-row-progress--completed">{{item.progressText}}</view>
+          </view>
+
+          <view class="goal-row-footer">
+            <view class="goal-row-status goal-row-status--completed">{{item.statusText}}</view>
+            <view class="goal-row-update">{{item.updateText}}</view>
+          </view>
+        </view>
+        <view class="goal-row-arrow">›</view>
+      </view>
+    </block>
+  </view>
 
   <view class="fab" bindtap="handleCreateProject">+</view>
 </view>

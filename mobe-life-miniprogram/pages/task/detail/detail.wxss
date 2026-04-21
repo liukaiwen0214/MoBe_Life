@@ -7,7 +7,7 @@
   background: #ffffff;
   border: 1rpx solid #edf2e8;
   border-radius: 32rpx;
-  padding: 40rpx 32rpx;
+  padding: 40rpx 32rpx 44rpx;
 }
 
 .detail-tag {
@@ -17,15 +17,16 @@
   background: #f3f7ee;
   color: #7b8d75;
   font-size: 22rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 
 .detail-title {
   font-size: 42rpx;
   font-weight: 700;
   color: #243024;
-  line-height: 1.5;
+  line-height: 1.45;
   margin-bottom: 20rpx;
+  word-break: break-word;
 }
 
 .detail-meta {
@@ -33,28 +34,252 @@
   align-items: center;
   gap: 16rpx;
   flex-wrap: wrap;
-  margin-bottom: 16rpx;
 }
 
 .detail-status {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #35c86a;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 .detail-time {
   font-size: 24rpx;
+  color: #6f7d6f;
+  line-height: 1.5;
+}
+
+.detail-belong {
+  margin-top: 16rpx;
+  font-size: 25rpx;
+  line-height: 1.7;
+  color: #7d8a7d;
+}
+
+.detail-divider {
+  height: 1rpx;
+  background: #eef3ea;
+  margin: 28rpx 0;
+}
+.detail-note-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-note-title {
+  font-size: 24rpx;
+  color: #8a9588;
+  margin-bottom: 14rpx;
+}
+
+.detail-note-main {
+  font-size: 28rpx;
+  color: #405040;
+  line-height: 1.85;
+  word-break: break-word;
+}
+
+.detail-note-extra {
+  margin-top: 20rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #f1f4ee;
+}
+
+.detail-note-extra-label {
+  font-size: 22rpx;
+  color: #9aa49a;
+  margin-bottom: 8rpx;
+}
+
+.detail-note-extra-text {
+  font-size: 25rpx;
+  color: #6d786d;
+  line-height: 1.8;
+  word-break: break-word;
+}
+.detail-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.detail-line {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24rpx;
+  padding: 8rpx 0;
+}
+
+.detail-label {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: #8a9588;
+  line-height: 1.7;
+}
+
+.detail-value {
+  flex: 1;
+  font-size: 26rpx;
+  color: #5f6c5f;
+  line-height: 1.7;
+  text-align: right;
+  word-break: break-word;
+}
+
+.detail-value--overdue {
+  color: #c96f6f;
+}
+
+.status-flow {
+  margin-top: 4rpx;
+}
+
+/* 流程进度条 - 后面覆盖前面的最终版本 */
+.flow-scroll {
+  width: 100%;
+}
+
+.flow-track {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 18rpx;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding: 8rpx 8rpx 12rpx;
+  box-sizing: border-box;
+}
+
+.flow-step {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: 180rpx;
+  flex-shrink: 0;
+}
+
+.flow-step-top {
+  position: relative;
+  width: 100%;
+  height: 28rpx;
+}
+
+.flow-step-line {
+  position: absolute;
+  left: 50%;
+  right: -50%;
+  top: 50%;
+  height: 2rpx;
+  background: #e1e8de;
+  transform: translateY(-50%);
+}
+
+.flow-step:last-child .flow-step-line {
+  display: none;
+}
+
+.flow-step-line--passed,
+.flow-step-line--current {
+  background: #8fc9a0;
+}
+
+.flow-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 999rpx;
+  background: #dfe8dc;
+  transform: translate(-50%, -50%);
+}
+
+.flow-dot--passed {
+  background: #8fc9a0;
+}
+
+.flow-dot--current {
+  width: 22rpx;
+  height: 22rpx;
+  background: #2db35f;
+  box-shadow: 0 0 0 8rpx rgba(45, 179, 95, 0.12);
+}
+
+.flow-label {
+  margin-top: 18rpx;
+  width: 100%;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: #8a9588;
+  text-align: center;
+  word-break: break-word;
+}
+
+.flow-label--current {
+  color: #2db35f;
+  font-weight: 600;
+}
+
+/* 时间轴样式 */
+.timeline-block {
+  margin-top: 4rpx;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 18rpx;
+  padding: 12rpx 0;
+}
+
+.timeline-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.timeline-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 999rpx;
+  background: #8fc9a0;
+  margin-top: 8rpx;
+}
+
+.timeline-line {
+  width: 2rpx;
+  flex: 1;
+  min-height: 44rpx;
+  background: #dfe8dc;
+  margin-top: 8rpx;
+}
+
+.timeline-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-title {
+  font-size: 27rpx;
+  line-height: 1.7;
+  color: #2f3b2f;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.timeline-time {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  line-height: 1.6;
   color: #8c988c;
 }
 
-.detail-node {
+.timeline-remark {
+  margin-top: 8rpx;
   font-size: 24rpx;
-  color: #708070;
-  margin-bottom: 20rpx;
-}
-
-.detail-desc {
-  font-size: 26rpx;
-  line-height: 1.8;
-  color: #5f6f5f;
+  line-height: 1.75;
+  color: #5f6c5f;
+  word-break: break-word;
 }

@@ -30,11 +30,11 @@ public class GoalDetailVO {
   @Schema(description = "当前状态ID")
   private Long currentStatusId;
 
-  @Schema(description = "当前状态编码")
-  private String statusCode;
+  // @Schema(description = "当前状态编码")
+  // private String statusCode;
 
-  @Schema(description = "当前状态名称")
-  private String statusText;
+  // @Schema(description = "当前状态名称")
+  // private String statusText;
 
   @Schema(description = "节点数量")
   private Integer nodeCount;
@@ -62,4 +62,9 @@ public class GoalDetailVO {
 
   @Schema(description = "执行日志")
   private List<GoalLogItemVO> logs;
+  @Schema(description = "是否已完成：0-未完成 1-已完成")
+  private Integer isCompleted;
+
+  @Schema(description = "完成时间")
+  private LocalDateTime completedTime;
 }

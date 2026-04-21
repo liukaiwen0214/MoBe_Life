@@ -16,6 +16,6 @@ public class GoalListQueryDTO {
   @Schema(description = "关键词")
   private String keyword;
 
-  @Schema(description = "状态编码")
-  private String statusCode;
+  @Schema(description = "是否包含已完成目标")
+  private Boolean includeCompleted;
 }

@@ -11,15 +11,17 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface MobeProjectMapper extends BaseMapper<MobeProject> {
-    List<ProjectListItemVO> selectProjectList(@Param("userId") Long userId,
-            @Param("keyword") String keyword,
-            @Param("statusCode") String statusCode,
-            @Param("offset") Long offset,
-            @Param("pageSize") Integer pageSize);
+        List<ProjectListItemVO> selectProjectList(
+                        @Param("userId") Long userId,
+                        @Param("keyword") String keyword,
+                        @Param("includeCompleted") Boolean includeCompleted,
+                        @Param("offset") long offset,
+                        @Param("pageSize") int pageSize);
 
-    Long countProjectList(@Param("userId") Long userId,
-            @Param("keyword") String keyword,
-            @Param("statusCode") String statusCode);
+        Long countProjectList(
+                        @Param("userId") Long userId,
+                        @Param("keyword") String keyword,
+                        @Param("includeCompleted") Boolean includeCompleted);
 
-    ProjectDetailVO selectProjectBaseDetail(@Param("id") Long id, @Param("userId") Long userId);
+        ProjectDetailVO selectProjectBaseDetail(@Param("id") Long id, @Param("userId") Long userId);
 }

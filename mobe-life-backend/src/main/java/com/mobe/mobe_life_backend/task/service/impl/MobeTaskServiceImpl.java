@@ -18,6 +18,9 @@ import com.mobe.mobe_life_backend.task.vo.TaskDetailVO;
 import com.mobe.mobe_life_backend.task.vo.TaskListItemVO;
 import com.mobe.mobe_life_backend.task.vo.TaskLogItemVO;
 import com.mobe.mobe_life_backend.task.vo.TaskStatusItemVO;
+import com.mobe.mobe_life_backend.common.entity.MobeStatusChangeLog;
+import com.mobe.mobe_life_backend.common.mapper.MobeStatusChangeLogMapper;
+import com.mobe.mobe_life_backend.task.vo.TaskStatusChangeLogItemVO;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,13 +33,16 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   private final MobeTaskItemMapper mobeTaskItemMapper;
   private final MobeTaskStatusMapper mobeTaskStatusMapper;
   private final MobeTaskOperationLogMapper mobeTaskOperationLogMapper;
+  private final MobeStatusChangeLogMapper mobeStatusChangeLogMapper;
 
   public MobeTaskServiceImpl(MobeTaskItemMapper mobeTaskItemMapper,
       MobeTaskStatusMapper mobeTaskStatusMapper,
-      MobeTaskOperationLogMapper mobeTaskOperationLogMapper) {
+      MobeTaskOperationLogMapper mobeTaskOperationLogMapper,
+      MobeStatusChangeLogMapper mobeStatusChangeLogMapper) {
     this.mobeTaskItemMapper = mobeTaskItemMapper;
     this.mobeTaskStatusMapper = mobeTaskStatusMapper;
     this.mobeTaskOperationLogMapper = mobeTaskOperationLogMapper;
+    this.mobeStatusChangeLogMapper = mobeStatusChangeLogMapper;
   }
 
   @Override
@@ -123,10 +129,28 @@ public class MobeTaskServiceImpl implements MobeTaskService {
       vo.setCreateTime(log.getCreateTime());
       return vo;
     }).toList();
+    List<MobeStatusChangeLog> statusChangeLogs = mobeStatusChangeLogMapper.selectList(
+        new LambdaQueryWrapper<MobeStatusChangeLog>()
+            .eq(MobeStatusChangeLog::getUserId, userId)
+            .eq(MobeStatusChangeLog::getBizType, "TASK")
+            .eq(MobeStatusChangeLog::getBizId, id)
+            .eq(MobeStatusChangeLog::getIsDeleted, 0)
+            .orderByDesc(MobeStatusChangeLog::getCreateTime));
+
+    List<TaskStatusChangeLogItemVO> statusChangeLogVOList = statusChangeLogs.stream().map(log -> {
+      TaskStatusChangeLogItemVO vo = new TaskStatusChangeLogItemVO();
+      vo.setId(log.getId());
+      vo.setChangeType(log.getChangeType());
+      vo.setFromStatusName(log.getFromStatusName());
+      vo.setToStatusName(log.getToStatusName());
+      vo.setChangeTime(log.getCreateTime());
+      vo.setChangeRemark(log.getChangeRemark());
+      return vo;
+    }).toList();
 
     detailVO.setStatusList(statusVOList);
     detailVO.setLogs(logVOList);
-
+    detailVO.setStatusChangeLogs(statusChangeLogVOList);
     return detailVO;
   }
 }

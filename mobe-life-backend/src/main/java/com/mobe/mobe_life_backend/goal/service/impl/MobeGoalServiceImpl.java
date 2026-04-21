@@ -9,6 +9,7 @@ import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
 import com.mobe.mobe_life_backend.common.exception.GoalErrorCode;
 import com.mobe.mobe_life_backend.common.response.PageResult;
 import com.mobe.mobe_life_backend.goal.dto.GoalListQueryDTO;
+import com.mobe.mobe_life_backend.goal.entity.MobeGoal;
 import com.mobe.mobe_life_backend.goal.mapper.MobeGoalMapper;
 import com.mobe.mobe_life_backend.goal.vo.GoalDetailVO;
 import com.mobe.mobe_life_backend.goal.vo.GoalListItemVO;
@@ -25,6 +26,9 @@ import com.mobe.mobe_life_backend.task.mapper.MobeTaskItemMapper;
 import com.mobe.mobe_life_backend.task.mapper.MobeTaskOperationLogMapper;
 import com.mobe.mobe_life_backend.task.mapper.MobeTaskStatusMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,8 +70,7 @@ public class MobeGoalServiceImpl implements MobeGoalService {
     Long total = mobeGoalMapper.countGoalList(
         userId,
         queryDTO.getKeyword(),
-        queryDTO.getStatusCode());
-
+        queryDTO.getIncludeCompleted());
     if (total == null || total == 0) {
       return PageResult.empty(pageNum, pageSize);
     }
@@ -75,7 +78,7 @@ public class MobeGoalServiceImpl implements MobeGoalService {
     List<GoalListItemVO> list = mobeGoalMapper.selectGoalList(
         userId,
         queryDTO.getKeyword(),
-        queryDTO.getStatusCode(),
+        queryDTO.getIncludeCompleted(),
         offset,
         pageSize);
 
@@ -105,6 +108,8 @@ public class MobeGoalServiceImpl implements MobeGoalService {
             .orderByAsc(MobeNode::getId));
 
     List<Long> nodeIds = nodeList.stream().map(MobeNode::getId).toList();
+    Map<Long, String> nodeNameMap = nodeList.stream()
+        .collect(Collectors.toMap(MobeNode::getId, MobeNode::getTitle));
 
     // 2. 查询目标下待办（直接挂目标 + 挂节点）
     LambdaQueryWrapper<MobeTaskItem> taskWrapper = new LambdaQueryWrapper<MobeTaskItem>()
@@ -159,6 +164,13 @@ public class MobeGoalServiceImpl implements MobeGoalService {
       vo.setTitle(task.getTitle());
       vo.setDeadlineTime(task.getDeadlineTime());
 
+      vo.setDirectOwnerType(task.getDirectOwnerType());
+      vo.setDirectOwnerId(task.getDirectOwnerId());
+
+      if ("NODE".equals(task.getDirectOwnerType()) && task.getDirectOwnerId() != null) {
+        vo.setNodeName(nodeNameMap.get(task.getDirectOwnerId()));
+      }
+
       MobeTaskStatus status = statusMap.get(task.getCurrentStatusId());
       if (status != null) {
         vo.setStatusCode(status.getStatusCode());
@@ -208,5 +220,163 @@ public class MobeGoalServiceImpl implements MobeGoalService {
     detailVO.setLogs(logVOList);
 
     return detailVO;
+  }
+
+  @Override
+  public void completeGoal(Long id, HttpServletRequest request) {
+    Long userId = UserContext.getCurrentUserId();
+    if (userId == null) {
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
+    }
+
+    MobeGoal goal = mobeGoalMapper.selectById(id);
+    if (goal == null || Integer.valueOf(1).equals(goal.getIsDeleted())) {
+      throw new BusinessException(GoalErrorCode.GOAL_NOT_FOUND);
+    }
+
+    if (!userId.equals(goal.getUserId())) {
+      throw new BusinessException(AuthErrorCode.NO_PERMISSION);
+    }
+
+    if (Integer.valueOf(1).equals(goal.getIsCompleted())) {
+      throw new BusinessException("目标已是完成状态");
+    }
+    List<MobeNode> nodeList = mobeNodeMapper.selectList(
+        new LambdaQueryWrapper<MobeNode>()
+            .eq(MobeNode::getUserId, userId)
+            .eq(MobeNode::getOwnerType, "GOAL")
+            .eq(MobeNode::getOwnerId, id)
+            .eq(MobeNode::getIsDeleted, 0));
+
+    List<Long> nodeIds = nodeList.stream().map(MobeNode::getId).toList();
+
+    LambdaQueryWrapper<MobeTaskItem> taskWrapper = new LambdaQueryWrapper<MobeTaskItem>()
+        .eq(MobeTaskItem::getUserId, userId)
+        .eq(MobeTaskItem::getIsDeleted, 0)
+        .and(w -> {
+          w.eq(MobeTaskItem::getDirectOwnerType, "GOAL")
+              .eq(MobeTaskItem::getDirectOwnerId, id);
+          if (!nodeIds.isEmpty()) {
+            w.or()
+                .eq(MobeTaskItem::getDirectOwnerType, "NODE")
+                .in(MobeTaskItem::getDirectOwnerId, nodeIds);
+          }
+        });
+
+    List<MobeTaskItem> taskList = mobeTaskItemMapper.selectList(taskWrapper);
+
+    if (!taskList.isEmpty()) {
+      List<Long> statusIds = taskList.stream()
+          .map(MobeTaskItem::getCurrentStatusId)
+          .filter(java.util.Objects::nonNull)
+          .distinct()
+          .toList();
+
+      if (!statusIds.isEmpty()) {
+        List<MobeTaskStatus> statusList = mobeTaskStatusMapper.selectList(
+            new LambdaQueryWrapper<MobeTaskStatus>()
+                .in(MobeTaskStatus::getId, statusIds)
+                .eq(MobeTaskStatus::getIsDeleted, 0));
+
+        Map<Long, MobeTaskStatus> statusMap = statusList.stream()
+            .collect(Collectors.toMap(MobeTaskStatus::getId, item -> item));
+
+        boolean hasUnfinishedTask = taskList.stream().anyMatch(task -> {
+          MobeTaskStatus status = statusMap.get(task.getCurrentStatusId());
+          return status == null || !Integer.valueOf(1).equals(status.getIsTerminal());
+        });
+
+        if (hasUnfinishedTask) {
+          throw new BusinessException("该目标下仍有未完成待办，不能赋予完成态");
+        }
+      }
+    }
+
+    goal.setIsCompleted(1);
+    goal.setCompletedTime(LocalDateTime.now());
+    goal.setUpdatedBy(userId);
+    mobeGoalMapper.updateById(goal);
+
+    if (!nodeList.isEmpty()) {
+      for (MobeNode node : nodeList) {
+        if (!Integer.valueOf(1).equals(node.getIsCompleted())) {
+          node.setIsCompleted(1);
+          node.setCompletedTime(LocalDateTime.now());
+          node.setUpdatedBy(userId);
+          mobeNodeMapper.updateById(node);
+        }
+      }
+    }
+
+    mobeGoalMapper.updateById(goal);
+  }
+
+  @Override
+  public void reopenGoal(Long id) {
+    Long userId = UserContext.getCurrentUserId();
+    if (userId == null) {
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
+    }
+
+    MobeGoal goal = checkGoalForReopen(id, userId);
+    doReopenGoal(goal, userId);
+  }
+
+  @Override
+  public void reopenGoalWithNodes(Long id) {
+    Long userId = UserContext.getCurrentUserId();
+    if (userId == null) {
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
+    }
+
+    MobeGoal goal = checkGoalForReopen(id, userId);
+    doReopenGoal(goal, userId);
+    doReopenGoalNodes(id, userId);
+  }
+
+  private MobeGoal checkGoalForReopen(Long id, Long userId) {
+    MobeGoal goal = mobeGoalMapper.selectById(id);
+    if (goal == null || Integer.valueOf(1).equals(goal.getIsDeleted())) {
+      throw new BusinessException(GoalErrorCode.GOAL_NOT_FOUND);
+    }
+
+    if (!userId.equals(goal.getUserId())) {
+      throw new BusinessException(AuthErrorCode.NO_PERMISSION);
+    }
+
+    if (!Integer.valueOf(1).equals(goal.getIsCompleted())) {
+      throw new BusinessException("该目标当前不是完成状态");
+    }
+
+    return goal;
+  }
+
+  private void doReopenGoal(MobeGoal goal, Long userId) {
+    goal.setIsCompleted(0);
+    goal.setCompletedTime(null);
+    goal.setUpdatedBy(userId);
+    mobeGoalMapper.updateById(goal);
+  }
+
+  private void doReopenGoalNodes(Long goalId, Long userId) {
+    List<MobeNode> nodeList = mobeNodeMapper.selectList(
+        new LambdaQueryWrapper<MobeNode>()
+            .eq(MobeNode::getUserId, userId)
+            .eq(MobeNode::getOwnerType, "GOAL")
+            .eq(MobeNode::getOwnerId, goalId)
+            .eq(MobeNode::getIsDeleted, 0));
+
+    if (nodeList.isEmpty()) {
+      return;
+    }
+
+    for (MobeNode node : nodeList) {
+      if (Integer.valueOf(1).equals(node.getIsCompleted())) {
+        node.setIsCompleted(0);
+        node.setCompletedTime(null);
+        node.setUpdatedBy(userId);
+        mobeNodeMapper.updateById(node);
+      }
+    }
   }
 }

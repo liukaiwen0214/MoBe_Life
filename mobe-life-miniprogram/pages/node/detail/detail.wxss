@@ -3,49 +3,92 @@
   box-sizing: border-box;
 }
 
-.detail-card,
-.task-list-card {
+.detail-card {
   background: #ffffff;
   border: 1rpx solid #edf2e8;
   border-radius: 32rpx;
-  padding: 32rpx 28rpx;
-  margin-bottom: 20rpx;
+  padding: 40rpx 32rpx 44rpx;
 }
 
 .detail-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 36rpx;
-  padding: 0 14rpx;
+  display: inline-block;
+  padding: 10rpx 20rpx;
   border-radius: 999rpx;
-  background: #f1f6eb;
-  color: #6f8d66;
-  font-size: 20rpx;
-  line-height: 1;
-  margin-bottom: 16rpx;
+  background: #f3f7ee;
+  color: #7b8d75;
+  font-size: 22rpx;
+  margin-bottom: 24rpx;
 }
 
 .detail-title {
   font-size: 40rpx;
   font-weight: 700;
   color: #243024;
-  line-height: 1.5;
-  margin-bottom: 14rpx;
+  line-height: 1.45;
+  margin-bottom: 20rpx;
+  word-break: break-word;
 }
 
-.detail-owner,
-.detail-summary {
-  font-size: 24rpx;
+.detail-line {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24rpx;
+  padding: 10rpx 0;
+}
+
+.detail-label {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: #8a9588;
   line-height: 1.7;
+}
+
+.detail-value {
+  flex: 1;
+  font-size: 28rpx;
+  color: #2f3b2f;
+  line-height: 1.7;
+  text-align: right;
+  word-break: break-word;
+}
+
+.detail-summary {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  line-height: 1.8;
   color: #708070;
 }
 
-.task-list-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #243024;
-  margin-bottom: 16rpx;
+.detail-divider {
+  height: 1rpx;
+  background: #eef3ea;
+  margin: 28rpx 0;
+}
+
+.detail-text-group {
+  margin-bottom: 24rpx;
+}
+
+.detail-text-group:last-child {
+  margin-bottom: 0;
+}
+
+.detail-subtitle {
+  font-size: 24rpx;
+  color: #8a9588;
+  margin-bottom: 10rpx;
+}
+
+.detail-text {
+  font-size: 28rpx;
+  color: #405040;
+  line-height: 1.85;
+  word-break: break-word;
+}
+
+.task-list {
+  margin-top: 4rpx;
 }
 
 .task-row {
@@ -73,6 +116,7 @@
   color: #243024;
   line-height: 1.5;
   margin-bottom: 8rpx;
+  word-break: break-word;
 }
 
 .task-meta {
@@ -98,4 +142,28 @@
   line-height: 1;
   color: #b7c0b3;
   flex-shrink: 0;
+}
+.page {
+  padding: 24rpx 24rpx 156rpx;
+  box-sizing: border-box;
+}
+
+.detail-action-bar {
+  position: fixed;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: calc(24rpx + env(safe-area-inset-bottom));
+  z-index: 10;
+}
+
+.detail-action-btn {
+  height: 88rpx;
+  border-radius: 24rpx;
+  background: #243024;
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 88rpx;
+  text-align: center;
+  box-shadow: 0 12rpx 28rpx rgba(36, 48, 36, 0.14);
 }

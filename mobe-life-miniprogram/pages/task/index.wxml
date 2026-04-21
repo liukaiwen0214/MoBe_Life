@@ -7,14 +7,17 @@
   <block wx:for="{{todoSections}}" wx:key="key" wx:for-item="section">
     <view class="group-card">
       <view class="group-header" data-key="{{section.key}}" bindtap="handleToggleSection">
-        <view class="group-header-left">
-          <text class="group-title">{{section.title}}</text>
-          <text class="group-count">({{section.count}})</text>
-        </view>
+        <view class="group-header-main">
+          <view class="group-header-top">
+            <view class="group-header-left">
+              <text class="group-title">{{section.title}}</text>
+            </view>
+            <text class="group-arrow {{section.collapsed ? 'group-arrow--collapsed' : ''}}">⌃</text>
+          </view>
 
-        <view class="group-header-right">
-          <text wx:if="{{section.type}}" class="group-tag">{{section.type}}</text>
-          <text class="group-arrow">{{section.collapsed ? '⌄' : '⌃'}}</text>
+          <view wx:if="{{section.summary}}" class="group-summary">
+            {{section.summary}}
+          </view>
         </view>
       </view>
 
@@ -22,26 +25,23 @@
         <block wx:if="{{section.tasks}}">
           <block wx:for="{{section.tasks}}" wx:key="id" wx:for-item="task">
             <view class="task-row">
-              <view
-                class="task-action-box"
-                data-task-id="{{task.id}}"
-                data-flow-mode="{{task.flowMode}}"
-                bindtap="handleTaskAction"
-              ></view>
+              <view class="task-action-box" data-task-id="{{task.id}}" data-flow-mode="{{task.flowMode}}" bindtap="handleTaskAction"></view>
 
-              <view
-                class="task-content"
-                data-task-id="{{task.id}}"
-                bindtap="handleTaskTap"
-              >
+              <view class="task-content" data-task-id="{{task.id}}" bindtap="handleTaskTap">
                 <view class="task-title">{{task.title}}</view>
-                <view class="task-meta">
-                  <text class="task-status">{{task.statusText}}</text>
-                  <text class="task-time">{{task.timeText}}</text>
-                </view>
-
-                <view wx:if="{{task.nodeName}}" class="task-node-row">
-                  <text class="task-node">{{task.nodeName}}</text>
+                <view class="task-row-meta">
+                  <view class="task-row-meta-left">
+                    <view class="task-row-status">{{task.statusText}}</view>
+                    <view class="task-row-time {{task.isOverdue ? 'task-row-time--overdue' : ''}}">
+                      {{task.timeText}}
+                    </view>
+                    <view wx:if="{{task.isOverdue}}" class="task-row-overdue">
+                      {{task.overdueText}}
+                    </view>
+                  </view>
+                  <view wx:if="{{task.belongText}}" class="task-belong">
+                    {{task.belongText}}
+                  </view>
                 </view>
               </view>
             </view>

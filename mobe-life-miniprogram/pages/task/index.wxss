@@ -52,11 +52,6 @@
   color: #243024;
 }
 
-.group-count {
-  font-size: 22rpx;
-  color: #98a398;
-}
-
 .group-arrow {
   font-size: 20rpx;
   color: #9cab9c;
@@ -102,41 +97,67 @@
   margin-bottom: 10rpx;
   word-break: break-word;
 }
+.task-row-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
 
-.task-meta {
+.task-row-meta-left {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
 }
 
-.task-status {
+.task-row-status {
   font-size: 22rpx;
+  line-height: 30rpx;
   color: #35c86a;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
-.task-time {
+.task-row-time {
   font-size: 22rpx;
+  line-height: 30rpx;
   color: #8c988c;
+  flex-shrink: 0;
 }
 
+.task-belong {
+  display: block;
+  font-size: 22rpx;
+  line-height: 35rpx;
+  color: #9aa49a;
+  text-align: right;
+  max-width: 300rpx;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-top: 2rpx;
+}
+.task-row-time--overdue {
+  color: #d96c6c;
+}
+
+.task-row-overdue {
+  font-size: 22rpx;
+  line-height: 30rpx;
+  color: #d96c6c;
+  font-weight: 600;
+  flex-shrink: 0;
+}
 .task-node-row {
   display: flex;
   justify-content: flex-end;
   margin-top: 10rpx;
 }
-
-.task-node {
-  max-width: 220rpx;
-  font-size: 20rpx;
-  color: #98a398;
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .panel {
   background: #ffffff;
   border: 1rpx solid #edf2e8;
@@ -253,4 +274,54 @@
   line-height: 1;
   color: #b7c0b3;
   flex-shrink: 0;
+}
+.group-header {
+  padding: 8rpx 0;
+}
+
+.group-header-main {
+  width: 100%;
+}
+
+.group-header-top {
+  min-height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.group-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  min-width: 0;
+  flex: 1;
+}
+
+.group-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #243024;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.group-summary {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: #8c988c;
+}
+
+.group-arrow {
+  font-size: 28rpx;
+  color: #8fa08f;
+  flex-shrink: 0;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.group-arrow--collapsed {
+  transform: rotate(180deg);
 }

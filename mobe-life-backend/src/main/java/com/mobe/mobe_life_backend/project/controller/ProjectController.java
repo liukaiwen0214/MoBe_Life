@@ -8,6 +8,7 @@ import com.mobe.mobe_life_backend.project.vo.ProjectListItemVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mobe.mobe_life_backend.project.vo.ProjectDetailVO;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 /**
  * 项目模块接口
@@ -48,5 +50,30 @@ public class ProjectController {
   public Result<ProjectDetailVO> getProjectDetail(
       @Parameter(description = "项目ID") @PathVariable Long id) {
     return Result.success(mobeProjectService.getProjectDetail(id));
+  }
+
+  @Operation(summary = "赋予项目完成态")
+  @PostMapping("/{id}/complete")
+  public Result<Boolean> completeProject(
+      @Parameter(description = "项目ID", required = true) @PathVariable Long id,
+      HttpServletRequest request) {
+    mobeProjectService.completeProject(id, request);
+    return Result.success(true);
+  }
+
+  @Operation(summary = "恢复项目")
+  @PostMapping("/{id}/reopen")
+  public Result<Boolean> reopenProject(
+      @Parameter(description = "项目ID", required = true) @PathVariable Long id) {
+    mobeProjectService.reopenProject(id);
+    return Result.success(true);
+  }
+
+  @Operation(summary = "恢复项目并恢复其下全部节点")
+  @PostMapping("/{id}/reopen-all")
+  public Result<Boolean> reopenProjectWithNodes(
+      @Parameter(description = "项目ID", required = true) @PathVariable Long id) {
+    mobeProjectService.reopenProjectWithNodes(id);
+    return Result.success(true);
   }
 }

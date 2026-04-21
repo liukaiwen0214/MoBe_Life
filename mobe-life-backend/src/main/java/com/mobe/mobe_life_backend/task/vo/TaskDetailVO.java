@@ -65,4 +65,6 @@ public class TaskDetailVO {
 
   @Schema(description = "操作日志")
   private List<TaskLogItemVO> logs;
+  @Schema(description = "状态变更时间线")
+  private List<TaskStatusChangeLogItemVO> statusChangeLogs;
 }

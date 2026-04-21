@@ -9,6 +9,7 @@ import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
 import com.mobe.mobe_life_backend.common.exception.NodeErrorCode;
 import com.mobe.mobe_life_backend.common.response.PageResult;
 import com.mobe.mobe_life_backend.node.dto.NodeListQueryDTO;
+import com.mobe.mobe_life_backend.node.entity.MobeNode;
 import com.mobe.mobe_life_backend.node.mapper.MobeNodeMapper;
 import com.mobe.mobe_life_backend.node.vo.NodeDetailVO;
 import com.mobe.mobe_life_backend.node.vo.NodeListItemVO;
@@ -18,6 +19,9 @@ import com.mobe.mobe_life_backend.task.entity.MobeTaskStatus;
 import com.mobe.mobe_life_backend.task.mapper.MobeTaskItemMapper;
 import com.mobe.mobe_life_backend.task.mapper.MobeTaskStatusMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -130,4 +134,62 @@ public class MobeNodeServiceImpl implements MobeNodeService {
     return detailVO;
   }
 
+  @Override
+  public void completeNode(Long id, HttpServletRequest request) {
+    Long userId = UserContext.getCurrentUserId();
+    if (userId == null) {
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
+    }
+
+    MobeNode node = mobeNodeMapper.selectById(id);
+    if (node == null || Integer.valueOf(1).equals(node.getIsDeleted())) {
+      throw new BusinessException(NodeErrorCode.NODE_NOT_FOUND);
+    }
+
+    if (!userId.equals(node.getUserId())) {
+      throw new BusinessException(AuthErrorCode.NO_PERMISSION);
+    }
+
+    if (Integer.valueOf(1).equals(node.getIsCompleted())) {
+      throw new BusinessException("节点已是完成状态");
+    }
+    List<MobeTaskItem> taskList = mobeTaskItemMapper.selectList(
+        new LambdaQueryWrapper<MobeTaskItem>()
+            .eq(MobeTaskItem::getUserId, userId)
+            .eq(MobeTaskItem::getDirectOwnerType, "NODE")
+            .eq(MobeTaskItem::getDirectOwnerId, id)
+            .eq(MobeTaskItem::getIsDeleted, 0));
+
+    if (!taskList.isEmpty()) {
+      List<Long> statusIds = taskList.stream()
+          .map(MobeTaskItem::getCurrentStatusId)
+          .filter(java.util.Objects::nonNull)
+          .distinct()
+          .toList();
+
+      if (!statusIds.isEmpty()) {
+        List<MobeTaskStatus> statusList = mobeTaskStatusMapper.selectList(
+            new LambdaQueryWrapper<MobeTaskStatus>()
+                .in(MobeTaskStatus::getId, statusIds)
+                .eq(MobeTaskStatus::getIsDeleted, 0));
+
+        Map<Long, MobeTaskStatus> statusMap = statusList.stream()
+            .collect(Collectors.toMap(MobeTaskStatus::getId, item -> item));
+
+        boolean hasUnfinishedTask = taskList.stream().anyMatch(task -> {
+          MobeTaskStatus status = statusMap.get(task.getCurrentStatusId());
+          return status == null || !Integer.valueOf(1).equals(status.getIsTerminal());
+        });
+
+        if (hasUnfinishedTask) {
+          throw new BusinessException("该节点下仍有未完成待办，不能赋予完成态");
+        }
+      }
+    }
+    node.setIsCompleted(1);
+    node.setCompletedTime(LocalDateTime.now());
+    node.setUpdatedBy(userId);
+
+    mobeNodeMapper.updateById(node);
+  }
 }

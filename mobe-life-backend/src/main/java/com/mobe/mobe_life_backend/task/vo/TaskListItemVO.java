@@ -34,4 +34,11 @@ public class TaskListItemVO {
 
   @Schema(description = "更新时间")
   private LocalDateTime updateTime;
+
+  @Schema(description = "根归属类型")
+  private String rootOwnerType;
+  @Schema(description = "根归属对象名称")
+  private String rootOwnerName;
+  @Schema(description = "根节点名称")
+  private String nodeName;
 }

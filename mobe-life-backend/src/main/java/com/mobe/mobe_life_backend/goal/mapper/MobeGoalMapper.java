@@ -12,15 +12,17 @@ import java.util.List;
 
 @Mapper
 public interface MobeGoalMapper extends BaseMapper<MobeGoal> {
-  List<GoalListItemVO> selectGoalList(@Param("userId") Long userId,
-      @Param("keyword") String keyword,
-      @Param("statusCode") String statusCode,
-      @Param("offset") Long offset,
-      @Param("pageSize") Integer pageSize);
+        List<GoalListItemVO> selectGoalList(
+                        @Param("userId") Long userId,
+                        @Param("keyword") String keyword,
+                        @Param("includeCompleted") Boolean includeCompleted,
+                        @Param("offset") long offset,
+                        @Param("pageSize") int pageSize);
 
-  Long countGoalList(@Param("userId") Long userId,
-      @Param("keyword") String keyword,
-      @Param("statusCode") String statusCode);
+        Long countGoalList(
+                        @Param("userId") Long userId,
+                        @Param("keyword") String keyword,
+                        @Param("includeCompleted") Boolean includeCompleted);
 
-  GoalDetailVO selectGoalBaseDetail(@Param("id") Long id, @Param("userId") Long userId);
+        GoalDetailVO selectGoalBaseDetail(@Param("id") Long id, @Param("userId") Long userId);
 }

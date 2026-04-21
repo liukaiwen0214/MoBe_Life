@@ -57,6 +57,12 @@ public class MobeGoal {
   @Schema(description = "更新人")
   private Long updatedBy;
 
+  @Schema(description = "是否完成：0-否，1-是")
+  private Integer isCompleted;
+
+  @Schema(description = "完成时间")
+  private LocalDateTime completedTime;
+
   @Schema(description = "创建时间")
   @TableField(fill = FieldFill.INSERT)
   private LocalDateTime createTime;

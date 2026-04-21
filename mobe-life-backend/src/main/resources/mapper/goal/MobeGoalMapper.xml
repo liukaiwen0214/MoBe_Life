@@ -7,12 +7,12 @@
     SELECT
       g.id AS id,
       g.title AS title,
+      g.is_completed AS isCompleted,
+      g.completed_time AS completedTime,
       COALESCE(COUNT(DISTINCT n.id), 0) AS nodeCount,
       COALESCE(COUNT(DISTINCT t.id), 0) AS taskCount,
       COALESCE(COUNT(DISTINCT CASE WHEN ts.is_terminal = 1 THEN t.id END), 0) AS completedCount,
       COALESCE(COUNT(DISTINCT t.id), 0) AS totalCount,
-      cs.status_code AS statusCode,
-      cs.status_name AS statusText,
       g.update_time AS updateTime
     FROM mobe_goal g
     LEFT JOIN mobe_node n
@@ -27,43 +27,37 @@
         OR (t.direct_owner_type = 'NODE' AND t.direct_owner_id = n.id)
       )
       AND t.is_deleted = 0
-    LEFT JOIN mobe_task_status cs
-      ON cs.id = g.current_status_id
-      AND cs.is_deleted = 0
     LEFT JOIN mobe_task_status ts
       ON ts.id = t.current_status_id
       AND ts.is_deleted = 0
     WHERE g.user_id = #{userId}
       AND g.is_deleted = 0
+    <if test="includeCompleted == null or includeCompleted == false">
+      AND g.is_completed = 0
+    </if>
     <if test="keyword != null and keyword != ''">
       AND g.title LIKE CONCAT('%', #{keyword}, '%')
-    </if>
-    <if test="statusCode != null and statusCode != ''">
-      AND cs.status_code = #{statusCode}
     </if>
     GROUP BY
       g.id,
       g.title,
-      cs.status_code,
-      cs.status_name,
+      g.is_completed,
+      g.completed_time,
       g.update_time
-    ORDER BY g.update_time DESC
+    ORDER BY g.is_completed ASC, g.update_time DESC
     LIMIT #{offset}, #{pageSize}
   </select>
 
   <select id="countGoalList" resultType="java.lang.Long">
     SELECT COUNT(1)
     FROM mobe_goal g
-    LEFT JOIN mobe_task_status cs
-      ON cs.id = g.current_status_id
-      AND cs.is_deleted = 0
     WHERE g.user_id = #{userId}
       AND g.is_deleted = 0
+    <if test="includeCompleted == null or includeCompleted == false">
+      AND g.is_completed = 0
+    </if>
     <if test="keyword != null and keyword != ''">
       AND g.title LIKE CONCAT('%', #{keyword}, '%')
-    </if>
-    <if test="statusCode != null and statusCode != ''">
-      AND cs.status_code = #{statusCode}
     </if>
   </select>
 
@@ -75,9 +69,8 @@
       g.remark AS remark,
       g.execution_mode AS executionMode,
       g.status_template_id AS statusTemplateId,
-      g.current_status_id AS currentStatusId,
-      cs.status_code AS statusCode,
-      cs.status_name AS statusText,
+      g.is_completed AS isCompleted,
+      g.completed_time AS completedTime,
       COALESCE(COUNT(DISTINCT n.id), 0) AS nodeCount,
       COALESCE(COUNT(DISTINCT t.id), 0) AS taskCount,
       COALESCE(COUNT(DISTINCT CASE WHEN ts.is_terminal = 1 THEN t.id END), 0) AS completedCount,
@@ -96,9 +89,6 @@
         OR (t.direct_owner_type = 'NODE' AND t.direct_owner_id = n.id)
       )
       AND t.is_deleted = 0
-    LEFT JOIN mobe_task_status cs
-      ON cs.id = g.current_status_id
-      AND cs.is_deleted = 0
     LEFT JOIN mobe_task_status ts
       ON ts.id = t.current_status_id
       AND ts.is_deleted = 0
@@ -112,9 +102,8 @@
       g.remark,
       g.execution_mode,
       g.status_template_id,
-      g.current_status_id,
-      cs.status_code,
-      cs.status_name,
+      g.is_completed,
+      g.completed_time,
       g.update_time
   </select>
 

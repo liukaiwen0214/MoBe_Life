@@ -1,17 +1,100 @@
 <view class="page">
   <view class="detail-card">
     <view class="detail-tag">待办详情</view>
+
     <view class="detail-title">{{detail.title}}</view>
 
     <view class="detail-meta">
-      <text class="detail-status">{{detail.statusText}}</text>
-      <text class="detail-time">{{detail.timeText}}</text>
+      <view class="detail-status">{{detail.statusText}}</view>
+      <view class="detail-time">{{detail.timeText}}</view>
     </view>
 
-    <view wx:if="{{detail.nodeName}}" class="detail-node">
-      所属节点：{{detail.nodeName}}
+    <view wx:if="{{detail.belongText}}" class="detail-belong">
+      {{detail.belongText}}
     </view>
 
-    <view class="detail-desc">{{detail.desc}}</view>
+    <view class="detail-divider"></view>
+
+    <view class="detail-note-block">
+      <view class="detail-note-title">说明</view>
+
+      <view class="detail-note-main">
+        {{detail.contentText || '暂无内容'}}
+      </view>
+
+      <view wx:if="{{detail.remarkText}}" class="detail-note-extra">
+        <view class="detail-note-extra-label">补充备注</view>
+        <view class="detail-note-extra-text">{{detail.remarkText}}</view>
+      </view>
+    </view>
+
+    <view class="detail-divider"></view>
+
+    <view class="detail-info-list">
+      <view class="detail-line">
+        <view class="detail-label">计划开始</view>
+        <view class="detail-value">{{detail.planStartText || '未设置时间'}}</view>
+      </view>
+
+      <view class="detail-line">
+        <view class="detail-label">计划结束</view>
+        <view class="detail-value">{{detail.planEndText || '未设置时间'}}</view>
+      </view>
+
+      <view class="detail-line">
+        <view class="detail-label">截止时间</view>
+        <view class="detail-value {{detail.deadlineIsOverdue ? 'detail-value--overdue' : ''}}">
+          {{detail.deadlineText || '未设置时间'}}
+        </view>
+      </view>
+
+      <view class="detail-line">
+        <view class="detail-label">完成时间</view>
+        <view class="detail-value">{{detail.completedText || '未设置时间'}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{detail.statusFlowList && detail.statusFlowList.length}}" class="detail-divider"></view>
+
+    <view wx:if="{{detail.statusFlowList && detail.statusFlowList.length}}" class="status-flow">
+      <view class="detail-subtitle">状态流程</view>
+
+      <scroll-view class="flow-scroll" scroll-x="true" enhanced="true" show-scrollbar="false" scroll-into-view="{{detail.currentFlowAnchor}}">
+        <view class="flow-track">
+          <block wx:for="{{detail.statusFlowList}}" wx:key="id" wx:for-item="item" wx:for-index="index">
+            <view class="flow-step" id="flow-step-{{index}}">
+              <view class="flow-step-top">
+                <view class="flow-step-line {{item.isPassed ? 'flow-step-line--passed' : ''}} {{item.isCurrent ? 'flow-step-line--current' : ''}}"></view>
+                <view class="flow-dot {{item.isCurrent ? 'flow-dot--current' : ''}} {{item.isPassed ? 'flow-dot--passed' : ''}}"></view>
+              </view>
+              <view class="flow-label {{item.isCurrent ? 'flow-label--current' : ''}}">
+                {{item.statusName}}
+              </view>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view wx:if="{{detail.statusTimeline && detail.statusTimeline.length}}" class="detail-divider"></view>
+
+    <view wx:if="{{detail.statusTimeline && detail.statusTimeline.length}}" class="timeline-block">
+      <view class="detail-subtitle">状态时间线</view>
+
+      <block wx:for="{{detail.statusTimeline}}" wx:key="id" wx:for-item="item">
+        <view class="timeline-item">
+          <view class="timeline-side">
+            <view class="timeline-dot"></view>
+            <view wx:if="{{!item.isLast}}" class="timeline-line"></view>
+          </view>
+
+          <view class="timeline-content">
+            <view class="timeline-title">{{item.title}}</view>
+            <view class="timeline-time">{{item.timeText}}</view>
+            <view wx:if="{{item.remark}}" class="timeline-remark">{{item.remark}}</view>
+          </view>
+        </view>
+      </block>
+    </view>
   </view>
 </view>

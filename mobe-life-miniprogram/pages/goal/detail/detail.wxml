@@ -1,80 +1,95 @@
 <view class="page">
-  <!-- 概览区 -->
   <view class="detail-card">
+    <view class="detail-tag">目标</view>
     <view class="detail-title">{{detail.title}}</view>
-    <view class="detail-desc">{{detail.desc}}</view>
 
     <view class="detail-meta">
-      <text class="detail-status">{{detail.statusText}}</text>
-      <text class="detail-mode">{{detail.executionMode}}</text>
-      <text class="detail-progress">{{detail.progressText}}</text>
+      <view class="detail-status">{{detail.statusText}}</view>
+      <view class="detail-time">{{detail.executionMode}}</view>
     </view>
 
-    <view class="detail-summary">
-      <text class="detail-summary-item">{{detail.nodeCount}} 个节点</text>
-      <text class="detail-summary-item">{{detail.taskCount}} 个待办</text>
+    <view class="detail-summary">{{detail.summaryText}}</view>
+
+    <view class="detail-divider"></view>
+
+    <view class="detail-note-block">
+      <view class="detail-note-title">目标说明</view>
+      <view class="detail-note-main">{{detail.contentText || '暂无说明'}}</view>
+
+      <view wx:if="{{detail.remarkText}}" class="detail-note-extra">
+        <view class="detail-note-extra-label">补充备注</view>
+        <view class="detail-note-extra-text">{{detail.remarkText}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{detail.statusFlowList && detail.statusFlowList.length > 0}}" class="detail-divider"></view>
+
+    <view wx:if="{{detail.statusFlowList && detail.statusFlowList.length > 0}}" class="section-block">
+      <view class="section-head">
+        <view class="detail-subtitle detail-subtitle--strong">状态流程</view>
+        <view class="section-link" bindtap="handleEditFlow">编辑流程</view>
+      </view>
+
+      <scroll-view class="flow-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+        <view class="flow-track">
+          <block wx:for="{{detail.statusFlowList}}" wx:key="id" wx:for-item="status">
+            <view class="flow-step">
+              <view class="flow-step-top">
+                <view class="flow-step-line {{status.isPassed ? 'flow-step-line--passed' : ''}} {{status.isCurrent ? 'flow-step-line--current' : ''}}"></view>
+                <view class="flow-dot {{status.isCurrent ? 'flow-dot--current' : ''}} {{status.isPassed ? 'flow-dot--passed' : ''}}"></view>
+              </view>
+              <view class="flow-label {{status.isCurrent ? 'flow-label--current' : ''}}">
+                {{status.name}}
+              </view>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view wx:if="{{detail.nodeSections && detail.nodeSections.length > 0}}" class="detail-divider"></view>
+
+    <view wx:if="{{detail.nodeSections && detail.nodeSections.length > 0}}" class="section-block">
+      <view class="detail-subtitle detail-subtitle--strong">节点承接</view>
+
+      <block wx:for="{{detail.nodeSections}}" wx:key="id" wx:for-item="node">
+        <view class="node-panel">
+          <view class="node-panel-head" data-node-id="{{node.id}}" bindtap="handleToggleNodeSection">
+            <view class="node-panel-head-main">
+              <view class="node-panel-title">{{node.title}}</view>
+              <view class="node-panel-desc">{{node.taskCount}} 个待办</view>
+            </view>
+            <view class="node-panel-head-right">
+              <!-- <view class="node-panel-link" data-node-id="{{node.id}}" catchtap="handleNodeTap">详情</view> -->
+              <view class="node-panel-arrow {{node.collapsed ? 'node-panel-arrow--collapsed' : ''}}">⌃</view>
+            </view>
+          </view>
+
+          <view wx:if="{{!node.collapsed}}" class="node-panel-body">
+            <block wx:if="{{node.tasks && node.tasks.length > 0}}">
+              <block wx:for="{{node.tasks}}" wx:key="id" wx:for-item="task">
+                <view class="task-row" data-task-id="{{task.id}}" bindtap="handleTaskTap">
+                  <view class="task-row-main">
+                    <view class="task-row-title">{{task.title}}</view>
+                    <view class="task-row-desc">{{task.statusText}} · {{task.timeText}}</view>
+                  </view>
+                  <view class="task-row-arrow">›</view>
+                </view>
+              </block>
+            </block>
+
+            <view wx:else class="node-panel-empty">
+              当前没有待办
+            </view>
+          </view>
+        </view>
+      </block>
     </view>
   </view>
 
-  <!-- 节点与待办区 -->
-  <view class="detail-card">
-    <view class="section-title">节点与待办</view>
-
-    <view class="subsection-title">节点</view>
-    <block wx:for="{{detail.nodes}}" wx:key="id" wx:for-item="node">
-      <view class="list-row" data-node-id="{{node.id}}" bindtap="handleNodeTap">
-        <view class="list-row-main">
-          <view class="list-row-title">{{node.title}}</view>
-          <view class="list-row-desc">{{node.taskCount}} 个待办</view>
-        </view>
-        <text class="list-row-arrow">›</text>
-      </view>
-    </block>
-
-    <view class="subsection-title subsection-title--spacing">待办</view>
-    <block wx:for="{{detail.tasks}}" wx:key="id" wx:for-item="task">
-      <view class="list-row" data-task-id="{{task.id}}" bindtap="handleTaskTap">
-        <view class="list-row-main">
-          <view class="list-row-title">{{task.title}}</view>
-          <view class="list-row-desc">{{task.statusText}} · {{task.timeText}}</view>
-        </view>
-        <text class="list-row-arrow">›</text>
-      </view>
-    </block>
-  </view>
-
-  <!-- 状态流程区 -->
-  <view class="detail-card">
-    <view class="section-title">状态流程</view>
-    <view class="flow-template">当前模板：{{detail.templateName}}</view>
-    <view class="flow-preview">{{detail.flowPreviewText}}</view>
-    <view class="flow-extra">
-      <text class="flow-extra-item">执行模式：{{detail.executionMode}}</text>
-      <text class="flow-extra-item">状态停用：后续补功能</text>
+  <view class="detail-action-bar">
+    <view class="detail-action-btn" bindtap="handleGoalAction">
+      {{detail.isCompleted ? '恢复目标' : '赋予完成态'}}
     </view>
-  </view>
-
-  <!-- 状态列表区 -->
-  <view class="detail-card">
-    <view class="section-title">状态列表</view>
-    <block wx:for="{{detail.statusList}}" wx:key="id" wx:for-item="status">
-      <view class="list-row list-row--plain">
-        <view class="list-row-main">
-          <view class="list-row-title">{{status.name}}</view>
-          <view class="list-row-desc">{{status.attrs}}</view>
-        </view>
-      </view>
-    </block>
-  </view>
-
-  <!-- 执行日志区 -->
-  <view class="detail-card">
-    <view class="section-title">执行日志</view>
-    <block wx:for="{{detail.logs}}" wx:key="id" wx:for-item="log">
-      <view class="log-row">
-        <view class="log-text">{{log.text}}</view>
-        <view class="log-time">{{log.timeText}}</view>
-      </view>
-    </block>
   </view>
 </view>
