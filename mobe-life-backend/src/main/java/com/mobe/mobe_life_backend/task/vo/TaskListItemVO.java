@@ -46,4 +46,20 @@ public class TaskListItemVO {
   private String rootOwnerName;
   @Schema(description = "根节点名称")
   private String nodeName;
+  @Schema(description = "状态颜色")
+  private String statusColor;
+
+  @Schema(description = "状态图标")
+  private String statusIcon;
+
+  @Schema(description = "是否初始状态")
+  private Integer isInitial;
+
+  @Schema(description = "是否结束状态")
+  private Integer isTerminal;
+
+  @Schema(description = "状态排序值")
+  private Integer statusSortNo;
+  @Schema(description = "待办颜色")
+  private String colorCode;
 }

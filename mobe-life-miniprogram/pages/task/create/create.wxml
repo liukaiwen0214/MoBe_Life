@@ -1,0 +1,109 @@
+<view class="form-page">
+  <view class="form-card">
+    <view class="form-title">新建待办</view>
+
+    <view class="form-item">
+      <view class="form-label">名称</view>
+      <input
+        class="form-input"
+        placeholder="请输入待办名称"
+        value="{{form.title}}"
+        bindinput="handleTitleInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">说明</view>
+      <textarea
+        class="form-textarea"
+        placeholder="请输入说明"
+        value="{{form.content}}"
+        bindinput="handleContentInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">备注</view>
+      <textarea
+        class="form-textarea"
+        placeholder="请输入备注"
+        value="{{form.remark}}"
+        bindinput="handleRemarkInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">计划开始</view>
+      <view class="datetime-cell" data-field="planStart" bindtap="handlePickDateTime">
+        <text class="datetime-text {{display.planStartText === '未设置' ? 'datetime-text--placeholder' : ''}}">
+          {{display.planStartText}}
+        </text>
+        <view class="datetime-actions">
+          <text
+            wx:if="{{display.planStartText !== '未设置'}}"
+            class="datetime-clear"
+            data-field="planStart"
+            catchtap="handleClearDateTime"
+          >
+            清空
+          </text>
+          <text class="datetime-arrow">›</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">计划结束</view>
+      <view class="datetime-cell" data-field="planEnd" bindtap="handlePickDateTime">
+        <text class="datetime-text {{display.planEndText === '未设置' ? 'datetime-text--placeholder' : ''}}">
+          {{display.planEndText}}
+        </text>
+        <view class="datetime-actions">
+          <text
+            wx:if="{{display.planEndText !== '未设置'}}"
+            class="datetime-clear"
+            data-field="planEnd"
+            catchtap="handleClearDateTime"
+          >
+            清空
+          </text>
+          <text class="datetime-arrow">›</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">截止时间</view>
+      <view class="datetime-cell" data-field="deadline" bindtap="handlePickDateTime">
+        <text class="datetime-text {{display.deadlineText === '未设置' ? 'datetime-text--placeholder' : ''}}">
+          {{display.deadlineText}}
+        </text>
+        <view class="datetime-actions">
+          <text
+            wx:if="{{display.deadlineText !== '未设置'}}"
+            class="datetime-clear"
+            data-field="deadline"
+            catchtap="handleClearDateTime"
+          >
+            清空
+          </text>
+          <text class="datetime-arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <picker mode="date" value="" bindchange="handleHiddenDateChange" wx:if="{{activeDateField}}">
+    <view class="hidden-picker-trigger"></view>
+  </picker>
+
+  <picker mode="time" value="" bindchange="handleHiddenTimeChange" wx:if="{{activeTimeField}}">
+    <view class="hidden-picker-trigger"></view>
+  </picker>
+
+  <view class="form-action-bar">
+    <view class="form-action-btn" bindtap="handleSubmit">
+      保存
+    </view>
+  </view>
+</view>

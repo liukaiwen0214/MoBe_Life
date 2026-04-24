@@ -27,16 +27,20 @@
       </view>
 
       <view wx:if="{{!section.collapsed}}" class="group-body">
-        <block wx:if="{{section.tasks}}">
-          <block wx:for="{{section.tasks}}" wx:key="id" wx:for-item="task">
-            <view class="task-row">
-              <view class="task-action-box" data-task-id="{{task.id}}" data-flow-mode="{{task.flowMode}}" bindtap="handleTaskAction"></view>
+        <block wx:if="{{section.activeTasks && section.activeTasks.length}}">
+          <block wx:for="{{section.activeTasks}}" wx:key="id" wx:for-item="task">
+            <view class="task-row {{task.rowClass}}">
+              <view wx:if="{{task.colorCode}}" class="task-accent" style="background: {{task.colorCode}};"></view>
+
+              <view class="task-action-box" style="{{task.statusColor ? 'border-color:' + task.statusColor + ';background:' + task.statusColor + '22;' : ''}}" data-task-id="{{task.id}}" data-is-terminal="{{task.isTerminal}}" bindtap="handleTaskAction"></view>
 
               <view class="task-content" data-task-id="{{task.id}}" bindtap="handleTaskTap">
                 <view class="task-title">{{task.title}}</view>
                 <view class="task-row-meta">
                   <view class="task-row-meta-left">
-                    <view class="task-row-status">{{task.statusText}}</view>
+                    <view class="task-row-status" style="{{task.statusColor ? 'color:' + task.statusColor + ';background:' + task.statusColor + '22;' : ''}}">
+                      {{task.statusText}}
+                    </view>
                     <view class="task-row-time {{task.isOverdue ? 'task-row-time--overdue' : ''}}">
                       {{task.timeText}}
                     </view>
@@ -52,6 +56,39 @@
             </view>
           </block>
         </block>
+
+        <view wx:if="{{section.completedTasks && section.completedTasks.length}}" class="completed-block">
+          <view class="completed-title">已完成</view>
+
+          <block wx:for="{{section.visibleCompletedTasks}}" wx:key="id" wx:for-item="task">
+            <view class="task-row {{task.rowClass}}">
+              <view wx:if="{{task.colorCode}}" class="task-accent" style="background: {{task.colorCode}};"></view>
+
+              <view class="task-action-box task-action-box--done" style="{{task.statusColor ? 'border-color:' + task.statusColor + ';background:' + task.statusColor + ';' : ''}}" data-task-id="{{task.id}}" data-is-terminal="{{task.isTerminal}}" bindtap="handleTaskAction">
+                ✓
+              </view>
+
+              <view class="task-content" data-task-id="{{task.id}}" bindtap="handleTaskTap">
+                <view class="task-title task-title--completed">{{task.title}}</view>
+                <view class="task-row-meta">
+                  <view class="task-row-meta-left">
+                    <view class="task-row-status task-row-status--done" style="{{task.statusColor ? 'color:' + task.statusColor + ';background:' + task.statusColor + '22;' : ''}}">
+                      {{task.statusText}}
+                    </view>
+                    <view class="task-row-time task-row-time--done">{{task.timeText}}</view>
+                  </view>
+                  <view wx:if="{{task.belongText}}" class="task-belong task-belong--completed">
+                    {{task.belongText}}
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+
+          <view wx:if="{{section.completedHiddenCount > 0}}" class="completed-more" data-key="{{section.key}}" bindtap="handleShowMoreCompleted">
+            查看更多已完成（{{section.completedHiddenCount}}）
+          </view>
+        </view>
       </view>
     </view>
   </block>

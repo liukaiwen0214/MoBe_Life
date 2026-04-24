@@ -10,6 +10,8 @@
     "pages/email/bind",
     "pages/password/index",
     "pages/task/detail/detail",
+    "pages/task/create/create",
+    "pages/task/edit/edit",
     "pages/node/detail/detail",
     "pages/node/index",
     "pages/node/edit/edit",

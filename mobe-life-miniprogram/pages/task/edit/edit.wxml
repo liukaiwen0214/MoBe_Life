@@ -1,0 +1,92 @@
+<view class="form-page">
+  <view class="form-card">
+    <view class="form-title">编辑待办</view>
+
+    <view class="form-item">
+      <view class="form-label">名称</view>
+      <input
+        class="form-input"
+        placeholder="请输入待办名称"
+        value="{{form.title}}"
+        bindinput="handleTitleInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">说明</view>
+      <textarea
+        class="form-textarea"
+        placeholder="请输入说明"
+        value="{{form.content}}"
+        bindinput="handleContentInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">备注</view>
+      <textarea
+        class="form-textarea"
+        placeholder="请输入备注"
+        value="{{form.remark}}"
+        bindinput="handleRemarkInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">计划开始</view>
+      <view class="datetime-row">
+        <picker mode="date" value="{{form.planStartDate}}" bindchange="handlePlanStartDateChange">
+          <view class="picker-value {{form.planStartDate ? '' : 'picker-value--placeholder'}}">
+            {{form.planStartDate || '选择日期'}}
+          </view>
+        </picker>
+
+        <picker mode="time" value="{{form.planStartClock}}" bindchange="handlePlanStartClockChange">
+          <view class="picker-value {{form.planStartClock ? '' : 'picker-value--placeholder'}}">
+            {{form.planStartClock || '选择时间'}}
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">计划结束</view>
+      <view class="datetime-row">
+        <picker mode="date" value="{{form.planEndDate}}" bindchange="handlePlanEndDateChange">
+          <view class="picker-value {{form.planEndDate ? '' : 'picker-value--placeholder'}}">
+            {{form.planEndDate || '选择日期'}}
+          </view>
+        </picker>
+
+        <picker mode="time" value="{{form.planEndClock}}" bindchange="handlePlanEndClockChange">
+          <view class="picker-value {{form.planEndClock ? '' : 'picker-value--placeholder'}}">
+            {{form.planEndClock || '选择时间'}}
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">截止时间</view>
+      <view class="datetime-row">
+        <picker mode="date" value="{{form.deadlineDate}}" bindchange="handleDeadlineDateChange">
+          <view class="picker-value {{form.deadlineDate ? '' : 'picker-value--placeholder'}}">
+            {{form.deadlineDate || '选择日期'}}
+          </view>
+        </picker>
+
+        <picker mode="time" value="{{form.deadlineClock}}" bindchange="handleDeadlineClockChange">
+          <view class="picker-value {{form.deadlineClock ? '' : 'picker-value--placeholder'}}">
+            {{form.deadlineClock || '选择时间'}}
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-action-bar">
+    <view class="form-action-btn" bindtap="handleSubmit">
+      保存修改
+    </view>
+  </view>
+</view>

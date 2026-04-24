@@ -38,12 +38,15 @@ import com.mobe.mobe_life_backend.task.entity.MobeTaskItem;
 import org.springframework.util.StringUtils;
 import com.mobe.mobe_life_backend.task.dto.TaskNextStatusDTO;
 import com.mobe.mobe_life_backend.task.dto.TaskUpdateDTO;
-
-import java.time.LocalDateTime;
+import com.mobe.mobe_life_backend.task.dto.TaskReleaseDTO;
+import com.mobe.mobe_life_backend.task.vo.TaskFlowStatusItemVO;
+import com.mobe.mobe_life_backend.task.vo.TaskFlowStatusOptionVO;
+import com.mobe.mobe_life_backend.task.vo.TaskFlowVO;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 import java.util.Collections;
 import java.util.List;
@@ -81,8 +84,10 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   /**
    * 构造任务服务实现。
    *
-   * <p>这里通过构造器注入依赖，是为了让这个服务在启动阶段就把必需组件准备齐，
-   * 也方便测试和后续重构时看清楚它到底依赖哪些数据源。</p>
+   * <p>
+   * 这里通过构造器注入依赖，是为了让这个服务在启动阶段就把必需组件准备齐，
+   * 也方便测试和后续重构时看清楚它到底依赖哪些数据源。
+   * </p>
    */
   public MobeTaskServiceImpl(MobeTaskItemMapper mobeTaskItemMapper,
       MobeTaskStatusMapper mobeTaskStatusMapper,
@@ -241,9 +246,11 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   /**
    * 创建待办。
    *
-   * <p>这个方法做的事情并不只是“插入一条待办记录”，还包括：
+   * <p>
+   * 这个方法做的事情并不只是“插入一条待办记录”，还包括：
    * 校验输入、确认归属对象是否合法、决定该待办应该挂哪套状态模板、
-   * 并把待办初始化到模板规定的起始状态。</p>
+   * 并把待办初始化到模板规定的起始状态。
+   * </p>
    *
    * @param dto 创建参数。
    * @return 新创建待办的主键 ID。
@@ -348,12 +355,14 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   /**
    * 根据归属对象反推出待办应该绑定的状态模板。
    *
-   * <p>这一步是整个待办模型里很关键的规则：待办的状态不是随便指定的，
-   * 而是继承自它所挂载的项目、目标，或者节点的上级对象。</p>
+   * <p>
+   * 这一步是整个待办模型里很关键的规则：待办的状态不是随便指定的，
+   * 而是继承自它所挂载的项目、目标，或者节点的上级对象。
+   * </p>
    *
-   * @param userId 当前登录用户 ID。
+   * @param userId          当前登录用户 ID。
    * @param directOwnerType 归属类型。
-   * @param directOwnerId 归属对象 ID。
+   * @param directOwnerId   归属对象 ID。
    * @return 可用的状态模板 ID。
    */
   private Long resolveStatusTemplateId(Long userId, String directOwnerType, Long directOwnerId) {
@@ -474,7 +483,7 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   /**
    * 读取某个状态模板的初始状态。
    *
-   * @param userId 当前登录用户 ID。
+   * @param userId           当前登录用户 ID。
    * @param statusTemplateId 状态模板 ID。
    * @return 模板中的初始状态。
    */
@@ -498,10 +507,12 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   /**
    * 将待办推进到下一个状态。
    *
-   * <p>这里采用的是“顺序推进”模型：当前状态必须能在状态模板里找到，
-   * 并且只能移动到排序上的下一个启用状态，而不是任意跳转。</p>
+   * <p>
+   * 这里采用的是“顺序推进”模型：当前状态必须能在状态模板里找到，
+   * 并且只能移动到排序上的下一个启用状态，而不是任意跳转。
+   * </p>
    *
-   * @param id 待办 ID。
+   * @param id  待办 ID。
    * @param dto 状态推进附加参数，例如备注。
    */
   @Override
@@ -620,10 +631,12 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   /**
    * 更新待办基础信息。
    *
-   * <p>这个方法除了改标题、内容、时间外，还有一个关键规则：
-   * 如果归属对象发生变化，导致状态模板切换，就必须把待办状态重置到新模板的初始状态。</p>
+   * <p>
+   * 这个方法除了改标题、内容、时间外，还有一个关键规则：
+   * 如果归属对象发生变化，导致状态模板切换，就必须把待办状态重置到新模板的初始状态。
+   * </p>
    *
-   * @param id 待办 ID。
+   * @param id  待办 ID。
    * @param dto 更新参数。
    */
   @Override
@@ -706,8 +719,10 @@ public class MobeTaskServiceImpl implements MobeTaskService {
   /**
    * 软删除待办。
    *
-   * <p>这里没有直接物理删除数据库记录，而是把 `isDeleted` 标记为 1。
-   * 这样做的好处是：后续若需要审计、恢复或追溯历史，原始数据还在。</p>
+   * <p>
+   * 这里没有直接物理删除数据库记录，而是把 `isDeleted` 标记为 1。
+   * 这样做的好处是：后续若需要审计、恢复或追溯历史，原始数据还在。
+   * </p>
    *
    * @param id 待办 ID。
    */
@@ -734,5 +749,204 @@ public class MobeTaskServiceImpl implements MobeTaskService {
     task.setUpdatedBy(userId);
 
     mobeTaskItemMapper.updateById(task);
+  }
+
+  @Override
+  public TaskFlowVO getTaskFlow(Long id) {
+    Long userId = UserContext.getCurrentUserId();
+    if (userId == null) {
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
+    }
+
+    MobeTaskItem task = mobeTaskItemMapper.selectOne(
+        new LambdaQueryWrapper<MobeTaskItem>()
+            .eq(MobeTaskItem::getId, id)
+            .eq(MobeTaskItem::getUserId, userId)
+            .eq(MobeTaskItem::getIsDeleted, 0)
+            .last("LIMIT 1"));
+
+    if (task == null) {
+      throw new BusinessException(TaskErrorCode.TASK_NOT_FOUND);
+    }
+
+    if (task.getStatusTemplateId() == null || task.getCurrentStatusId() == null) {
+      throw new BusinessException("当前待办缺少有效流程状态信息");
+    }
+
+    List<MobeTaskStatus> statusList = mobeTaskStatusMapper.selectList(
+        new LambdaQueryWrapper<MobeTaskStatus>()
+            .eq(MobeTaskStatus::getUserId, userId)
+            .eq(MobeTaskStatus::getTemplateId, task.getStatusTemplateId())
+            .eq(MobeTaskStatus::getIsDeleted, 0)
+            .orderByAsc(MobeTaskStatus::getSortNo)
+            .orderByAsc(MobeTaskStatus::getId));
+
+    if (statusList.isEmpty()) {
+      throw new BusinessException("当前状态模板未配置流程状态");
+    }
+
+    Map<Long, MobeTaskStatus> statusMap = statusList.stream()
+        .collect(Collectors.toMap(MobeTaskStatus::getId, Function.identity()));
+
+    MobeTaskStatus currentStatus = statusMap.get(task.getCurrentStatusId());
+    if (currentStatus == null) {
+      throw new BusinessException("当前待办状态不在模板中");
+    }
+
+    int currentIndex = -1;
+    for (int i = 0; i < statusList.size(); i++) {
+      if (Objects.equals(statusList.get(i).getId(), currentStatus.getId())) {
+        currentIndex = i;
+        break;
+      }
+    }
+
+    TaskFlowStatusOptionVO nextStatus = null;
+    if (currentIndex >= 0 && currentIndex < statusList.size() - 1) {
+      MobeTaskStatus next = statusList.get(currentIndex + 1);
+      if (Integer.valueOf(1).equals(next.getIsEnabled())) {
+        nextStatus = buildFlowOption(next);
+      }
+    }
+
+    List<TaskFlowStatusOptionVO> releaseOptions = statusList.stream()
+        .filter(item -> Integer.valueOf(1).equals(item.getIsEnabled()))
+        .filter(item -> !Integer.valueOf(1).equals(item.getIsTerminal()))
+        .map(this::buildFlowOption)
+        .toList();
+
+    List<TaskFlowStatusItemVO> statusItemVOList = statusList.stream().map(item -> {
+      TaskFlowStatusItemVO vo = new TaskFlowStatusItemVO();
+      vo.setId(item.getId());
+      vo.setStatusCode(item.getStatusCode());
+      vo.setStatusName(item.getStatusName());
+      vo.setSortNo(item.getSortNo());
+      vo.setIsInitial(item.getIsInitial());
+      vo.setIsTerminal(item.getIsTerminal());
+      vo.setIsEnabled(item.getIsEnabled());
+      vo.setStatusColor(item.getStatusColor());
+      vo.setStatusIcon(item.getStatusIcon());
+      return vo;
+    }).toList();
+
+    TaskFlowVO vo = new TaskFlowVO();
+    vo.setTaskId(task.getId());
+    vo.setCurrentStatusId(currentStatus.getId());
+    vo.setCurrentStatusCode(currentStatus.getStatusCode());
+    vo.setCurrentStatusName(currentStatus.getStatusName());
+    vo.setIsTerminal(currentStatus.getIsTerminal());
+    vo.setAllowNext(
+        !Integer.valueOf(1).equals(currentStatus.getIsTerminal()) && nextStatus != null ? 1 : 0);
+    vo.setAllowRelease(
+        Integer.valueOf(1).equals(currentStatus.getIsTerminal())
+            && Integer.valueOf(1).equals(currentStatus.getAllowReopen())
+                ? 1
+                : 0);
+    vo.setNextStatus(nextStatus);
+    vo.setReleaseOptions(releaseOptions);
+    vo.setStatusList(statusItemVOList);
+    return vo;
+  }
+
+  private TaskFlowStatusOptionVO buildFlowOption(MobeTaskStatus status) {
+    TaskFlowStatusOptionVO vo = new TaskFlowStatusOptionVO();
+    vo.setId(status.getId());
+    vo.setStatusCode(status.getStatusCode());
+    vo.setStatusName(status.getStatusName());
+    return vo;
+  }
+
+  @Override
+  public void releaseTaskToStatus(Long id, TaskReleaseDTO dto) {
+    Long userId = UserContext.getCurrentUserId();
+    if (userId == null) {
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
+    }
+
+    if (dto == null || dto.getTargetStatusId() == null) {
+      throw new BusinessException("目标状态不能为空");
+    }
+
+    MobeTaskItem task = mobeTaskItemMapper.selectOne(
+        new LambdaQueryWrapper<MobeTaskItem>()
+            .eq(MobeTaskItem::getId, id)
+            .eq(MobeTaskItem::getUserId, userId)
+            .eq(MobeTaskItem::getIsDeleted, 0)
+            .last("LIMIT 1"));
+
+    if (task == null) {
+      throw new BusinessException(TaskErrorCode.TASK_NOT_FOUND);
+    }
+
+    if (task.getStatusTemplateId() == null || task.getCurrentStatusId() == null) {
+      throw new BusinessException("当前待办缺少有效流程状态信息");
+    }
+
+    List<MobeTaskStatus> statusList = mobeTaskStatusMapper.selectList(
+        new LambdaQueryWrapper<MobeTaskStatus>()
+            .eq(MobeTaskStatus::getUserId, userId)
+            .eq(MobeTaskStatus::getTemplateId, task.getStatusTemplateId())
+            .eq(MobeTaskStatus::getIsDeleted, 0)
+            .orderByAsc(MobeTaskStatus::getSortNo)
+            .orderByAsc(MobeTaskStatus::getId));
+
+    if (statusList.isEmpty()) {
+      throw new BusinessException("当前状态模板未配置流程状态");
+    }
+
+    Map<Long, MobeTaskStatus> statusMap = statusList.stream()
+        .collect(Collectors.toMap(MobeTaskStatus::getId, Function.identity()));
+
+    MobeTaskStatus currentStatus = statusMap.get(task.getCurrentStatusId());
+    if (currentStatus == null) {
+      throw new BusinessException("当前待办状态不在模板中");
+    }
+
+    if (!Integer.valueOf(1).equals(currentStatus.getIsTerminal())) {
+      throw new BusinessException("当前待办未处于终态，不能放出");
+    }
+
+    if (!Integer.valueOf(1).equals(currentStatus.getAllowReopen())) {
+      throw new BusinessException("当前终态不允许放出");
+    }
+
+    MobeTaskStatus targetStatus = statusMap.get(dto.getTargetStatusId());
+    if (targetStatus == null) {
+      throw new BusinessException("目标状态不存在或不属于当前模板");
+    }
+
+    if (!Integer.valueOf(1).equals(targetStatus.getIsEnabled())) {
+      throw new BusinessException("目标状态未启用");
+    }
+
+    if (Integer.valueOf(1).equals(targetStatus.getIsTerminal())) {
+      throw new BusinessException("目标状态不能是终态");
+    }
+
+    if (Objects.equals(currentStatus.getId(), targetStatus.getId())) {
+      throw new BusinessException("当前已处于该状态");
+    }
+
+    task.setCurrentStatusId(targetStatus.getId());
+    task.setCompletedAt(null);
+    task.setUpdatedBy(userId);
+    mobeTaskItemMapper.updateById(task);
+
+    MobeStatusChangeLog log = new MobeStatusChangeLog();
+    log.setUserId(userId);
+    log.setBizType("TASK");
+    log.setBizId(task.getId());
+    log.setStatusTemplateId(task.getStatusTemplateId());
+    log.setFromStatusId(currentStatus.getId());
+    log.setFromStatusCode(currentStatus.getStatusCode());
+    log.setFromStatusName(currentStatus.getStatusName());
+    log.setToStatusId(targetStatus.getId());
+    log.setToStatusCode(targetStatus.getStatusCode());
+    log.setToStatusName(targetStatus.getStatusName());
+    log.setChangeType("REOPEN");
+    log.setChangeRemark(dto.getChangeRemark());
+    log.setOperatorId(userId);
+    log.setIsDeleted(0);
+    mobeStatusChangeLogMapper.insert(log);
   }
 }

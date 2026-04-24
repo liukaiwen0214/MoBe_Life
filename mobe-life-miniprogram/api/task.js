@@ -57,3 +57,23 @@ export const updateTask = (id, data) => {
     data,
   })
 }
+export const deleteTask = (id) => {
+  return request({
+    url: `/api/tasks/${id}`,
+    method: 'DELETE',
+  })
+}
+export const getTaskFlow = (id) => {
+  return request({
+    url: `/api/tasks/${id}/flow`,
+    method: 'GET',
+  })
+}
+
+export const releaseTaskToStatus = (id, data) => {
+  return request({
+    url: `/api/tasks/${id}/release`,
+    method: 'POST',
+    data,
+  })
+}

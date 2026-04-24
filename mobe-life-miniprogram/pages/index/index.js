@@ -123,17 +123,15 @@ Page({
    * 每日一句：
    * 第一版直接请求 ONE，失败则保留默认文案。
    * 后续可以把这段迁到后端的首页聚合接口里。
-   *   baseUrl: 'http://127.0.0.1:8080',
-  // baseUrl: 'http://119.91.216.175:8080',
    */
   loadDailyQuote() {
     return new Promise((resolve) => {
       wx.request({
         // TODO: 上线前不要保留这里的硬编码地址，需统一切到配置模块或公共请求封装。
         // 本地联调用这个
-        url: 'http://127.0.0.1:8080/api/tool/daily-quote',
+        // url: 'http://127.0.0.1:8080/api/tool/daily-quote',
         // 服务器联调用这个
-        // url: 'http://119.91.216.175:8080/api/tool/daily-quote',
+        url: 'http://39.106.162.13/api/tool/daily-quote',
         method: 'GET',
         success: (res) => {
           try {
@@ -239,8 +237,8 @@ Page({
 
       wx.request({
         // TODO: 上线前不要保留这里的硬编码地址，需统一切到配置模块或公共请求封装。
-        url: 'http://127.0.0.1:8080/api/tool/weather',
-        // url: 'http://119.91.216.175:8080/api/tool/weather',
+        // url: 'http://127.0.0.1:8080/api/tool/weather',
+        url: 'http://39.106.162.13/api/tool/weather',
         method: 'GET',
         data: {
           latitude,

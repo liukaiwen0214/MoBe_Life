@@ -9,8 +9,10 @@ import com.mobe.mobe_life_backend.common.response.PageResult;
 import com.mobe.mobe_life_backend.task.dto.TaskCreateDTO;
 import com.mobe.mobe_life_backend.task.dto.TaskListQueryDTO;
 import com.mobe.mobe_life_backend.task.dto.TaskNextStatusDTO;
+import com.mobe.mobe_life_backend.task.dto.TaskReleaseDTO;
 import com.mobe.mobe_life_backend.task.dto.TaskUpdateDTO;
 import com.mobe.mobe_life_backend.task.vo.TaskDetailVO;
+import com.mobe.mobe_life_backend.task.vo.TaskFlowVO;
 import com.mobe.mobe_life_backend.task.vo.TaskListItemVO;
 
 /**
@@ -28,4 +30,8 @@ public interface MobeTaskService {
   void updateTask(Long id, TaskUpdateDTO dto);
 
   void deleteTask(Long id);
+
+  TaskFlowVO getTaskFlow(Long id);
+
+  void releaseTaskToStatus(Long id, TaskReleaseDTO dto);
 }

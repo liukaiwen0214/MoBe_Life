@@ -1,14 +1,10 @@
-/**
- * 核心职责：承载小程序页面 `task` 的交互逻辑和数据流。
- * 所属业务模块：小程序展示层 / 页面逻辑。
- * 重要依赖关系或外部约束：页面脚本通常与同目录的 WXML、WXSS 配合工作，字段命名应与模板绑定保持一致。
- */
-import { getTaskDetail } from '../../../api/task'
+import { getTaskDetail, moveTaskToNextStatus, deleteTask } from '../../../api/task'
 
 Page({
   data: {
     taskId: '',
     loading: false,
+    needRefresh: false,
     detail: {
       title: '',
       statusText: '',
@@ -39,6 +35,13 @@ Page({
     }
   },
 
+  onShow() {
+    if (this.data.needRefresh && this.data.taskId) {
+      this.setData({ needRefresh: false })
+      this.loadTaskDetail(this.data.taskId)
+    }
+  },
+
   async loadTaskDetail(taskId) {
     this.setData({ loading: true })
 
@@ -52,6 +55,11 @@ Page({
       const completed = this.buildTimeDisplay(detail?.completedAt, false, detail?.statusCode)
 
       const statusFlowList = this.buildStatusFlowList(detail?.statusList, detail?.statusCode)
+      const currentStatus = Array.isArray(detail?.statusList)
+        ? detail.statusList.find((item) => item.statusCode === detail?.statusCode)
+        : null
+
+      const isTerminal = Number(currentStatus?.isTerminal) === 1
 
       this.setData({
         rawDetail: detail,
@@ -72,6 +80,7 @@ Page({
           statusFlowList,
           currentFlowAnchor: this.buildCurrentFlowAnchor(statusFlowList),
           statusTimeline: this.buildStatusTimeline(detail?.statusChangeLogs),
+          isTerminal,
         },
       })
     } catch (error) {
@@ -84,6 +93,7 @@ Page({
       this.setData({ loading: false })
     }
   },
+
   buildCurrentFlowAnchor(statusFlowList) {
     const list = Array.isArray(statusFlowList) ? statusFlowList : []
     const currentIndex = list.findIndex((item) => item.isCurrent)
@@ -94,6 +104,7 @@ Page({
 
     return `flow-step-${currentIndex}`
   },
+
   buildBelongText(detail) {
     const ownerName = detail?.ownerName || ''
     const ownerType = detail?.directOwnerType || ''
@@ -275,5 +286,127 @@ Page({
     }
 
     return '状态已更新'
+  },
+
+  handleEditTask() {
+    const { taskId } = this.data
+    if (!taskId) {
+      return
+    }
+
+    wx.navigateTo({
+      url: `/pages/task/edit/edit?id=${taskId}`,
+    })
+  },
+
+  async handleNextStatus() {
+    const { taskId, detail } = this.data
+    if (!taskId) {
+      return
+    }
+
+    if (detail.isTerminal) {
+      wx.showToast({
+        title: '当前待办已完成',
+        icon: 'none',
+      })
+      return
+    }
+
+    try {
+      wx.showLoading({
+        title: '处理中',
+        mask: true,
+      })
+
+      await moveTaskToNextStatus(taskId, {})
+
+      wx.hideLoading()
+      wx.showToast({
+        title: '状态已推进',
+        icon: 'success',
+      })
+
+      const pages = getCurrentPages()
+      const prevPage = pages.length > 1 ? pages[pages.length - 2] : null
+      if (prevPage && typeof prevPage.setData === 'function') {
+        prevPage.setData({ needRefresh: true })
+      }
+
+      this.setData({ needRefresh: true })
+      this.loadTaskDetail(taskId)
+    } catch (error) {
+      wx.hideLoading()
+      console.error('推进待办状态失败', error)
+
+      const message =
+        error?.message ||
+        error?.msg ||
+        error?.data?.message ||
+        '状态推进失败'
+
+      wx.showModal({
+        title: '提示',
+        content: message,
+        showCancel: false,
+      })
+    }
+  },
+
+  handleDeleteTask() {
+    const { taskId } = this.data
+    if (!taskId) {
+      return
+    }
+
+    wx.showModal({
+      title: '提示',
+      content: '确认删除这个待办吗？',
+      success: async (res) => {
+        if (!res.confirm) {
+          return
+        }
+
+        try {
+          wx.showLoading({
+            title: '处理中',
+            mask: true,
+          })
+
+          await deleteTask(taskId)
+
+          wx.hideLoading()
+          wx.showToast({
+            title: '删除成功',
+            icon: 'success',
+          })
+
+          const pages = getCurrentPages()
+          const prevPage = pages.length > 1 ? pages[pages.length - 2] : null
+          if (prevPage && typeof prevPage.setData === 'function') {
+            prevPage.setData({ needRefresh: true })
+          }
+
+          setTimeout(() => {
+            wx.navigateBack()
+          }, 600)
+        } catch (error) {
+          wx.hideLoading()
+          console.error('删除待办失败', error)
+
+          const message =
+            error?.message ||
+            error?.msg ||
+            error?.data?.message ||
+            '删除失败'
+
+          wx.showModal({
+            title: '提示',
+            content: message,
+            showCancel: false,
+          })
+        }
+      },
+    })
   },
 })

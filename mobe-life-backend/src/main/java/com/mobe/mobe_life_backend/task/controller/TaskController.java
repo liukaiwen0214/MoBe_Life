@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.mobe.mobe_life_backend.task.dto.TaskNextStatusDTO;
 import com.mobe.mobe_life_backend.task.dto.TaskUpdateDTO;
+import com.mobe.mobe_life_backend.task.dto.TaskReleaseDTO;
+import com.mobe.mobe_life_backend.task.vo.TaskFlowVO;
 
 /**
  * 待办控制器。
@@ -120,6 +122,22 @@ public class TaskController {
   public Result<Boolean> deleteTask(
       @Parameter(description = "待办ID", required = true) @PathVariable Long id) {
     mobeTaskService.deleteTask(id);
+    return Result.success(true);
+  }
+
+  @GetMapping("/{id}/flow")
+  @Operation(summary = "获取待办流程视图", description = "获取当前待办的完整流程线路、下一状态与可放出状态")
+  public Result<TaskFlowVO> getTaskFlow(
+      @Parameter(description = "待办ID") @PathVariable Long id) {
+    return Result.success(mobeTaskService.getTaskFlow(id));
+  }
+
+  @PostMapping("/{id}/release")
+  @Operation(summary = "放出待办", description = "将终态待办放出到指定的非终态状态")
+  public Result<Boolean> releaseTaskToStatus(
+      @Parameter(description = "待办ID", required = true) @PathVariable Long id,
+      @RequestBody TaskReleaseDTO dto) {
+    mobeTaskService.releaseTaskToStatus(id, dto);
     return Result.success(true);
   }
 }
