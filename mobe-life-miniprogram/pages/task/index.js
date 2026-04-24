@@ -1,3 +1,8 @@
+/**
+ * 核心职责：承载小程序待办页，负责拉取待办列表并按归属对象分组，供“待办”和“节点”两个子视图展示。
+ * 所属业务模块：小程序展示层 / 待办页。
+ * 重要依赖关系或外部约束：当前真实数据只接通了待办子页签，节点子页签仍是静态占位数据。
+ */
 import { getTaskList } from '../../api/task'
 
 Page({
@@ -50,6 +55,12 @@ Page({
     this.loadTaskList()
   },
 
+  /**
+   * 拉取待办列表并刷新页面数据。
+   *
+   * 第一版直接请求最多 50 条数据，优先把页面结构跑通；
+   * 后续若要支持下拉分页，需要把这里改成增量合并模式。
+   */
   async loadTaskList() {
     this.setData({ loading: true })
 
@@ -78,6 +89,12 @@ Page({
     }
   },
 
+  /**
+   * 把扁平待办列表按根归属对象分组成页面区块。
+   *
+   * @param {Array<Object>} taskList 待办列表。
+   * @returns {Array<Object>} 页面展示所需的分组结果。
+   */
   buildTodoSections(taskList) {
     const sectionMap = new Map()
 
@@ -108,6 +125,8 @@ Page({
       }
 
       const section = sectionMap.get(sectionKey)
+      const isOverdue = this.isTaskOverdue(task)
+
       section.tasks.push({
         id: task.id,
         title: task.title || '未命名待办',
@@ -119,8 +138,8 @@ Page({
         belongText: this.buildTaskBelongText(task),
         rootOwnerName: task.rootOwnerName || '',
         nodeName: task.nodeName || '',
-        isOverdue: this.isTaskOverdue(task),
-        overdueText: this.isTaskOverdue(task) ? '已延期' : '',
+        isOverdue,
+        overdueText: isOverdue ? '已延期' : '',
       })
       section.count = section.tasks.length
     })
@@ -137,6 +156,13 @@ Page({
       summary: this.buildSectionSummary(section.tasks),
     }))
   },
+
+  /**
+   * 生成单个待办的归属展示文案。
+   *
+   * @param {Object} task 待办对象。
+   * @returns {string} 例如“项目名 · 节点名”的文本。
+   */
   buildTaskBelongText(task) {
     const rootOwnerName = task.rootOwnerName || ''
     const nodeName = task.nodeName || ''
@@ -148,6 +174,12 @@ Page({
     return rootOwnerName
   },
 
+  /**
+   * 生成顶部摘要文案。
+   *
+   * @param {Array<Object>} taskList 待办列表。
+   * @returns {string} 汇总后的简短说明。
+   */
   buildSummaryText(taskList) {
     const now = Date.now()
 
@@ -170,6 +202,12 @@ Page({
     return `今日待办有 ${total} 个，其中 ${expiredCount} 个延期，${normalCount} 个正常`
   },
 
+  /**
+   * 把截止时间格式化为适合卡片展示的相对时间。
+   *
+   * @param {string} deadlineTime ISO 时间字符串。
+   * @returns {string} 人类可读的时间文案。
+   */
   formatTimeText(deadlineTime) {
     if (!deadlineTime) {
       return '未设置时间'
@@ -206,6 +244,41 @@ Page({
     return `${month}-${day} ${timePart}`
   },
 
+  /**
+   * 判断待办是否已经延期。
+   *
+   * @param {Object} task 待办对象。
+   * @returns {boolean} 已过截止时间且未完成时返回 true。
+   */
+  isTaskOverdue(task) {
+    if (!task.deadlineTime) {
+      return false
+    }
+
+    if (task.statusCode === 'DONE') {
+      return false
+    }
+
+    const deadline = new Date(task.deadlineTime).getTime()
+    return !Number.isNaN(deadline) && deadline < Date.now()
+  },
+
+  /**
+   * 生成分组摘要文案。
+   *
+   * @param {Array<Object>} tasks 当前分组内的待办列表。
+   * @returns {string} 用于区块标题旁的统计描述。
+   */
+  buildSectionSummary(tasks) {
+    const overdueCount = tasks.filter((task) => task.isOverdue).length
+    return `共 ${tasks.length} 个待办${overdueCount > 0 ? `，${overdueCount} 个延期` : ''}`
+  },
+
+  /**
+   * 展开或收起某个待办分组。
+   *
+   * @param {Object} e 小程序事件对象。
+   */
   handleToggleSection(e) {
     const { key } = e.currentTarget.dataset
     const todoSections = this.data.todoSections.map((item) => {
@@ -221,6 +294,11 @@ Page({
     this.setData({ todoSections })
   },
 
+  /**
+   * 处理待办卡片上的快捷操作。
+   *
+   * @param {Object} e 小程序事件对象。
+   */
   handleTaskAction(e) {
     const { taskId, flowMode } = e.currentTarget.dataset
 
@@ -244,6 +322,11 @@ Page({
     })
   },
 
+  /**
+   * 进入待办详情页。
+   *
+   * @param {Object} e 小程序事件对象。
+   */
   handleTaskTap(e) {
     const { taskId } = e.currentTarget.dataset
     wx.navigateTo({
@@ -251,6 +334,10 @@ Page({
     })
   },
 
+  /**
+   * 处理新建待办入口点击。
+   * 当前仍为占位交互，后续接入真实新建流程即可替换这里。
+   */
   handleCreateTask() {
     wx.showToast({
       title: '进入新建待办',

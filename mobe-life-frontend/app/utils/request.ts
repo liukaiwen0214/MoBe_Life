@@ -19,6 +19,7 @@ export const useRequest = () => {
     options?: Parameters<typeof $fetch<T>>[1],
   ) => {
     try {
+      // 当前阶段只统一 API 根地址，未来如果要接 token、刷新逻辑和业务码兜底，可以继续在这里扩展。
       return await $fetch<T>(url, {
         baseURL: config.public.apiBase,
         ...options,

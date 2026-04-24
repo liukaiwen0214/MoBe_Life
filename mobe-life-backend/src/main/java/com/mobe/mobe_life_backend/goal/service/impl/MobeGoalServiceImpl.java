@@ -1,3 +1,8 @@
+/**
+ * 核心职责：实现目标中心的核心业务流程，把控制层请求转换为可执行的业务逻辑。
+ * 所属业务模块：目标中心 / 服务实现。
+ * 重要依赖关系或外部约束：依赖服务接口、数据访问层或外部集成组件；应尽量把复杂规则集中在这里。
+ */
 package com.mobe.mobe_life_backend.goal.service.impl;
 
 import org.springframework.stereotype.Service;
@@ -56,6 +61,11 @@ public class MobeGoalServiceImpl implements MobeGoalService {
     this.mobeTaskOperationLogMapper = mobeTaskOperationLogMapper;
   }
 
+  /**
+   * 获取GoalList。
+   *
+   * @return 返回对应结果。
+   */
   @Override
   public PageResult<GoalListItemVO> getGoalList(GoalListQueryDTO queryDTO) {
     Long userId = UserContext.getCurrentUserId();
@@ -85,6 +95,11 @@ public class MobeGoalServiceImpl implements MobeGoalService {
     return PageResult.of(total, pageNum, pageSize, list);
   }
 
+  /**
+   * 获取GoalDetail。
+   *
+   * @return 返回对应结果。
+   */
   @Override
   public GoalDetailVO getGoalDetail(Long id) {
     Long userId = UserContext.getCurrentUserId();
@@ -222,6 +237,9 @@ public class MobeGoalServiceImpl implements MobeGoalService {
     return detailVO;
   }
 
+  /**
+   * 执行completeGoal。
+   */
   @Override
   public void completeGoal(Long id, HttpServletRequest request) {
     Long userId = UserContext.getCurrentUserId();
@@ -311,6 +329,9 @@ public class MobeGoalServiceImpl implements MobeGoalService {
     mobeGoalMapper.updateById(goal);
   }
 
+  /**
+   * 执行reopenGoal。
+   */
   @Override
   public void reopenGoal(Long id) {
     Long userId = UserContext.getCurrentUserId();
@@ -322,6 +343,9 @@ public class MobeGoalServiceImpl implements MobeGoalService {
     doReopenGoal(goal, userId);
   }
 
+  /**
+   * 执行reopenGoalWithNodes。
+   */
   @Override
   public void reopenGoalWithNodes(Long id) {
     Long userId = UserContext.getCurrentUserId();

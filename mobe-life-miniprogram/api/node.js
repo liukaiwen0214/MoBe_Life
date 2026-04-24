@@ -35,9 +35,68 @@ export const getNodeDetail = (id) => {
     method: 'GET',
   })
 }
+
+/**
+ * 赋予节点完成态。
+ *
+ * @param {number|string} id 节点 ID
+ * @returns {Promise<boolean>}
+ */
 export const completeNode = (id) => {
   return request({
     url: `/api/nodes/${id}/complete`,
     method: 'POST',
+  })
+}
+
+/**
+ * 新增节点。
+ *
+ * @param {Object} data
+ * @param {string} data.ownerType 所属类型：PROJECT/GOAL
+ * @param {number|string} data.ownerId 所属对象 ID
+ * @param {string} data.title 节点名称
+ * @param {string} [data.content] 节点说明
+ * @param {string} [data.remark] 备注
+ * @returns {Promise<number>} 新增后的节点 ID
+ */
+export const createNode = (data) => {
+  return request({
+    url: '/api/nodes',
+    method: 'POST',
+    data,
+  })
+}
+
+/**
+ * 编辑节点。
+ *
+ * @param {number|string} id 节点 ID
+ * @param {Object} data
+ * @param {string} data.title 节点名称
+ * @param {string} [data.content] 节点说明
+ * @param {string} [data.remark] 备注
+ * @returns {Promise<boolean>}
+ */
+export const updateNode = (id, data) => {
+  return request({
+    url: `/api/nodes/${id}`,
+    method: 'PUT',
+    data,
+  })
+}
+/**
+ * 删除节点。
+ *
+ * @param {number|string} id 节点 ID
+ * @param {Object} [data]
+ * @param {string} [data.deleteMode] 删除模式：COMPLETE_TASKS / DELETE_TASKS
+ * @returns {Promise<boolean>}
+ */
+export const deleteNode = (id, data) => {
+  return request({
+    url: `/api/nodes/${id}`,
+    method: 'DELETE',
+    data,
   })
 }

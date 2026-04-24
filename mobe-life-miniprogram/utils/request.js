@@ -28,16 +28,19 @@ const request = (options) => {
       success(res) {
         const response = res.data || {}
 
+        // HTTP 层失败通常意味着网关、路由或服务本身异常，此时直接按错误分支处理。
         if (res.statusCode !== 200) {
           reject(new Error(response.message || '请求失败'))
           return
         }
 
+        // 业务码非 0 说明后端已经明确判定失败，调用方应统一走 catch 分支而不是继续判空使用数据。
         if (response.code !== 0) {
           reject(new Error(response.message || '请求失败'))
           return
         }
 
+        // 这里直接把业务层真正关心的 `data` 解包出来，减少页面代码到处写 `res.data.data`。
         resolve(response.data)
       },
       fail(err) {

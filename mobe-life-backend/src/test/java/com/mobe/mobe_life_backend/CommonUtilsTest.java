@@ -9,6 +9,10 @@ import com.mobe.mobe_life_backend.common.utils.JwtUtils;
 import com.mobe.mobe_life_backend.common.utils.PasswordUtils;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * 公共工具测试。
  *
@@ -27,8 +31,8 @@ public class CommonUtilsTest {
     String rawPassword = "123456";
     String encodedPassword = PasswordUtils.encode(rawPassword);
 
-    System.out.println("加密后密码: " + encodedPassword);
-    System.out.println("密码是否匹配: " + PasswordUtils.matches(rawPassword, encodedPassword));
+    assertNotEquals(rawPassword, encodedPassword);
+    assertTrue(PasswordUtils.matches(rawPassword, encodedPassword));
   }
 
   /**
@@ -40,8 +44,7 @@ public class CommonUtilsTest {
   void testJwtUtils() {
     String token = JwtUtils.createToken(1L);
 
-    System.out.println("token: " + token);
-    System.out.println("userId: " + JwtUtils.getUserId(token));
-    System.out.println("isValid: " + JwtUtils.isValid(token));
+    assertTrue(JwtUtils.isValid(token));
+    assertEquals(1L, JwtUtils.getUserId(token));
   }
 }

@@ -1,9 +1,15 @@
-import { getNodeDetail, completeNode } from '../../../api/node'
+/**
+ * 核心职责：承载小程序页面 `node` 的交互逻辑和数据流。
+ * 所属业务模块：小程序展示层 / 页面逻辑。
+ * 重要依赖关系或外部约束：页面脚本通常与同目录的 WXML、WXSS 配合工作，字段命名应与模板绑定保持一致。
+ */
+import { getNodeDetail, completeNode, deleteNode } from '../../../api/node'
 
 Page({
   data: {
     nodeId: '',
     loading: false,
+    needRefresh: false,
     detail: {
       title: '',
       ownerName: '',
@@ -25,6 +31,13 @@ Page({
 
     if (nodeId) {
       this.loadNodeDetail(nodeId)
+    }
+  },
+
+  onShow() {
+    if (this.data.needRefresh && this.data.nodeId) {
+      this.setData({ needRefresh: false })
+      this.loadNodeDetail(this.data.nodeId)
     }
   },
 
@@ -136,64 +149,172 @@ Page({
     return `${month}-${day} ${timePart}`
   },
 
+  handleOwnerTap() {
+    wx.showToast({
+      title: '请前往网页端修改所属项目/目标',
+      icon: 'none',
+    })
+  },
+
+  handleEditNode() {
+    const { nodeId } = this.data
+    if (!nodeId) {
+      return
+    }
+
+    wx.navigateTo({
+      url: `/pages/node/edit/edit?id=${nodeId}`,
+      fail: (err) => {
+        console.error('navigateTo edit node fail =', err)
+      },
+    })
+  },
+
   handleTaskTap(e) {
     const { taskId } = e.currentTarget.dataset
     wx.navigateTo({
       url: `/pages/task/detail/detail?id=${taskId}`,
     })
   },
+
   handleCompleteNode() {
-  const { nodeId } = this.data
-  if (!nodeId) {
-    return
-  }
+    const { nodeId } = this.data
+    if (!nodeId) {
+      return
+    }
 
-  wx.showModal({
-    title: '提示',
-    content: '确认将这个节点赋予完成态吗？',
-    success: async (res) => {
-      if (!res.confirm) {
-        return
-      }
-
-      try {
-        wx.showLoading({
-          title: '处理中',
-          mask: true,
-        })
-
-        await completeNode(nodeId)
-
-        wx.hideLoading()
-        wx.showToast({
-          title: '已设为完成',
-          icon: 'success',
-        })
-        const pages = getCurrentPages()
-        const prevPage = pages.length > 1 ? pages[pages.length - 2] : null
-        if (prevPage && typeof prevPage.setData === 'function') {
-          prevPage.setData({ needRefresh: true })
+    wx.showModal({
+      title: '提示',
+      content: '确认将这个节点赋予完成态吗？',
+      success: async (res) => {
+        if (!res.confirm) {
+          return
         }
-        setTimeout(() => {
-          wx.navigateBack()
-        }, 600)
-      } catch (error) {
-        wx.hideLoading()
-        console.error('赋予目标完成态失败', error)
-      
-        const message =
-          error?.message ||
-          error?.msg ||
-          error?.data?.message ||
-          '操作失败'
-      
-        wx.showModal({
-          title: '提示',
-          content: message,
-          showCancel: false,
-        })
+
+        try {
+          wx.showLoading({
+            title: '处理中',
+            mask: true,
+          })
+
+          await completeNode(nodeId)
+
+          wx.hideLoading()
+          wx.showToast({
+            title: '已设为完成',
+            icon: 'success',
+          })
+
+          const pages = getCurrentPages()
+          const prevPage = pages.length > 1 ? pages[pages.length - 2] : null
+          if (prevPage && typeof prevPage.setData === 'function') {
+            prevPage.setData({ needRefresh: true })
+          }
+
+          setTimeout(() => {
+            wx.navigateBack()
+          }, 600)
+        } catch (error) {
+          wx.hideLoading()
+          console.error('赋予节点完成态失败', error)
+
+          const message =
+            error?.message ||
+            error?.msg ||
+            error?.data?.message ||
+            '操作失败'
+
+          wx.showModal({
+            title: '提示',
+            content: message,
+            showCancel: false,
+          })
+        }
+      },
+    })
+  },
+
+  handleDeleteNode() {
+    const { nodeId, detail } = this.data
+    if (!nodeId) {
+      return
+    }
+
+    if (!detail.tasks || !detail.tasks.length) {
+      wx.showModal({
+        title: '提示',
+        content: '确认删除这个节点吗？',
+        success: async (res) => {
+          if (!res.confirm) {
+            return
+          }
+          await this.submitDeleteNode()
+        },
+      })
+      return
+    }
+
+    wx.showActionSheet({
+      itemList: ['完成并删除', '整体删除'],
+      alertText: '当前节点中存在未完成的待办',
+      success: async (res) => {
+        if (res.tapIndex === 0) {
+          await this.submitDeleteNode('COMPLETE_TASKS')
+          return
+        }
+
+        if (res.tapIndex === 1) {
+          await this.submitDeleteNode('DELETE_TASKS')
+        }
+      },
+    })
+  },
+
+  async submitDeleteNode(deleteMode) {
+    const { nodeId } = this.data
+
+    try {
+      wx.showLoading({
+        title: '处理中',
+        mask: true,
+      })
+
+      if (deleteMode) {
+        await deleteNode(nodeId, { deleteMode })
+      } else {
+        await deleteNode(nodeId)
       }
-    },
-  })
-},
+
+      wx.hideLoading()
+      wx.showToast({
+        title: '删除成功',
+        icon: 'success',
+      })
+
+      const pages = getCurrentPages()
+      const prevPage = pages.length > 1 ? pages[pages.length - 2] : null
+      if (prevPage && typeof prevPage.setData === 'function') {
+        prevPage.setData({ needRefresh: true })
+      }
+
+      setTimeout(() => {
+        wx.navigateBack()
+      }, 600)
+    } catch (error) {
+      wx.hideLoading()
+      console.error('删除节点失败', error)
+
+      const message =
+        error?.message ||
+        error?.msg ||
+        error?.data?.message ||
+        '删除失败'
+
+      wx.showModal({
+        title: '提示',
+        content: message,
+        showCancel: false,
+      })
+    }
+  },
 })

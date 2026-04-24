@@ -815,6 +815,9 @@ public class AuthServiceImpl implements AuthService {
     verificationCodeMapper.updateById(verificationCode);
   }
 
+  /**
+   * 执行codeLogin。
+   */
   @Override
   public LoginUserVO codeLogin(CodeLoginDTO codeLoginDTO) {
     String account = codeLoginDTO.getAccount().trim();
@@ -853,6 +856,9 @@ public class AuthServiceImpl implements AuthService {
     return loginUserVO;
   }
 
+  /**
+   * 发送LoginEmailCode。
+   */
   @Override
   public void sendLoginEmailCode(SendEmailCodeDTO sendEmailCodeDTO, HttpServletRequest request) {
     String email = sendEmailCodeDTO.getEmail().trim().toLowerCase();
@@ -950,6 +956,9 @@ public class AuthServiceImpl implements AuthService {
     }
   }
 
+  /**
+   * 发送UnbindEmailCode。
+   */
   @Override
   public void sendUnbindEmailCode(HttpServletRequest request) {
     Long userId = UserContext.getCurrentUserId();

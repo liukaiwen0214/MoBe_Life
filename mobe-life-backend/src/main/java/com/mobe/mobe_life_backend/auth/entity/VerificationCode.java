@@ -1,3 +1,8 @@
+/**
+ * 核心职责：定义认证中心的数据实体，用于映射数据库记录或领域状态。
+ * 所属业务模块：认证中心 / 实体模型。
+ * 重要依赖关系或外部约束：字段通常需要与数据库表结构、MyBatis-Plus 映射约定保持一致。
+ */
 package com.mobe.mobe_life_backend.auth.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;

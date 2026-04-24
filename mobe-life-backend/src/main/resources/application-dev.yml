@@ -1,24 +1,37 @@
+#
+# 核心职责：定义开发环境专用配置，供本地调试、联调和开发机运行时使用。
+# 所属业务模块：后端基础设施 / 开发环境配置。
+# 重要依赖关系或外部约束：这里允许保留更详细的调试日志和本地路径；
+# 一旦切到生产环境，应由 application-prod.yml 或外部参数接管。
+#
 server:
+  # 本地开发端口。前端和小程序联调时会直接依赖这个地址。
   port: 8080
 
 spring:
   datasource:
+    # 数据库连接信息通过环境变量注入，避免把真实账号密码硬编码进仓库。
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jmx:
+    # 开发环境关闭 JMX，可减少无关告警和本地端口冲突。
     enabled: false
   servlet:
     multipart:
+      # 上传文件大小限制，超过后 Spring 会在到达业务层前直接拒绝请求。
       max-file-size: 10MB
       max-request-size: 10MB
 
 mybatis-plus:
   configuration:
+    # 开启下划线到驼峰转换，让数据库字段如 `create_time` 自动映射为 `createTime`。
     map-underscore-to-camel-case: true
+  # Mapper XML 的扫描路径。
   mapper-locations: classpath*:/mapper/**/*.xml
 logging:
   level:
+    # 开发环境保留更细粒度日志，便于排查业务链路问题。
     root: INFO
     '[com.mobe.mobe_life_backend]': DEBUG
     '[org.springframework]': INFO
@@ -32,17 +45,22 @@ management:
   endpoints:
     jmx:
       exposure:
+        # 关闭 JMX 暴露，和上面的 `spring.jmx.enabled=false` 配合降低本地噪音。
         exclude: '*'
 file:
   upload:
+    # 开发环境上传目录直接落在当前工程里，便于本地查看上传结果。
     path: /Users/liukaiwen/Desktop/MoBe_Life/mobe-life-backend/uploads
+    # 文件访问前缀。若端口、域名变化，这里也要同步调整。
     access-url-prefix: http://127.0.0.1:8080/uploads
 wechat:
   miniapp:
+    # 小程序调用微信开放接口需要用到的身份信息。
     app-id: wx5992d0bb44379dea
     app-secret: d8989a5e2d77e9d74fae0f5ec76d3fd1
 tencent:
   ses:
+    # 腾讯云 SES 邮件发送配置。敏感密钥通过环境变量注入。
     secret-id: ${TENCENT_SES_SECRET_ID:}
     secret-key: ${TENCENT_SES_SECRET_KEY:}
     region: ap-hongkong
@@ -51,12 +69,15 @@ tencent:
     template-id: 172524
 springdoc:
   api-docs:
+    # 开发环境开放 OpenAPI 文档，方便前后端联调。
     enabled: true
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
 qweather:
+  # 和风天气接口地址与密钥。当前密钥仍在配置文件中，后续建议外置。
   api-host: https://ng6apxvu47.re.qweatherapi.com
   api-key: c3c21ab925fa4cbcb9546be600153926
 one:
+  # ONE 每日一句接口地址。
   api-url: http://v3.wufazhuce.com:8000/api/channel/one/0/0

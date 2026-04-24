@@ -1,53 +1,72 @@
+<!--
+  核心职责：定义小程序 `node` 页面或组件的结构模板。
+  所属业务模块：小程序展示层 / 结构模板。
+  重要依赖关系或外部约束：模板中的字段和事件名需要与对应 JS 文件中的 data、methods 和组件属性严格一致。
+-->
 <view class="page">
   <view class="detail-card">
-    <view class="detail-tag">{{detail.ownerType}}</view>
+    <view class="detail-head">
+      <view class="detail-tag">{{detail.ownerType}}</view>
+      <view class="detail-edit-link" bindtap="handleEditNode">编辑节点</view>
+    </view>
+
     <view class="detail-title">{{detail.title}}</view>
 
-    <view wx:if="{{detail.ownerName}}" class="detail-line">
-      <text class="detail-label">所属{{detail.ownerType}}</text>
-      <text class="detail-value">{{detail.ownerName}}</text>
+    <view wx:if="{{detail.ownerName}}" class="detail-line detail-line--clickable" bindtap="handleOwnerTap">
+      <view class="detail-line-left">
+        <view class="detail-label">所属{{detail.ownerType}}</view>
+      </view>
+      <view class="detail-line-right">
+        <view class="detail-value">{{detail.ownerName}}</view>
+        <view class="detail-line-arrow">›</view>
+      </view>
     </view>
 
     <view class="detail-line">
-      <text class="detail-label">更新时间</text>
-      <text class="detail-value">{{detail.updateText}}</text>
+      <view class="detail-label">更新时间</view>
+      <view class="detail-value">{{detail.updateText}}</view>
     </view>
 
     <view wx:if="{{detail.summaryText}}" class="detail-summary">
       {{detail.summaryText}}
     </view>
 
-    <view wx:if="{{detail.contentText}}" class="detail-divider"></view>
-    <view wx:if="{{detail.contentText}}" class="detail-text-group">
-      <view class="detail-subtitle">说明</view>
-      <view class="detail-text">{{detail.contentText}}</view>
-    </view>
+    <view class="detail-divider"></view>
 
-    <view wx:if="{{detail.remarkText}}" class="detail-text-group">
-      <view class="detail-subtitle">备注</view>
-      <view class="detail-text">{{detail.remarkText}}</view>
+    <view class="detail-note-block">
+      <view class="detail-note-title">节点说明</view>
+      <view class="detail-note-main">{{detail.contentText || '暂无说明'}}</view>
+
+      <view wx:if="{{detail.remarkText}}" class="detail-note-extra">
+        <view class="detail-note-extra-label">补充备注</view>
+        <view class="detail-note-extra-text">{{detail.remarkText}}</view>
+      </view>
     </view>
 
     <view wx:if="{{detail.tasks && detail.tasks.length}}" class="detail-divider"></view>
 
     <view wx:if="{{detail.tasks && detail.tasks.length}}" class="task-list">
-      <view class="detail-subtitle">节点下待办</view>
+      <view class="detail-subtitle detail-subtitle--strong">节点下待办</view>
 
       <block wx:for="{{detail.tasks}}" wx:key="id" wx:for-item="task">
         <view class="task-row" data-task-id="{{task.id}}" bindtap="handleTaskTap">
           <view class="task-content">
             <view class="task-title">{{task.title}}</view>
             <view class="task-meta">
-              <text class="task-status">{{task.statusText}}</text>
-              <text class="task-time">{{task.timeText}}</text>
+              <view class="task-status">{{task.statusText}}</view>
+              <view class="task-time">{{task.timeText}}</view>
             </view>
           </view>
-          <text class="task-arrow">›</text>
+          <view class="task-arrow">›</view>
         </view>
       </block>
     </view>
   </view>
+
   <view class="detail-action-bar">
+    <view class="detail-action-btn detail-action-btn--ghost" bindtap="handleDeleteNode">
+      删除节点
+    </view>
     <view class="detail-action-btn" bindtap="handleCompleteNode">
       赋予完成态
     </view>

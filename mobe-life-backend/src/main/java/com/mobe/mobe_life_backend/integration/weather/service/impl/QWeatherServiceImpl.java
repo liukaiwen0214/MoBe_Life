@@ -1,3 +1,8 @@
+/**
+ * 核心职责：对接和风天气接口，根据经纬度查询城市与实时天气并转换为前端可直接使用的结构。
+ * 所属业务模块：外部集成 / 天气服务实现。
+ * 重要依赖关系或外部约束：依赖和风天气 API Key 与 Host 配置；远程接口可能返回 gzip 压缩体。
+ */
 package com.mobe.mobe_life_backend.integration.weather.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,6 +12,7 @@ import com.mobe.mobe_life_backend.integration.weather.config.QWeatherProperties;
 import com.mobe.mobe_life_backend.integration.weather.service.WeatherService;
 import com.mobe.mobe_life_backend.integration.weather.vo.WeatherInfoVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import java.io.ByteArrayInputStream;
@@ -25,13 +31,22 @@ import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QWeatherServiceImpl implements WeatherService {
 
   private final QWeatherProperties qWeatherProperties;
   private final ObjectMapper objectMapper;
 
+  /** JDK 原生 HTTP 客户端。当前请求量不大，用单例客户端即可满足需求。 */
   private final HttpClient httpClient = HttpClient.newHttpClient();
 
+  /**
+   * 根据经纬度获取实时天气。
+   *
+   * @param latitude 纬度。
+   * @param longitude 经度。
+   * @return 聚合后的天气信息。
+   */
   @Override
   public WeatherInfoVO getWeatherByLocation(Double latitude, Double longitude) {
     try {
@@ -51,11 +66,12 @@ public class QWeatherServiceImpl implements WeatherService {
     } catch (BusinessException e) {
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Failed to fetch weather by location, latitude={}, longitude={}", latitude, longitude, e);
       throw new BusinessException(500, "获取天气失败：" + e.getMessage());
     }
   }
 
+  /** 校验和风天气基础配置是否齐全。 */
   private void validateConfig() {
     if (!StringUtils.hasText(qWeatherProperties.getApiHost())
         || !StringUtils.hasText(qWeatherProperties.getApiKey())) {
@@ -63,6 +79,7 @@ public class QWeatherServiceImpl implements WeatherService {
     }
   }
 
+  /** 把经纬度按和风天气要求格式化为 `经度,纬度` 字符串。 */
   private String buildLocation(Double longitude, Double latitude) {
     String lng = BigDecimal.valueOf(longitude)
         .setScale(6, RoundingMode.HALF_UP)
@@ -75,6 +92,7 @@ public class QWeatherServiceImpl implements WeatherService {
     return lng + "," + lat;
   }
 
+  /** 调用城市查询接口，把经纬度转换为更适合展示的城市名。 */
   private String fetchCityName(String location) throws Exception {
     String url = qWeatherProperties.getApiHost()
         + "/geo/v2/city/lookup?location="
@@ -90,8 +108,6 @@ public class QWeatherServiceImpl implements WeatherService {
 
     HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
     String responseBody = decodeResponseBody(response.body());
-    System.out.println("QWeather city status: " + response.statusCode());
-    System.out.println("QWeather city response: " + responseBody);
     JsonNode root = objectMapper.readTree(responseBody);
 
     String code = root.path("code").asText();
@@ -117,6 +133,7 @@ public class QWeatherServiceImpl implements WeatherService {
     return "当前城市";
   }
 
+  /** 调用实时天气接口，读取 `now` 节点。 */
   private JsonNode fetchWeatherNow(String location) throws Exception {
     String url = qWeatherProperties.getApiHost()
         + "/v7/weather/now?location="
@@ -132,8 +149,6 @@ public class QWeatherServiceImpl implements WeatherService {
 
     HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
     String responseBody = decodeResponseBody(response.body());
-    System.out.println("QWeather weather status: " + response.statusCode());
-    System.out.println("QWeather weather response: " + responseBody);
     JsonNode root = objectMapper.readTree(responseBody);
 
     String code = root.path("code").asText();
@@ -148,6 +163,7 @@ public class QWeatherServiceImpl implements WeatherService {
     return now;
   }
 
+  /** 按响应头实际内容解码 HTTP 响应体，兼容和风天气返回 gzip 压缩数据。 */
   private String decodeResponseBody(byte[] bodyBytes) throws Exception {
     if (bodyBytes == null || bodyBytes.length == 0) {
       return "";

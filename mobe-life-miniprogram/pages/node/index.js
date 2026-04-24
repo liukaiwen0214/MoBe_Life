@@ -1,3 +1,8 @@
+/**
+ * 核心职责：承载小程序页面 `node` 的交互逻辑和数据流。
+ * 所属业务模块：小程序展示层 / 页面逻辑。
+ * 重要依赖关系或外部约束：页面脚本通常与同目录的 WXML、WXSS 配合工作，字段命名应与模板绑定保持一致。
+ */
 import { getNodeList } from '../../api/node'
 
 Page({
@@ -135,9 +140,8 @@ Page({
   },
 
   handleCreateNode() {
-    wx.showToast({
-      title: '进入新建节点',
-      icon: 'none',
+    wx.navigateTo({
+      url: '/pages/node/create/create',
     })
   },
 })

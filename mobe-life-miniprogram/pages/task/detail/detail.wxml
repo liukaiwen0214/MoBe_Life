@@ -1,3 +1,8 @@
+<!--
+  核心职责：定义小程序 `task` 页面或组件的结构模板。
+  所属业务模块：小程序展示层 / 结构模板。
+  重要依赖关系或外部约束：模板中的字段和事件名需要与对应 JS 文件中的 data、methods 和组件属性严格一致。
+-->
 <view class="page">
   <view class="detail-card">
     <view class="detail-tag">待办详情</view>

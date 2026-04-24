@@ -1,3 +1,8 @@
+/**
+ * 核心职责：聚合项目列表、项目详情以及项目完成/重开流程，把项目、节点、待办、状态和日志拼装成完整视图。
+ * 所属业务模块：项目中心 / 业务服务实现。
+ * 重要依赖关系或外部约束：项目完成态依赖下属节点和待办完成情况；需要确保所有查询都以当前用户为边界。
+ */
 package com.mobe.mobe_life_backend.project.service.impl;
 
 import com.mobe.mobe_life_backend.project.service.MobeProjectService;
@@ -39,10 +44,15 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class MobeProjectServiceImpl implements MobeProjectService {
+  /** 项目主表访问入口。 */
   private final MobeProjectMapper mobeProjectMapper;
+  /** 节点主表访问入口。 */
   private final MobeNodeMapper mobeNodeMapper;
+  /** 待办主表访问入口。 */
   private final MobeTaskItemMapper mobeTaskItemMapper;
+  /** 待办状态字典访问入口。 */
   private final MobeTaskStatusMapper mobeTaskStatusMapper;
+  /** 待办操作日志访问入口。 */
   private final MobeTaskOperationLogMapper mobeTaskOperationLogMapper;
 
   public MobeProjectServiceImpl(MobeProjectMapper mobeProjectMapper,
@@ -57,6 +67,12 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     this.mobeTaskOperationLogMapper = mobeTaskOperationLogMapper;
   }
 
+  /**
+   * 获取项目列表。
+   *
+   * @param queryDTO 分页和筛选条件。
+   * @return 当前用户可见的项目分页结果。
+   */
   @Override
   public PageResult<ProjectListItemVO> getProjectList(ProjectListQueryDTO queryDTO) {
     Long userId = UserContext.getCurrentUserId();
@@ -64,6 +80,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
       throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
     }
 
+    // 与待办、节点列表统一分页兜底规则，避免不同模块分页默认行为不一致。
     int pageNum = queryDTO.getPageNum() == null || queryDTO.getPageNum() < 1 ? 1 : queryDTO.getPageNum();
     int pageSize = queryDTO.getPageSize() == null || queryDTO.getPageSize() < 1 ? 10 : queryDTO.getPageSize();
     long offset = (long) (pageNum - 1) * pageSize;
@@ -86,9 +103,14 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     return PageResult.of(total, pageNum, pageSize, list);
   }
 
+  /**
+   * 获取项目详情。
+   *
+   * @param id 项目 ID。
+   * @return 包含节点、待办、状态和最近日志的项目详情视图。
+   */
   @Override
   public ProjectDetailVO getProjectDetail(Long id) {
-    System.out.println(">>> project detail service hit");
     Long userId = UserContext.getCurrentUserId();
     if (userId == null) {
       throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
@@ -99,7 +121,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
       throw new BusinessException(ProjectErrorCode.PROJECT_NOT_FOUND);
     }
 
-    // 1. 查询项目下节点
+    // 1. 查询项目下节点。项目详情页需要先知道节点集合，后续才能关联节点待办和节点计数。
     List<MobeNode> nodeList = mobeNodeMapper.selectList(
         new LambdaQueryWrapper<MobeNode>()
             .eq(MobeNode::getUserId, userId)
@@ -114,7 +136,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     Map<Long, String> nodeNameMap = nodeList.stream()
         .collect(Collectors.toMap(MobeNode::getId, MobeNode::getTitle));
 
-    // 2. 查询项目下待办（直接挂项目 + 挂节点）
+    // 2. 查询项目下待办（直接挂项目 + 挂在项目节点上的待办都要纳入）。
     LambdaQueryWrapper<MobeTaskItem> taskWrapper = new LambdaQueryWrapper<MobeTaskItem>()
         .eq(MobeTaskItem::getUserId, userId)
         .eq(MobeTaskItem::getIsDeleted, 0)
@@ -132,7 +154,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
 
     List<MobeTaskItem> taskList = mobeTaskItemMapper.selectList(taskWrapper);
 
-    // 3. 查状态列表（按项目绑定模板）
+    // 3. 查状态列表（按项目绑定模板），用于把任务上的状态 ID 还原成可展示文本。
     List<MobeTaskStatus> statusList = Collections.emptyList();
     if (detailVO.getStatusTemplateId() != null) {
       statusList = mobeTaskStatusMapper.selectList(
@@ -147,7 +169,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     Map<Long, MobeTaskStatus> statusMap = statusList.stream()
         .collect(Collectors.toMap(MobeTaskStatus::getId, item -> item));
 
-    // 4. 组装节点列表
+    // 4. 组装节点列表，同时回填每个节点下挂载的待办数量。
     Map<Long, Long> nodeTaskCountMap = taskList.stream()
         .filter(task -> "NODE".equals(task.getDirectOwnerType()) && task.getDirectOwnerId() != null)
         .collect(Collectors.groupingBy(MobeTaskItem::getDirectOwnerId, Collectors.counting()));
@@ -160,7 +182,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
       return vo;
     }).toList();
 
-    // 5. 组装待办列表
+    // 5. 组装待办列表，把原始任务实体转成详情页直接渲染的卡片结构。
     List<ProjectTaskItemVO> taskVOList = taskList.stream().map(task -> {
       ProjectTaskItemVO vo = new ProjectTaskItemVO();
       vo.setId(task.getId());
@@ -181,8 +203,8 @@ public class MobeProjectServiceImpl implements MobeProjectService {
       }
       return vo;
     }).toList();
-    log.info("taskVOList: {}", taskVOList);
-    // 6. 组装状态列表
+
+    // 6. 组装状态列表。这里直接透出是否初始/终态，方便前端决定按钮和徽标展示。
     List<ProjectStatusItemVO> statusVOList = statusList.stream().map(status -> {
       ProjectStatusItemVO vo = new ProjectStatusItemVO();
       vo.setId(status.getId());
@@ -194,7 +216,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
       return vo;
     }).toList();
 
-    // 7. 查询日志（先只取项目相关待办操作日志）
+    // 7. 查询日志。当前版本优先展示与项目下待办相关的最近操作，用于提供轻量动态感知。
     List<ProjectLogItemVO> logVOList = new ArrayList<>();
     if (!taskList.isEmpty()) {
       List<Long> taskIds = taskList.stream().map(MobeTaskItem::getId).toList();
@@ -225,6 +247,12 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     return detailVO;
   }
 
+  /**
+   * 将项目标记为完成。
+   *
+   * @param id 项目 ID。
+   * @param request 当前请求对象；当前版本未使用，但为后续操作审计预留。
+   */
   @Override
   public void completeProject(Long id, HttpServletRequest request) {
     Long userId = UserContext.getCurrentUserId();
@@ -244,6 +272,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     if (Integer.valueOf(1).equals(project.getIsCompleted())) {
       throw new BusinessException("项目已是完成状态");
     }
+    // 项目完成前必须确认项目下所有待办都已进入终态，否则会出现父项目完成但子任务未完成的语义冲突。
     List<MobeNode> nodeList = mobeNodeMapper.selectList(
         new LambdaQueryWrapper<MobeNode>()
             .eq(MobeNode::getUserId, userId)
@@ -278,6 +307,7 @@ public class MobeProjectServiceImpl implements MobeProjectService {
       if (!statusIds.isEmpty()) {
         List<MobeTaskStatus> statusList = mobeTaskStatusMapper.selectList(
             new LambdaQueryWrapper<MobeTaskStatus>()
+                .eq(MobeTaskStatus::getUserId, userId)
                 .in(MobeTaskStatus::getId, statusIds)
                 .eq(MobeTaskStatus::getIsDeleted, 0));
 
@@ -310,6 +340,13 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     mobeProjectMapper.updateById(project);
   }
 
+  /**
+   * 校验项目是否允许重开。
+   *
+   * @param id 项目 ID。
+   * @param userId 当前登录用户 ID。
+   * @return 已校验通过的项目实体。
+   */
   private MobeProject checkProjectForReopen(Long id, Long userId) {
     MobeProject project = mobeProjectMapper.selectById(id);
     if (project == null || Integer.valueOf(1).equals(project.getIsDeleted())) {
@@ -327,6 +364,12 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     return project;
   }
 
+  /**
+   * 将项目本身从完成态恢复为进行中。
+   *
+   * @param project 已校验的项目实体。
+   * @param userId 当前登录用户 ID。
+   */
   private void doReopenProject(MobeProject project, Long userId) {
     project.setIsCompleted(0);
     project.setCompletedTime(null);
@@ -334,6 +377,12 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     mobeProjectMapper.updateById(project);
   }
 
+  /**
+   * 重开项目下已完成的节点。
+   *
+   * @param projectId 项目 ID。
+   * @param userId 当前登录用户 ID。
+   */
   private void doReopenProjectNodes(Long projectId, Long userId) {
     List<MobeNode> nodeList = mobeNodeMapper.selectList(
         new LambdaQueryWrapper<MobeNode>()
@@ -356,6 +405,9 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     }
   }
 
+  /**
+   * 执行reopenProject。
+   */
   @Override
   public void reopenProject(Long id) {
     Long userId = UserContext.getCurrentUserId();
@@ -367,6 +419,9 @@ public class MobeProjectServiceImpl implements MobeProjectService {
     doReopenProject(project, userId);
   }
 
+  /**
+   * 执行reopenProjectWithNodes。
+   */
   @Override
   public void reopenProjectWithNodes(Long id) {
     Long userId = UserContext.getCurrentUserId();

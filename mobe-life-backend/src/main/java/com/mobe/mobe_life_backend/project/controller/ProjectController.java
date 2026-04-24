@@ -1,3 +1,8 @@
+/**
+ * 核心职责：对外暴露项目中心相关接口，负责接收请求并调用对应业务能力。
+ * 所属业务模块：项目中心 / 控制层。
+ * 重要依赖关系或外部约束：依赖 Spring MVC 与服务层；通常不承载复杂业务逻辑。
+ */
 package com.mobe.mobe_life_backend.project.controller;
 
 import com.mobe.mobe_life_backend.common.response.PageResult;
@@ -29,6 +34,11 @@ public class ProjectController {
   @Resource
   private MobeProjectService mobeProjectService;
 
+  /**
+   * 获取ProjectList。
+   *
+   * @return 返回对应结果。
+   */
   @GetMapping
   @Operation(summary = "获取项目列表", description = "分页获取当前登录用户的项目列表")
   public Result<PageResult<ProjectListItemVO>> getProjectList(@Valid ProjectListQueryDTO queryDTO) {
@@ -52,6 +62,11 @@ public class ProjectController {
     return Result.success(mobeProjectService.getProjectDetail(id));
   }
 
+  /**
+   * 将项目标记为完成。
+   *
+   * @return 成功时返回 `true`。
+   */
   @Operation(summary = "赋予项目完成态")
   @PostMapping("/{id}/complete")
   public Result<Boolean> completeProject(
@@ -61,6 +76,11 @@ public class ProjectController {
     return Result.success(true);
   }
 
+  /**
+   * 恢复项目到未完成状态。
+   *
+   * @return 成功时返回 `true`。
+   */
   @Operation(summary = "恢复项目")
   @PostMapping("/{id}/reopen")
   public Result<Boolean> reopenProject(
@@ -69,6 +89,11 @@ public class ProjectController {
     return Result.success(true);
   }
 
+  /**
+   * 恢复项目并恢复其下全部节点。
+   *
+   * @return 成功时返回 `true`。
+   */
   @Operation(summary = "恢复项目并恢复其下全部节点")
   @PostMapping("/{id}/reopen-all")
   public Result<Boolean> reopenProjectWithNodes(

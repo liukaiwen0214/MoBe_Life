@@ -8,10 +8,12 @@ import { defineStore } from "pinia";
 /**
  * 应用级 store。
  *
- * 设计初衷是给布局和首页这类跨页面组件提供稳定的全局品牌信息来源。
+ * <p>设计初衷是给布局和首页这类跨页面组件提供稳定的全局品牌信息来源，
+ * 避免每个页面自己硬编码应用名。</p>
  */
 export const useAppStore = defineStore("app", {
   state: () => ({
+    // 应用品牌名通常会被导航栏、首页欢迎语和 SEO 元信息复用。
     appName: "MoBe Life",
   }),
 

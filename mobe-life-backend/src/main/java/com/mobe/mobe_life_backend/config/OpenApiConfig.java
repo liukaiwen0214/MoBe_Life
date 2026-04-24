@@ -1,3 +1,8 @@
+/**
+ * 核心职责：承载系统配置相关代码，是该模块实现中的一个组成单元。
+ * 所属业务模块：系统配置 / OpenApiConfig.java。
+ * 重要依赖关系或外部约束：需要与同模块中的控制层、服务层和数据结构保持语义一致。
+ */
 package com.mobe.mobe_life_backend.config;
 
 import io.swagger.v3.oas.models.ExternalDocumentation;
@@ -13,6 +18,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+        /**
+         * 执行mobeOpenApi。
+         */
         @Bean
         public OpenAPI mobeOpenApi() {
                 return new OpenAPI()

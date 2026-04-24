@@ -1,3 +1,8 @@
+/**
+ * 核心职责：对外暴露工具中心相关接口，负责接收请求并调用对应业务能力。
+ * 所属业务模块：工具中心 / 控制层。
+ * 重要依赖关系或外部约束：依赖 Spring MVC 与服务层；通常不承载复杂业务逻辑。
+ */
 package com.mobe.mobe_life_backend.tool.controller;
 
 import com.mobe.mobe_life_backend.common.response.Result;
@@ -23,6 +28,11 @@ public class ToolController {
   private final WeatherService weatherService;
   private final QuoteService quoteService;
 
+  /**
+   * 获取Weather。
+   *
+   * @return 返回对应结果。
+   */
   @GetMapping("/api/tool/weather")
   @Operation(summary = "根据经纬度获取天气", description = "用于首页天气展示")
   public Result<WeatherCardVO> getWeather(@Valid WeatherQueryDTO queryDTO) {
@@ -69,6 +79,11 @@ public class ToolController {
     return "愿你今天也有一点轻松的呼吸感";
   }
 
+  /**
+   * 获取DailyQuote。
+   *
+   * @return 返回对应结果。
+   */
   @GetMapping("/api/tool/daily-quote")
   @Operation(summary = "获取每日一句", description = "用于首页每日一句展示")
   public Result<DailyQuoteVO> getDailyQuote() {

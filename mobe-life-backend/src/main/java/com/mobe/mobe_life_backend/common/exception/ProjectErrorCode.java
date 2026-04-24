@@ -42,16 +42,31 @@ public enum ProjectErrorCode implements BaseErrorCode {
     this.defaultMessage = defaultMessage;
   }
 
+  /**
+   * 获取Code。
+   *
+   * @return 返回对应结果。
+   */
   @Override
   public String getCode() {
     return code;
   }
 
+  /**
+   * 获取HttpStatus。
+   *
+   * @return 返回对应结果。
+   */
   @Override
   public HttpStatus getHttpStatus() {
     return httpStatus;
   }
 
+  /**
+   * 获取DefaultMessage。
+   *
+   * @return 返回对应结果。
+   */
   @Override
   public String getDefaultMessage() {
     return defaultMessage;

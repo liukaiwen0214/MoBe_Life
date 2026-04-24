@@ -44,6 +44,9 @@ public class MobeUserServiceImpl extends ServiceImpl<MobeUserMapper, MobeUser> i
 
   private final VerificationCodeMapper verificationCodeMapper;
 
+  /**
+   * 执行MobeUserServiceImpl。
+   */
   public MobeUserServiceImpl(VerificationCodeMapper verificationCodeMapper) {
     this.verificationCodeMapper = verificationCodeMapper;
   }
@@ -117,6 +120,9 @@ public class MobeUserServiceImpl extends ServiceImpl<MobeUserMapper, MobeUser> i
     this.updateById(user);
   }
 
+  /**
+   * 执行unbindEmail。
+   */
   @Override
   public void unbindEmail(UnbindEmailDTO unbindEmailDTO) {
     Long userId = UserContext.getCurrentUserId();

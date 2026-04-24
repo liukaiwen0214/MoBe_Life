@@ -1,8 +1,16 @@
+#
+# 核心职责：定义生产环境示例配置，用于说明正式部署时需要准备哪些关键参数。
+# 所属业务模块：后端基础设施 / 生产环境配置。
+# 重要依赖关系或外部约束：这里的数据库地址、账号和密码目前只是占位符；
+# 真正部署时应通过安全的配置管理方式提供，而不是直接提交真实凭据。
+#
 server:
+  # 生产环境服务端口。若接入 Nginx 或容器平台，也要与上游转发规则匹配。
   port: 8080
 
 spring:
   datasource:
+    # 下面这些值是示例占位，不可直接用于真实生产环境。
     url: jdbc:mysql://生产库地址:3306/mobe_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: 生产用户名
     password: 生产密码
@@ -10,7 +18,9 @@ spring:
 
 mybatis-plus:
   configuration:
+    # 与开发环境保持一致，继续启用数据库字段到 Java 驼峰字段的自动映射。
     map-underscore-to-camel-case: true
 logging:
   level:
+    # 生产环境默认建议保持 INFO，避免 DEBUG 日志带来性能与存储压力。
     root: INFO

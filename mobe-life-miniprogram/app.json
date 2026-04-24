@@ -12,6 +12,8 @@
     "pages/task/detail/detail",
     "pages/node/detail/detail",
     "pages/node/index",
+    "pages/node/edit/edit",
+    "pages/node/create/create",
     "pages/project/index",
     "pages/project/detail/detail"
   ],

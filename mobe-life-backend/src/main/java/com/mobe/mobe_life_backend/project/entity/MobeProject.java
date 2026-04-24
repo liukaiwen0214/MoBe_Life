@@ -1,3 +1,8 @@
+/**
+ * 核心职责：定义项目中心的数据实体，用于映射数据库记录或领域状态。
+ * 所属业务模块：项目中心 / 实体模型。
+ * 重要依赖关系或外部约束：字段通常需要与数据库表结构、MyBatis-Plus 映射约定保持一致。
+ */
 package com.mobe.mobe_life_backend.project.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -35,9 +40,6 @@ public class MobeProject {
 
   @Schema(description = "状态模板ID")
   private Long statusTemplateId;
-
-  @Schema(description = "当前状态ID")
-  private Long currentStatusId;
 
   @Schema(description = "执行模式")
   private String executionMode;

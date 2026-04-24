@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  核心职责：定义后端模块的 Maven 构建方式、依赖版本和打包插件配置。
+  所属业务模块：后端基础设施 / 构建配置。
+  重要依赖关系或外部约束：父 POM 统一继承 Spring Boot 的依赖管理策略；
+  修改版本号或插件配置前，需要同步评估编译、测试、运行时兼容性。
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.13</version>
+		<version>3.5.14</version>
 		<relativePath />
 	</parent>
 
@@ -18,10 +24,15 @@
 	<description>MoBe Life backend</description>
 
 	<properties>
+		<!-- Java 语言级别。当前后端按 Java 21 编译与运行。 -->
 		<java.version>21</java.version>
+		<!-- MyBatis-Plus 版本集中维护，便于 starter 与 BOM 同步升级。 -->
 		<mybatis-plus.version>3.5.15</mybatis-plus.version>
+		<!-- JWT 依赖版本。 -->
 		<jjwt.version>0.12.7</jjwt.version>
+		<!-- Hutool 工具库版本。 -->
 		<hutool.version>5.8.44</hutool.version>
+		<!-- Jackson 版本，主要影响 JSON 序列化与反序列化能力。 -->
 		<jackson.version>2.21.2</jackson.version>
 	</properties>
 
@@ -167,6 +178,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!--
+				  打包时排除 Lombok，避免它作为运行时依赖被带入最终产物。
+				-->
 				<configuration>
 					<excludes>
 						<exclude>
@@ -180,6 +194,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<!--
+				  编译插件单独声明 Lombok 注解处理器，
+				  这样编译期可以生成 getter/setter/构造器等代码，而运行期无需依赖 Lombok。
+				-->
 				<executions>
 					<execution>
 						<id>default-compile</id>

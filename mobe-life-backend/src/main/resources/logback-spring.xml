@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  核心职责：定义后端日志输出策略，包括控制台输出、文件滚动和不同包的日志级别。
+  所属业务模块：后端基础设施 / 日志配置。
+  重要依赖关系或外部约束：日志路径、滚动策略和日志级别会直接影响排障效率、磁盘占用和运行性能。
+-->
 <configuration>
 
+  <!-- 所有日志文件默认写到 logs 目录。 -->
   <property name="LOG_PATH" value="logs" />
 
+  <!-- 控制台输出：适合本地开发和容器日志采集场景。 -->
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
     </encoder>
   </appender>
 
+  <!-- 文件输出：按日期和大小滚动，避免单个日志文件无限膨胀。 -->
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- 文件名按日期分段，同一天超出大小时再继续用索引切分。 -->
       <fileNamePattern>${LOG_PATH}/mobe.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <!-- 单个日志文件大小上限。 -->
       <maxFileSize>10MB</maxFileSize>
+      <!-- 最多保留多少天的历史日志。 -->
       <maxHistory>15</maxHistory>
+      <!-- 所有历史日志占用磁盘的总上限。 -->
       <totalSizeCap>1GB</totalSizeCap>
     </rollingPolicy>
     <encoder>
@@ -21,7 +33,9 @@
     </encoder>
   </appender>
 
+  <!-- 业务包日志适当放宽到 DEBUG，便于定位业务逻辑问题。 -->
   <logger name="com.mobe.mobe_life_backend" level="DEBUG" />
+  <!-- 下面这些包通常容易产出噪音日志，因此保持较高阈值。 -->
   <logger name="javax.management" level="WARN" />
   <logger name="javax.management.remote.rmi" level="WARN" />
   <logger name="javax.management.mbeanserver" level="WARN" />
@@ -29,6 +43,7 @@
   <logger name="org.springframework" level="INFO" />
   <logger name="org.mybatis" level="INFO" />
 
+  <!-- 根日志器同时输出到控制台和文件。 -->
   <root level="INFO">
     <appender-ref ref="CONSOLE" />
     <appender-ref ref="FILE" />

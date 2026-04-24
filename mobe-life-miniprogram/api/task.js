@@ -36,3 +36,24 @@ export const getTaskDetail = (id) => {
     method: 'GET',
   })
 }
+export const createTask = (data) => {
+  return request({
+    url: '/api/tasks',
+    method: 'POST',
+    data,
+  })
+}
+export const moveTaskToNextStatus = (id, data) => {
+  return request({
+    url: `/api/tasks/${id}/next-status`,
+    method: 'POST',
+    data,
+  })
+}
+export const updateTask = (id, data) => {
+  return request({
+    url: `/api/tasks/${id}`,
+    method: 'PUT',
+    data,
+  })
+}

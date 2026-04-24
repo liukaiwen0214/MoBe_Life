@@ -1,3 +1,8 @@
+/**
+ * 核心职责：封装认证中心的请求参数模型，承载控制层到服务层的输入数据。
+ * 所属业务模块：认证中心 / DTO。
+ * 重要依赖关系或外部约束：通常与参数校验注解配合使用，字段命名需要与接口语义保持一致。
+ */
 package com.mobe.mobe_life_backend.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;

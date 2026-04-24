@@ -1,3 +1,8 @@
+/**
+ * 核心职责：对外暴露文件中心相关接口，负责接收请求并调用对应业务能力。
+ * 所属业务模块：文件中心 / 控制层。
+ * 重要依赖关系或外部约束：依赖 Spring MVC 与服务层；通常不承载复杂业务逻辑。
+ */
 package com.mobe.mobe_life_backend.file.controller;
 
 import com.mobe.mobe_life_backend.common.response.Result;
@@ -21,6 +26,11 @@ public class FileController {
 
   private final FileService fileService;
 
+  /**
+   * 上传头像文件。
+   *
+   * @return 返回上传后的文件信息。
+   */
   @Operation(summary = "上传头像文件", description = "上传用户头像图片并返回文件访问地址")
   @PostMapping("/upload/avatar")
   public Result<UploadFileVO> uploadAvatar(

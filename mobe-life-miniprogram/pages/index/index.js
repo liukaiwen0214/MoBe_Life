@@ -129,6 +129,7 @@ Page({
   loadDailyQuote() {
     return new Promise((resolve) => {
       wx.request({
+        // TODO: 上线前不要保留这里的硬编码地址，需统一切到配置模块或公共请求封装。
         // 本地联调用这个
         url: 'http://127.0.0.1:8080/api/tool/daily-quote',
         // 服务器联调用这个
@@ -171,27 +172,20 @@ Page({
    * 接口占位，避免后面接真实天气时再改页面结构。
    */
   async loadWeather() {
-    console.log('loadWeather start')
-
     try {
       const location = await this.getUserLocation()
-      console.log('location result:', location)
 
       if (!location) {
-        console.log('location is null, use fallback')
         this.setWeatherFallback('未开启定位', '天气暂不可用')
         return
       }
 
-      console.log('start fetch weather by location')
       const weather = await this.fetchWeatherByLocation({
         latitude: location.latitude,
         longitude: location.longitude,
       })
-      console.log('weather result:', weather)
 
       if (!weather) {
-        console.log('weather is null, use fallback')
         this.setWeatherFallback('当前城市', '天气暂不可用')
         return
       }
@@ -216,7 +210,6 @@ Page({
       wx.getLocation({
         type: 'gcj02',
         success: (res) => {
-          console.log('wx.getLocation success:', res)
           resolve({
             latitude: res.latitude,
             longitude: res.longitude,
@@ -245,6 +238,7 @@ Page({
       const token = storage.getToken()
 
       wx.request({
+        // TODO: 上线前不要保留这里的硬编码地址，需统一切到配置模块或公共请求封装。
         url: 'http://127.0.0.1:8080/api/tool/weather',
         // url: 'http://119.91.216.175:8080/api/tool/weather',
         method: 'GET',
