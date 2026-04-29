@@ -21,9 +21,33 @@
       ></image>
 
       <view class="tab-label-row">
-        <text class="tab-item-label {{currentSub === nav.key ? 'tab-item-label--active' : ''}}">
+        <view class="tab-item-label {{currentSub === nav.key ? 'tab-item-label--active' : ''}}">
           {{nav.label}}
-        </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 财务模块内部导航 -->
+  <view wx:elif="{{isFinanceModule}}" class="mobe-tabbar mobe-tabbar--module">
+    <view
+      wx:for="{{financeModuleNavItems}}"
+      wx:for-item="nav"
+      wx:key="key"
+      class="tab-item"
+      data-key="{{nav.key}}"
+      bindtap="handleFinanceModuleNavTap"
+    >
+      <image
+        class="tab-icon {{currentSub === nav.key ? 'tab-icon--active' : ''}}"
+        src="{{nav.icon}}"
+        mode="aspectFit"
+      ></image>
+
+      <view class="tab-label-row">
+        <view class="tab-item-label {{currentSub === nav.key ? 'tab-item-label--active' : ''}}">
+          {{nav.label}}
+        </view>
       </view>
     </view>
   </view>
@@ -45,9 +69,9 @@
       ></image>
 
       <view class="tab-label-row">
-        <text class="tab-item-label {{current === nav.key ? 'tab-item-label--active' : ''}}">
+        <view class="tab-item-label {{current === nav.key ? 'tab-item-label--active' : ''}}">
           {{nav.label}}
-        </text>
+        </view>
       </view>
     </view>
   </view>

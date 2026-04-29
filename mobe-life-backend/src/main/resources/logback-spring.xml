@@ -7,7 +7,8 @@
 <configuration>
 
   <!-- 使用绝对路径，避免因为启动工作目录不同而写到意料之外的位置。 -->
-  <property name="LOG_PATH" value="/www/wwwroot/mobe-life/backend/logs" />
+  <!-- <property name="LOG_PATH" value="/www/wwwroot/mobe-life/backend/logs" /> -->
+  <property name="LOG_PATH" value="/Users/liukaiwen/Desktop/MoBe_Life/mobe-life-backend/logs" />
 
   <!-- 控制台输出：适合本地开发和容器日志采集场景。 -->
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

@@ -1,40 +1,380 @@
-/*
- * 核心职责：定义小程序 `finance` 页面或组件的样式表现。
- * 所属业务模块：小程序展示层 / 样式。
- * 重要依赖关系或外部约束：样式类名需要与对应 WXML 模板保持一致，改动会直接影响页面视觉布局。
- */
-.page {
+.finance-page {
   min-height: 100vh;
+  padding: 24rpx 24rpx calc(132rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
-  padding: 32rpx 24rpx 220rpx;
+  background: #f8faf7;
 }
 
-.panel {
+.finance-summary-card,
+.finance-block-card {
   background: #ffffff;
   border: 1rpx solid #edf2e8;
   border-radius: 32rpx;
-  padding: 40rpx 32rpx;
+  padding: 28rpx;
+  box-sizing: border-box;
+  margin-bottom: 24rpx;
 }
 
-.panel-tag {
-  display: inline-block;
-  padding: 10rpx 20rpx;
-  border-radius: 999rpx;
-  background: #f3f7ee;
-  color: #7b8d75;
-  font-size: 22rpx;
-  margin-bottom: 20rpx;
+.finance-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
 }
 
-.panel-title {
-  font-size: 46rpx;
+.summary-label {
+  font-size: 24rpx;
+  color: #8d988d;
+  line-height: 1.5;
+}
+
+.summary-total {
+  margin-top: 10rpx;
+  font-size: 42rpx;
   font-weight: 700;
   color: #243024;
-  margin-bottom: 16rpx;
+  line-height: 1.15;
+  word-break: break-all;
 }
 
-.panel-desc {
+.summary-eye {
+  flex-shrink: 0;
+  min-width: 86rpx;
+  height: 46rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  background: #f4f7f2;
+  color: #8d988d;
+  font-size: 22rpx;
+  text-align: center;
+  line-height: 46rpx;
+  box-sizing: border-box;
+}
+
+.summary-inline-row {
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #edf2e8;
+  display: flex;
+  align-items: stretch;
+}
+
+.summary-inline-item {
+  flex: 1;
+  min-width: 0;
+  padding: 0 18rpx;
+  box-sizing: border-box;
+}
+
+.summary-inline-item:first-child {
+  padding-left: 0;
+}
+
+.summary-inline-item:last-child {
+  padding-right: 0;
+}
+
+.summary-inline-item--divider {
+  border-right: 1rpx solid #edf2e8;
+}
+
+.summary-item-label {
+  font-size: 22rpx;
+  color: #8d988d;
+  line-height: 1.5;
+}
+
+.summary-item-value {
+  margin-top: 6rpx;
   font-size: 26rpx;
-  line-height: 1.8;
-  color: #708070;
+  font-weight: 600;
+  color: #243024;
+  line-height: 1.25;
+  word-break: break-all;
+}
+
+.summary-item-value--income {
+  color: #20a35a;
+}
+
+.summary-item-value--expense {
+  color: #e35f5f;
+}
+
+.summary-budget {
+  margin-top: 22rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid #edf2e8;
+}
+
+.summary-budget-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14rpx;
+}
+
+.summary-budget-label {
+  font-size: 24rpx;
+  color: #5e695e;
+  line-height: 1.5;
+}
+
+.summary-budget-side-group {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  flex-shrink: 0;
+}
+
+.summary-budget-today-inline {
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  background: #f1f7f1;
+  color: #1f9b4f;
+  font-size: 20rpx;
+  line-height: 1.4;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.summary-budget-side {
+  font-size: 23rpx;
+  color: #7d887d;
+  line-height: 1.5;
+}
+
+.summary-budget-progress-wrap {
+  margin-top: 14rpx;
+}
+
+.summary-budget-bar {
+  position: relative;
+  height: 10rpx;
+  border-radius: 999rpx;
+  overflow: hidden;
+  background: #edf2e8;
+}
+
+.summary-budget-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 999rpx;
+  background: #35c86a;
+  overflow: hidden;
+}
+
+.summary-budget-bar-today {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 999rpx;
+  background: #1f9b4f;
+}
+
+.summary-budget-meta {
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  font-size: 21rpx;
+  color: #97a197;
+  line-height: 1.5;
+}
+
+.block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14rpx;
+  margin-bottom: 18rpx;
+}
+
+.block-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #243024;
+  line-height: 1.4;
+}
+
+.block-link {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #8d988d;
+  line-height: 1.4;
+}
+
+.block-link--green {
+  color: #35c86a;
+}
+
+.trend-summary {
+  margin-bottom: 18rpx;
+  font-size: 23rpx;
+  color: #8d988d;
+  line-height: 1.6;
+}
+
+.trend-canvas-wrap {
+  height: 190rpx;
+  margin-top: 2rpx;
+}
+
+.trend-canvas {
+  width: 100%;
+  height: 190rpx;
+  display: block;
+}
+
+.trend-label-row {
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10rpx;
+  padding: 0 6rpx;
+}
+
+.trend-label {
+  flex: 1;
+  text-align: center;
+  font-size: 20rpx;
+  color: #8d988d;
+  line-height: 1.4;
+}
+
+.trend-label--current {
+  color: #243024;
+  font-weight: 600;
+}
+
+.trend-label--future {
+  color: #c7d0c7;
+}
+
+.rank-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 16rpx 0;
+}
+
+.rank-item + .rank-item {
+  border-top: 1rpx solid #edf2e8;
+}
+
+.rank-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 999rpx;
+  margin-top: 12rpx;
+  flex-shrink: 0;
+}
+
+.rank-dot--orange {
+  background: #f0a24b;
+}
+
+.rank-dot--blue {
+  background: #5f8fe8;
+}
+
+.rank-dot--purple {
+  background: #ac7af0;
+}
+
+.rank-dot--green {
+  background: #58b882;
+}
+
+.rank-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.rank-top {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.rank-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #243024;
+  line-height: 1.45;
+  min-width: 0;
+}
+
+.rank-amount {
+  font-size: 23rpx;
+  color: #3c463c;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.rank-ratio {
+  font-size: 22rpx;
+  color: #8d988d;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.rank-bar {
+  margin-top: 10rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: #edf2e8;
+  overflow: hidden;
+}
+
+.rank-bar-fill {
+  height: 100%;
+  border-radius: 999rpx;
+}
+
+.rank-bar-fill--orange {
+  background: #f0a24b;
+}
+
+.rank-bar-fill--blue {
+  background: #5f8fe8;
+}
+
+.rank-bar-fill--purple {
+  background: #ac7af0;
+}
+
+.rank-bar-fill--green {
+  background: #58b882;
+}
+.trend-canvas-wrap {
+  position: relative;
+  height: 190rpx;
+  margin-top: 2rpx;
+}
+
+.trend-canvas {
+  width: 100%;
+  height: 190rpx;
+  display: block;
+}
+
+.trend-amount {
+  position: absolute;
+  transform: translate(-50%, 0);
+  font-size: 20rpx;
+  color: #9cad9c;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.trend-amount--current {
+  color: #35c86a;
+  font-weight: 600;
 }

@@ -9,6 +9,7 @@ package com.mobe.mobe_life_backend.task.service.impl;
 import org.springframework.stereotype.Service;
 import com.mobe.mobe_life_backend.task.service.MobeTaskService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
 import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
@@ -306,6 +307,7 @@ public class MobeTaskServiceImpl implements MobeTaskService {
     MobeTaskItem task = new MobeTaskItem();
     // 下面这一段是在补齐一条“系统可接受的完整待办默认值”。
     // 因为数据库里的待办不仅有标题、备注这些业务字段，还有排序、来源、优先级、删除标记等系统字段。
+    task.setTaskNo(generateTaskNo());
     task.setUserId(userId);
     task.setTitle(title.trim());
     task.setContent(dto.getContent());
@@ -337,6 +339,10 @@ public class MobeTaskServiceImpl implements MobeTaskService {
     // 插入成功后，MyBatis-Plus 会把新生成的主键回填到 task 对象里。
     mobeTaskItemMapper.insert(task);
     return task.getId();
+  }
+
+  private String generateTaskNo() {
+    return "TASK" + System.currentTimeMillis();
   }
 
   /**
@@ -589,24 +595,25 @@ public class MobeTaskServiceImpl implements MobeTaskService {
     MobeTaskStatus nextStatus = statusList.get(currentIndex + 1);
     LocalDateTime now = LocalDateTime.now();
 
-    // 真正更新待办主记录。
-    task.setCurrentStatusId(nextStatus.getId());
+    LambdaUpdateWrapper<MobeTaskItem> updateWrapper = new LambdaUpdateWrapper<MobeTaskItem>()
+        .eq(MobeTaskItem::getId, task.getId())
+        .eq(MobeTaskItem::getUserId, userId)
+        .set(MobeTaskItem::getCurrentStatusId, nextStatus.getId())
+        .set(MobeTaskItem::getUpdatedBy, userId);
 
     // 首次进入流转时，把“实际开始时间”补上。
-    // 这样后续即使多次推进状态，也能保留第一次真正开始执行的时间点。
     if (task.getActualStartTime() == null) {
-      task.setActualStartTime(now);
+      updateWrapper.set(MobeTaskItem::getActualStartTime, now);
     }
 
-    // 如果进入的是终态，就顺手写入完成时间；否则清空完成时间，避免状态和完成时间互相矛盾。
+    // 如果进入的是终态，就写入完成时间；否则清空完成时间。
     if (Integer.valueOf(1).equals(nextStatus.getIsTerminal())) {
-      task.setCompletedAt(now);
+      updateWrapper.set(MobeTaskItem::getCompletedAt, now);
     } else {
-      task.setCompletedAt(null);
+      updateWrapper.set(MobeTaskItem::getCompletedAt, null);
     }
 
-    task.setUpdatedBy(userId);
-    mobeTaskItemMapper.updateById(task);
+    mobeTaskItemMapper.update(null, updateWrapper);
 
     // 主表更新完成后，再追加一条状态变更日志，形成可追溯的状态历史。
     MobeStatusChangeLog log = new MobeStatusChangeLog();
@@ -927,10 +934,14 @@ public class MobeTaskServiceImpl implements MobeTaskService {
       throw new BusinessException("当前已处于该状态");
     }
 
-    task.setCurrentStatusId(targetStatus.getId());
-    task.setCompletedAt(null);
-    task.setUpdatedBy(userId);
-    mobeTaskItemMapper.updateById(task);
+    mobeTaskItemMapper.update(
+        null,
+        new LambdaUpdateWrapper<MobeTaskItem>()
+            .eq(MobeTaskItem::getId, task.getId())
+            .eq(MobeTaskItem::getUserId, userId)
+            .set(MobeTaskItem::getCurrentStatusId, targetStatus.getId())
+            .set(MobeTaskItem::getCompletedAt, null)
+            .set(MobeTaskItem::getUpdatedBy, userId));
 
     MobeStatusChangeLog log = new MobeStatusChangeLog();
     log.setUserId(userId);

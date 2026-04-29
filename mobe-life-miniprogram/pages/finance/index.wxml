@@ -1,14 +1,118 @@
-<!--
-  核心职责：定义小程序 `finance` 页面或组件的结构模板。
-  所属业务模块：小程序展示层 / 结构模板。
-  重要依赖关系或外部约束：模板中的字段和事件名需要与对应 JS 文件中的 data、methods 和组件属性严格一致。
--->
-<view class="page">
-  <view class="panel">
-    <view class="panel-tag">刻度</view>
-    <view class="panel-title">{{currentInfo.title}}</view>
-    <view class="panel-desc">{{currentInfo.desc}}</view>
-  </view>
-</view>
+<view class="finance-page">
+  <view class="finance-summary-card">
+    <view class="finance-summary-head">
+      <view>
+        <view class="summary-label">当前总资产</view>
+        <view class="summary-total">
+          {{hideAsset ? '******' : '¥' + overview.totalAssetText}}
+        </view>
+      </view>
 
-<mobe-tabbar current="scale" current-sub="{{subKey}}"></mobe-tabbar>
+      <view class="summary-eye" bindtap="toggleAssetVisible">
+        {{hideAsset ? '显示' : '隐藏'}}
+      </view>
+    </view>
+
+    <view class="summary-inline-row">
+      <view class="summary-inline-item summary-inline-item--divider">
+        <view class="summary-item-label">收入</view>
+        <view class="summary-item-value summary-item-value--income">
+          {{hideAsset ? '****' : '¥' + overview.monthIncomeText}}
+        </view>
+      </view>
+
+      <view class="summary-inline-item summary-inline-item--divider">
+        <view class="summary-item-label">支出</view>
+        <view class="summary-item-value summary-item-value--expense">
+          {{hideAsset ? '****' : '¥' + overview.monthExpenseText}}
+        </view>
+      </view>
+
+      <view class="summary-inline-item">
+        <view class="summary-item-label">结余</view>
+        <view class="summary-item-value">
+          {{hideAsset ? '****' : '¥' + overview.monthBalanceText}}
+        </view>
+      </view>
+    </view>
+
+    <view class="summary-budget">
+      <view class="summary-budget-row">
+        <view class="summary-budget-label">本月预算状态</view>
+        <view class="summary-budget-side-group">
+          <view class="summary-budget-today-inline">今日 ¥{{overview.todayExpenseText}}</view>
+          <view class="summary-budget-side">{{overview.budgetUsedText}}</view>
+        </view>
+      </view>
+
+      <view class="summary-budget-progress-wrap">
+        <view class="summary-budget-bar">
+          <view class="summary-budget-bar-fill" style="width: {{overview.budgetUsedRatio + '%'}};">
+            <view class="summary-budget-bar-today" style="left: {{overview.todayInnerLeft + '%'}}; width: {{overview.todayInnerWidth + '%'}};"></view>
+          </view>
+        </view>
+      </view>
+
+      <view class="summary-budget-meta">
+        <view>已花 ¥{{overview.budgetSpentText}}</view>
+        <view>剩余 ¥{{overview.budgetRemainText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="finance-block-card">
+    <view class="block-header">
+      <view class="block-title">支出趋势</view>
+      <view class="block-link">本周</view>
+    </view>
+
+    <view class="trend-summary">
+      {{weekSummaryText}}
+    </view>
+
+    <view class="trend-canvas-wrap">
+      <canvas type="2d" id="financeTrendCanvas" canvas-id="financeTrendCanvas" class="trend-canvas"></canvas>
+
+      <block wx:for="{{trendList}}" wx:key="label">
+        <view wx:if="{{!item.isFuture}}" class="trend-amount {{item.isCurrent ? 'trend-amount--current' : ''}}" style="left: {{item.amountLeftPx}}px; bottom: {{item.amountBottomPx}}px;">
+          ¥{{item.amount}}
+        </view>
+      </block>
+    </view>
+
+    <view class="trend-label-row">
+      <block wx:for="{{trendList}}" wx:key="label">
+        <view class="trend-label {{item.isCurrent ? 'trend-label--current' : ''}} {{item.isFuture ? 'trend-label--future' : ''}}">
+          {{item.label}}
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="finance-block-card">
+    <view class="block-header">
+      <view class="block-title">支出排行</view>
+      <view class="block-link block-link--green" bindtap="handleGoRankingDetail">查看全部</view>
+    </view>
+
+    <block wx:for="{{rankingList}}" wx:key="id">
+      <view class="rank-item">
+        <view class="rank-dot {{item.dotClass}}"></view>
+
+        <view class="rank-main">
+          <view class="rank-top">
+            <view class="rank-name">{{item.name}}</view>
+            <view class="rank-amount">¥{{item.amountText}}</view>
+            <view class="rank-ratio">{{item.ratioText}}</view>
+          </view>
+
+          <view class="rank-bar">
+            <view class="rank-bar-fill {{item.barClass}}" style="width: {{item.progress + '%'}};"></view>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <mobe-tabbar current="scale" currentSub="finance" />
+</view>

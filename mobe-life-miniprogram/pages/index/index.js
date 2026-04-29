@@ -129,9 +129,9 @@ Page({
       wx.request({
         // TODO: 上线前不要保留这里的硬编码地址，需统一切到配置模块或公共请求封装。
         // 本地联调用这个
-        // url: 'http://127.0.0.1:8080/api/tool/daily-quote',
+        url: 'http://127.0.0.1:8080/api/tool/daily-quote',
         // 服务器联调用这个
-        url: 'http://39.106.162.13/api/tool/daily-quote',
+        // url: 'http://39.106.162.13/api/tool/daily-quote',
         method: 'GET',
         success: (res) => {
           try {
@@ -237,8 +237,8 @@ Page({
 
       wx.request({
         // TODO: 上线前不要保留这里的硬编码地址，需统一切到配置模块或公共请求封装。
-        // url: 'http://127.0.0.1:8080/api/tool/weather',
-        url: 'http://39.106.162.13/api/tool/weather',
+        url: 'http://127.0.0.1:8080/api/tool/weather',
+        // url: 'http://39.106.162.13/api/tool/weather',
         method: 'GET',
         data: {
           latitude,

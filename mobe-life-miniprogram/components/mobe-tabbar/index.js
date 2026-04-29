@@ -14,7 +14,7 @@ const GLOBAL_NAV_ITEMS = [
   {
     key: 'scale',
     label: '财务',
-    type: 'fixed',
+    type: 'parent',
     pagePath: '/pages/finance/index',
     icon: '/assets/icons/tabbar/scale.svg',
   },
@@ -74,6 +74,39 @@ const TASK_MODULE_NAV_ITEMS = [
   },
 ]
 
+const FINANCE_MODULE_NAV_ITEMS = [
+  {
+    key: 'finance',
+    label: '财务',
+    pagePath: '/pages/finance/index',
+    icon: '/assets/icons/tabbar/finance/finance.svg',
+  },
+  {
+    key: 'bill',
+    label: '账单',
+    pagePath: '/pages/finance/bill/index',
+    icon: '/assets/icons/tabbar/finance/bill.svg',
+  },
+  {
+    key: 'budget',
+    label: '预算',
+    pagePath: '/pages/finance/budget/index',
+    icon: '/assets/icons/tabbar/finance/budget.svg',
+  },
+  {
+    key: 'account',
+    label: '账户',
+    pagePath: '/pages/finance/account/index',
+    icon: '/assets/icons/tabbar/finance/account.svg',
+  },
+  {
+    key: 'home',
+    label: '首页',
+    pagePath: '/pages/index/index',
+    icon: '/assets/icons/tabbar/now.svg',
+  },
+]
+
 Component({
   properties: {
     current: {
@@ -89,33 +122,40 @@ Component({
   data: {
     globalNavItems: GLOBAL_NAV_ITEMS,
     taskModuleNavItems: TASK_MODULE_NAV_ITEMS,
+    financeModuleNavItems: FINANCE_MODULE_NAV_ITEMS,
     isTaskModule: false,
+    isFinanceModule: false,
   },
 
   observers: {
-    'current'(current) {
-      this.setData({
-        isTaskModule: current === 'writing',
-      })
+    current(current) {
+      this.syncModuleState(current)
     },
   },
 
   lifetimes: {
     attached() {
-      this.setData({
-        isTaskModule: this.properties.current === 'writing',
-      })
+      this.syncModuleState(this.properties.current)
     },
   },
 
   methods: {
+    syncModuleState(current) {
+      this.setData({
+        isTaskModule: current === 'writing',
+        isFinanceModule: current === 'scale',
+      })
+    },
+
     handleGlobalNavTap(e) {
       const { key } = e.currentTarget.dataset
       const nav = GLOBAL_NAV_ITEMS.find((item) => item.key === key)
 
-      if (!nav) return
+      if (!nav) {
+        return
+      }
 
-      if (this.properties.current === nav.key && nav.key !== 'writing') {
+      if (this.properties.current === nav.key && nav.key !== 'writing' && nav.key !== 'scale') {
         return
       }
 
@@ -128,7 +168,33 @@ Component({
       const { key } = e.currentTarget.dataset
       const nav = TASK_MODULE_NAV_ITEMS.find((item) => item.key === key)
 
-      if (!nav) return
+      if (!nav) {
+        return
+      }
+
+      if (key === 'home') {
+        wx.reLaunch({
+          url: nav.pagePath,
+        })
+        return
+      }
+
+      if (this.properties.currentSub === key) {
+        return
+      }
+
+      wx.reLaunch({
+        url: nav.pagePath,
+      })
+    },
+
+    handleFinanceModuleNavTap(e) {
+      const { key } = e.currentTarget.dataset
+      const nav = FINANCE_MODULE_NAV_ITEMS.find((item) => item.key === key)
+
+      if (!nav) {
+        return
+      }
 
       if (key === 'home') {
         wx.reLaunch({

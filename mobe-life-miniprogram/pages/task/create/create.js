@@ -1,29 +1,96 @@
 import { createTask } from '../../../api/task'
+import { getProjectList } from '../../../api/project'
+import { getGoalList } from '../../../api/goal'
+import { getNodeList } from '../../../api/node'
 
 Page({
   data: {
     saving: false,
-    activeDateField: '',
-    activeTimeField: '',
-    display: {
-      planStartText: '未设置',
-      planEndText: '未设置',
-      deadlineText: '未设置',
-    },
+    ownerOptions: [
+      { label: '独立', value: 'INDEPENDENT' },
+      { label: '项目', value: 'PROJECT' },
+      { label: '目标', value: 'GOAL' },
+      { label: '节点', value: 'NODE' },
+    ],
+    ownerTypeIndex: 0,
+
+    projectOptions: [],
+    goalOptions: [],
+    nodeOptions: [],
+
+    projectIndex: -1,
+    goalIndex: -1,
+    nodeIndex: -1,
+
     form: {
       title: '',
       content: '',
       remark: '',
       directOwnerType: 'INDEPENDENT',
-      directOwnerId: '',
-      statusTemplateId: '',
-      planStartDate: '',
-      planStartClock: '',
-      planEndDate: '',
-      planEndClock: '',
+      directOwnerId: null,
+      planDateStart: '',
+      planDateEnd: '',
       deadlineDate: '',
-      deadlineClock: '',
     },
+  },
+
+  onLoad() {
+    this.loadOwnerOptions()
+  },
+
+  async loadOwnerOptions() {
+    try {
+      const [projectRes, goalRes, nodeRes] = await Promise.allSettled([
+        getProjectList({
+          pageNum: 1,
+          pageSize: 100,
+        }),
+        getGoalList({
+          pageNum: 1,
+          pageSize: 100,
+        }),
+        getNodeList({
+          pageNum: 1,
+          pageSize: 100,
+        }),
+      ])
+
+      let projectOptions = []
+      let goalOptions = []
+      let nodeOptions = []
+
+      if (projectRes.status === 'fulfilled') {
+        const projectList = Array.isArray(projectRes.value?.list) ? projectRes.value.list : []
+        projectOptions = projectList.map((item) => ({
+          label: item.title || '未命名项目',
+          value: item.id,
+        }))
+      }
+
+      if (goalRes.status === 'fulfilled') {
+        const goalList = Array.isArray(goalRes.value?.list) ? goalRes.value.list : []
+        goalOptions = goalList.map((item) => ({
+          label: item.title || '未命名目标',
+          value: item.id,
+        }))
+      }
+
+      if (nodeRes.status === 'fulfilled') {
+        const nodeList = Array.isArray(nodeRes.value?.list) ? nodeRes.value.list : []
+        nodeOptions = nodeList.map((item) => ({
+          label: item.title || '未命名节点',
+          value: item.id,
+        }))
+      }
+
+      this.setData({
+        projectOptions,
+        goalOptions,
+        nodeOptions,
+      })
+    } catch (error) {
+      console.error('加载归属选项失败', error)
+    }
   },
 
   handleTitleInput(e) {
@@ -44,115 +111,150 @@ Page({
     })
   },
 
-  handlePickDateTime(e) {
-    const { field } = e.currentTarget.dataset
-    if (!field) {
-      return
-    }
-
-    const dateFieldMap = {
-      planStart: 'planStartDate',
-      planEnd: 'planEndDate',
-      deadline: 'deadlineDate',
-    }
-
-    const timeFieldMap = {
-      planStart: 'planStartClock',
-      planEnd: 'planEndClock',
-      deadline: 'deadlineClock',
-    }
+  handleOwnerTypeChange(e) {
+    const ownerTypeIndex = Number(e.detail.value)
+    const ownerType = this.data.ownerOptions[ownerTypeIndex]?.value || 'INDEPENDENT'
 
     this.setData({
-      activeDateField: dateFieldMap[field],
-      activeTimeField: timeFieldMap[field],
+      ownerTypeIndex,
+      'form.directOwnerType': ownerType,
+      'form.directOwnerId': null,
+      projectIndex: -1,
+      goalIndex: -1,
+      nodeIndex: -1,
     })
   },
 
-  handleHiddenDateChange(e) {
-    const { activeDateField } = this.data
-    if (!activeDateField) {
-      return
-    }
+  handleProjectChange(e) {
+    const projectIndex = Number(e.detail.value)
+    const project = this.data.projectOptions[projectIndex]
 
     this.setData({
-      [`form.${activeDateField}`]: e.detail.value,
+      projectIndex,
+      goalIndex: -1,
+      nodeIndex: -1,
+      'form.directOwnerId': project?.value || null,
     })
   },
 
-  handleHiddenTimeChange(e) {
-    const { activeDateField, activeTimeField } = this.data
-    if (!activeTimeField) {
-      return
-    }
+  handleGoalChange(e) {
+    const goalIndex = Number(e.detail.value)
+    const goal = this.data.goalOptions[goalIndex]
 
     this.setData({
-      [`form.${activeTimeField}`]: e.detail.value,
-      activeDateField: '',
-      activeTimeField: '',
-    }, () => {
-      this.syncDisplayText()
+      goalIndex,
+      projectIndex: -1,
+      nodeIndex: -1,
+      'form.directOwnerId': goal?.value || null,
     })
   },
 
-  handleClearDateTime(e) {
-    const { field } = e.currentTarget.dataset
-    if (!field) {
-      return
-    }
-
-    const fieldMap = {
-      planStart: ['planStartDate', 'planStartClock'],
-      planEnd: ['planEndDate', 'planEndClock'],
-      deadline: ['deadlineDate', 'deadlineClock'],
-    }
-
-    const targetFields = fieldMap[field]
-    if (!targetFields) {
-      return
-    }
+  handleNodeChange(e) {
+    const nodeIndex = Number(e.detail.value)
+    const node = this.data.nodeOptions[nodeIndex]
 
     this.setData({
-      [`form.${targetFields[0]}`]: '',
-      [`form.${targetFields[1]}`]: '',
-    }, () => {
-      this.syncDisplayText()
+      nodeIndex,
+      projectIndex: -1,
+      goalIndex: -1,
+      'form.directOwnerId': node?.value || null,
     })
   },
 
-  formatDateTimeText(date, clock) {
-    if (!date || !clock) {
-      return '未设置'
-    }
-    return `${date} ${clock}`
-  },
-
-  syncDisplayText() {
-    const { form } = this.data
-
+  handlePlanDateStartChange(e) {
+    const value = e.detail.value
     this.setData({
-      'display.planStartText': this.formatDateTimeText(form.planStartDate, form.planStartClock),
-      'display.planEndText': this.formatDateTimeText(form.planEndDate, form.planEndClock),
-      'display.deadlineText': this.formatDateTimeText(form.deadlineDate, form.deadlineClock),
+      'form.planDateStart': value,
     })
   },
 
-  buildDateTime(date, clock) {
-    if (!date || !clock) {
+  handlePlanDateEndChange(e) {
+    const value = e.detail.value
+    this.setData({
+      'form.planDateEnd': value,
+    })
+  },
+
+  handleDeadlineDateChange(e) {
+    const value = e.detail.value
+    this.setData({
+      'form.deadlineDate': value,
+    })
+  },
+
+  buildPlanStartTime(date) {
+    if (!date) {
       return null
     }
-    return `${date}T${clock}:00`
+    return `${date}T00:00:01`
   },
 
-  async handleSubmit() {
+  buildPlanEndTime(date) {
+    if (!date) {
+      return null
+    }
+    return `${date}T23:59:59`
+  },
+
+  buildDeadlineTime(date) {
+    if (!date) {
+      return null
+    }
+    return `${date}T23:59:59`
+  },
+
+  validateForm() {
     const { form } = this.data
 
     if (!form.title || !form.title.trim()) {
       wx.showToast({
-        title: '请输入待办名称',
+        title: '请输入待办标题',
         icon: 'none',
       })
+      return false
+    }
+
+    if (form.directOwnerType === 'PROJECT' && !form.directOwnerId) {
+      wx.showToast({
+        title: '请选择所属项目',
+        icon: 'none',
+      })
+      return false
+    }
+
+    if (form.directOwnerType === 'GOAL' && !form.directOwnerId) {
+      wx.showToast({
+        title: '请选择所属目标',
+        icon: 'none',
+      })
+      return false
+    }
+
+    if (form.directOwnerType === 'NODE' && !form.directOwnerId) {
+      wx.showToast({
+        title: '请选择所属节点',
+        icon: 'none',
+      })
+      return false
+    }
+
+    if (form.planDateStart && form.planDateEnd && form.planDateEnd < form.planDateStart) {
+      wx.showToast({
+        title: '结束日期不能早于开始日期',
+        icon: 'none',
+      })
+      return false
+    }
+
+    return true
+  },
+
+  async handleSubmit() {
+    if (!this.validateForm()) {
       return
     }
+
+    const { form } = this.data
 
     try {
       this.setData({ saving: true })
@@ -161,12 +263,11 @@ Page({
         title: form.title.trim(),
         content: form.content || '',
         remark: form.remark || '',
-        directOwnerType: form.directOwnerType || 'INDEPENDENT',
-        directOwnerId: form.directOwnerId || null,
-        statusTemplateId: form.statusTemplateId || null,
-        planStartTime: this.buildDateTime(form.planStartDate, form.planStartClock),
-        planEndTime: this.buildDateTime(form.planEndDate, form.planEndClock),
-        deadlineTime: this.buildDateTime(form.deadlineDate, form.deadlineClock),
+        directOwnerType: form.directOwnerType,
+        directOwnerId: form.directOwnerType === 'INDEPENDENT' ? null : form.directOwnerId,
+        planStartTime: this.buildPlanStartTime(form.planDateStart),
+        planEndTime: this.buildPlanEndTime(form.planDateEnd),
+        deadlineTime: this.buildDeadlineTime(form.deadlineDate),
       })
 
       wx.showToast({
