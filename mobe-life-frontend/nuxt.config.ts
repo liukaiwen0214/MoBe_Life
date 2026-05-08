@@ -31,9 +31,8 @@ export default defineNuxtConfig({
 
   nitro: {
     devProxy: {
-      // 开发代理保持 `/api` 前缀不变，是为了让本地和生产环境的请求代码保持同构。
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://39.106.162.13/api',
         changeOrigin: true,
       },
     },

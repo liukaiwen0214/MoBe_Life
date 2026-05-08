@@ -1,0 +1,34 @@
+<view class="setting-page">
+  <view class="setting-header-card">
+    <view class="setting-page-title">设置</view>
+    <view class="setting-page-desc">
+      管理财务模块中的基础配置、规则与通知能力。
+    </view>
+  </view>
+
+  <view class="setting-section-card">
+    <block wx:for="{{settingGroupList}}" wx:key="id">
+      <view
+        class="setting-item"
+        data-id="{{item.id}}"
+        bindtap="handleOpenSetting"
+      >
+        <view class="setting-item-left">
+          <view class="setting-item-icon {{item.accentClass}}">
+            {{item.iconText}}
+          </view>
+
+          <view class="setting-item-main">
+            <view class="setting-item-title">{{item.title}}</view>
+            <view class="setting-item-desc">{{item.desc}}</view>
+            <view class="setting-item-meta">{{item.meta}}</view>
+          </view>
+        </view>
+
+        <view class="setting-item-arrow">›</view>
+      </view>
+    </block>
+  </view>
+
+  <mobe-tabbar current="scale" currentSub="account" />
+</view>

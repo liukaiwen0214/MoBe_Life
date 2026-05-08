@@ -1,0 +1,245 @@
+.account-page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx calc(200rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: #f8faf7;
+}
+
+.account-overview-card,
+.account-section-card {
+  background: #ffffff;
+  border: 1rpx solid #edf2e8;
+  border-radius: 32rpx;
+  padding: 28rpx;
+  box-sizing: border-box;
+  margin-bottom: 24rpx;
+}
+
+/* ===== 顶部总览 ===== */
+.account-overview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.account-overview-label {
+  font-size: 24rpx;
+  color: #8d988d;
+  line-height: 1.5;
+}
+
+.account-overview-total {
+  margin-top: 10rpx;
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #243024;
+  line-height: 1.15;
+  word-break: break-all;
+}
+
+.account-overview-count {
+  flex-shrink: 0;
+  min-width: 100rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  background: #f5f8f3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18rpx;
+  box-sizing: border-box;
+}
+
+.account-overview-count-num {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #243024;
+  line-height: 1.2;
+}
+
+.account-overview-count-label {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  color: #97a197;
+  line-height: 1.2;
+}
+
+.account-overview-row {
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #edf2e8;
+  display: flex;
+  align-items: stretch;
+}
+
+.account-overview-item {
+  flex: 1;
+  min-width: 0;
+  padding: 0 18rpx;
+  box-sizing: border-box;
+}
+
+.account-overview-item:first-child {
+  padding-left: 0;
+}
+
+.account-overview-item:last-child {
+  padding-right: 0;
+}
+
+.account-overview-item--divider {
+  border-right: 1rpx solid #edf2e8;
+}
+
+.account-overview-item-label {
+  font-size: 22rpx;
+  color: #8d988d;
+  line-height: 1.5;
+}
+
+.account-overview-item-value {
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #243024;
+  line-height: 1.25;
+  word-break: break-all;
+}
+
+.account-overview-item-value--income {
+  color: #20a35a;
+}
+
+.account-overview-item-value--expense {
+  color: #e35f5f;
+}
+
+/* ===== 账户分组 ===== */
+.account-section-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #243024;
+  line-height: 1.4;
+  margin-bottom: 10rpx;
+}
+
+.account-item {
+  padding: 18rpx 0 20rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.account-item + .account-item {
+  border-top: 1rpx solid rgba(36, 48, 36, 0.04);
+}
+
+.account-item-accent {
+  width: 8rpx;
+  height: 28rpx;
+  border-radius: 999rpx;
+  margin-top: 8rpx;
+  flex-shrink: 0;
+}
+
+.account-accent--green {
+  background: #35c86a;
+}
+
+.account-accent--blue {
+  background: #5f8fe8;
+}
+
+.account-accent--orange {
+  background: #f0a24b;
+}
+
+.account-accent--purple {
+  background: #ac7af0;
+}
+
+.account-accent--slate {
+  background: #8ea0bf;
+}
+
+.account-item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.account-item-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #243024;
+  line-height: 1.45;
+}
+
+.account-item-balance-wrap {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.account-item-balance-label {
+  font-size: 20rpx;
+  color: #97a197;
+  line-height: 1.4;
+}
+
+.account-item-balance {
+  margin-top: 4rpx;
+  font-size: 25rpx;
+  font-weight: 600;
+  color: #243024;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.account-item-sub {
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: #98a298;
+  line-height: 1.5;
+}
+
+.account-item-meta {
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  flex-wrap: wrap;
+}
+
+.account-item-meta-text {
+  font-size: 20rpx;
+  color: #7f8a7f;
+  line-height: 1.4;
+}
+
+/* ===== 悬浮按钮 ===== */
+.account-create-btn {
+  position: fixed;
+  right: 32rpx;
+  bottom: calc(168rpx + env(safe-area-inset-bottom));
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 999rpx;
+  background: #35c86a;
+  color: #ffffff;
+  font-size: 56rpx;
+  font-weight: 400;
+  text-align: center;
+  line-height: 104rpx;
+  box-shadow: 0 16rpx 28rpx rgba(53, 200, 106, 0.22);
+  z-index: 20;
+}

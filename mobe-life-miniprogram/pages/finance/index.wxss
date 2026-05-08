@@ -15,6 +15,7 @@
   margin-bottom: 24rpx;
 }
 
+/* ===== 顶部摘要 ===== */
 .finance-summary-head {
   display: flex;
   align-items: flex-start;
@@ -101,6 +102,7 @@
   color: #e35f5f;
 }
 
+/* ===== 预算状态 ===== */
 .summary-budget {
   margin-top: 22rpx;
   padding-top: 22rpx;
@@ -185,6 +187,7 @@
   line-height: 1.5;
 }
 
+/* ===== 区块标题 ===== */
 .block-header {
   display: flex;
   align-items: center;
@@ -211,6 +214,7 @@
   color: #35c86a;
 }
 
+/* ===== 趋势图 ===== */
 .trend-summary {
   margin-bottom: 18rpx;
   font-size: 23rpx;
@@ -219,6 +223,7 @@
 }
 
 .trend-canvas-wrap {
+  position: relative;
   height: 190rpx;
   margin-top: 2rpx;
 }
@@ -227,6 +232,21 @@
   width: 100%;
   height: 190rpx;
   display: block;
+}
+
+.trend-amount {
+  position: absolute;
+  transform: translate(-50%, 0);
+  font-size: 20rpx;
+  color: #9cad9c;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.trend-amount--current {
+  color: #35c86a;
+  font-weight: 600;
 }
 
 .trend-label-row {
@@ -255,80 +275,92 @@
   color: #c7d0c7;
 }
 
+/* ===== 排行 ===== */
 .rank-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 16rpx;
-  padding: 16rpx 0;
+  padding: 18rpx 0 20rpx;
 }
 
 .rank-item + .rank-item {
-  border-top: 1rpx solid #edf2e8;
+  border-top: 1rpx solid rgba(36, 48, 36, 0.04);
 }
 
-.rank-dot {
-  width: 16rpx;
-  height: 16rpx;
+.rank-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.rank-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  min-width: 0;
+  flex: 1;
+}
+
+.rank-accent {
+  width: 8rpx;
+  height: 24rpx;
   border-radius: 999rpx;
-  margin-top: 12rpx;
   flex-shrink: 0;
 }
 
-.rank-dot--orange {
+.rank-dot--orange,
+.rank-accent.rank-dot--orange {
   background: #f0a24b;
 }
 
-.rank-dot--blue {
+.rank-dot--blue,
+.rank-accent.rank-dot--blue {
   background: #5f8fe8;
 }
 
-.rank-dot--purple {
+.rank-dot--purple,
+.rank-accent.rank-dot--purple {
   background: #ac7af0;
 }
 
-.rank-dot--green {
+.rank-dot--green,
+.rank-accent.rank-dot--green {
   background: #58b882;
-}
-
-.rank-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.rank-top {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 10rpx;
 }
 
 .rank-name {
   font-size: 26rpx;
   font-weight: 600;
   color: #243024;
-  line-height: 1.45;
+  line-height: 1.4;
   min-width: 0;
 }
 
 .rank-amount {
+  flex-shrink: 0;
   font-size: 23rpx;
-  color: #3c463c;
-  line-height: 1.45;
+  font-weight: 500;
+  color: #667166;
+  line-height: 1.4;
   white-space: nowrap;
+}
+
+.rank-sub-row {
+  margin-top: 6rpx;
+  padding-left: 20rpx;
 }
 
 .rank-ratio {
-  font-size: 22rpx;
-  color: #8d988d;
-  line-height: 1.45;
-  white-space: nowrap;
+  font-size: 21rpx;
+  color: #9aa49a;
+  line-height: 1.4;
 }
 
 .rank-bar {
-  margin-top: 10rpx;
-  height: 8rpx;
+  margin-top: 12rpx;
+  margin-left: 20rpx;
+  width: calc(100% - 20rpx);
+  height: 6rpx;
   border-radius: 999rpx;
-  background: #edf2e8;
+  background: #eef3ed;
   overflow: hidden;
 }
 
@@ -351,30 +383,4 @@
 
 .rank-bar-fill--green {
   background: #58b882;
-}
-.trend-canvas-wrap {
-  position: relative;
-  height: 190rpx;
-  margin-top: 2rpx;
-}
-
-.trend-canvas {
-  width: 100%;
-  height: 190rpx;
-  display: block;
-}
-
-.trend-amount {
-  position: absolute;
-  transform: translate(-50%, 0);
-  font-size: 20rpx;
-  color: #9cad9c;
-  line-height: 1.2;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.trend-amount--current {
-  color: #35c86a;
-  font-weight: 600;
 }

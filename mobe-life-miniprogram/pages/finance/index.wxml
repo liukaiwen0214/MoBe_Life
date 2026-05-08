@@ -97,18 +97,21 @@
 
     <block wx:for="{{rankingList}}" wx:key="id">
       <view class="rank-item">
-        <view class="rank-dot {{item.dotClass}}"></view>
-
-        <view class="rank-main">
-          <view class="rank-top">
+        <view class="rank-row">
+          <view class="rank-left">
+            <view class="rank-accent {{item.dotClass}}"></view>
             <view class="rank-name">{{item.name}}</view>
-            <view class="rank-amount">¥{{item.amountText}}</view>
-            <view class="rank-ratio">{{item.ratioText}}</view>
           </view>
 
-          <view class="rank-bar">
-            <view class="rank-bar-fill {{item.barClass}}" style="width: {{item.progress + '%'}};"></view>
-          </view>
+          <view class="rank-amount">¥{{item.amountText}}</view>
+        </view>
+
+        <view class="rank-sub-row">
+          <view class="rank-ratio">占比 {{item.ratioText}}</view>
+        </view>
+
+        <view class="rank-bar">
+          <view class="rank-bar-fill {{item.barClass}}" style="width: {{item.progress + '%'}};"></view>
         </view>
       </view>
     </block>

@@ -1,14 +1,6 @@
 /* 核心职责：定义 Web 端全局样式基线、品牌字体和主题变量。 */
-@import "tailwindcss";
-@import "@nuxt/ui";
-
-@font-face {
-  font-family: "LXGW WenKai";
-  src: url("/fonts/LXGWWenKai-Light.ttf") format("truetype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 :root {
   /* 这组变量决定了当前产品的温和纸面感，不只是换色方便，更是统一三端视觉语义的根。 */
@@ -24,12 +16,9 @@
 html,
 body {
   font-family:
-    "LXGW WenKai",
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
-    "PingFang SC",
-    "Microsoft YaHei",
     sans-serif;
   background: var(--mobe-bg);
   color: var(--mobe-text);

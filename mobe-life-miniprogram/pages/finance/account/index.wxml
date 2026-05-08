@@ -1,0 +1,68 @@
+<view class="account-page">
+  <view class="account-overview-card">
+    <view class="account-overview-head">
+      <view>
+        <view class="account-overview-label">总资产</view>
+        <view class="account-overview-total">¥{{overview.totalAssetText}}</view>
+      </view>
+
+      <view class="account-overview-count">
+        <view class="account-overview-count-num">{{overview.accountCount}}</view>
+        <view class="account-overview-count-label">账户</view>
+      </view>
+    </view>
+
+    <view class="account-overview-row">
+      <view class="account-overview-item account-overview-item--divider">
+        <view class="account-overview-item-label">本月流入</view>
+        <view class="account-overview-item-value account-overview-item-value--income">
+          ¥{{overview.monthIncomeText}}
+        </view>
+      </view>
+
+      <view class="account-overview-item">
+        <view class="account-overview-item-label">本月流出</view>
+        <view class="account-overview-item-value account-overview-item-value--expense">
+          ¥{{overview.monthExpenseText}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <block wx:for="{{accountSectionList}}" wx:key="type">
+    <view class="account-section-card">
+      <view class="account-section-title">{{item.typeName}}</view>
+
+      <block wx:for="{{item.items}}" wx:key="id">
+        <view class="account-item" data-id="{{item.id}}" bindtap="handleAccountDetail">
+          <view class="account-item-accent {{item.accentClass}}"></view>
+
+          <view class="account-item-main">
+            <view class="account-item-top">
+              <view class="account-item-name">{{item.name}}</view>
+              <view class="account-item-balance-wrap">
+                <view class="account-item-balance-label">{{item.balanceLabel || '当前余额'}}</view>
+                <view class="account-item-balance">¥{{item.balanceText}}</view>
+              </view>
+            </view>
+
+            <view class="account-item-sub">{{item.subText}}</view>
+
+            <view class="account-item-meta">
+              <view class="account-item-meta-text">
+                本月流入 ¥{{item.monthIncomeText}}
+              </view>
+              <view class="account-item-meta-text">
+                本月流出 ¥{{item.monthExpenseText}}
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <view class="account-create-btn" bindtap="handleCreateAccount">＋</view>
+
+  <mobe-tabbar current="scale" currentSub="account" />
+</view>

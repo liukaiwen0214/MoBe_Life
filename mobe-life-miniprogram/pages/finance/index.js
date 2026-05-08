@@ -100,7 +100,7 @@ Page({
       isCurrent: index === currentWeekIndex,
       isFuture: index > currentWeekIndex,
       amountLeftPx: 0,
-      amountBottomPx: 0,
+      amountTopPx: 0,
     }))
   
     this.setData(
@@ -108,7 +108,9 @@ Page({
         trendList,
       },
       () => {
-        this.drawWeekTrendCanvas()
+        wx.nextTick(() => {
+          this.drawWeekTrendCanvas()
+        })
       }
     )
   },

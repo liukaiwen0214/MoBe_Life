@@ -89,15 +89,15 @@ const FINANCE_MODULE_NAV_ITEMS = [
   },
   {
     key: 'budget',
-    label: '预算',
-    pagePath: '/pages/finance/budget/index',
-    icon: '/assets/icons/tabbar/finance/budget.svg',
-  },
-  {
-    key: 'account',
     label: '账户',
     pagePath: '/pages/finance/account/index',
     icon: '/assets/icons/tabbar/finance/account.svg',
+  },
+  {
+    key: 'account',
+    label: '设置',
+    pagePath: '/pages/finance/setting/index',
+    icon: '/assets/icons/tabbar/finance/setting.svg',
   },
   {
     key: 'home',

@@ -1,0 +1,110 @@
+<view class="bill-page">
+  <view class="bill-summary-card">
+    <view class="bill-summary-item">
+      <view class="bill-summary-label">本月支出</view>
+      <view class="bill-summary-value bill-summary-value--expense">¥{{summary.monthExpenseText}}</view>
+    </view>
+
+    <view class="bill-summary-item">
+      <view class="bill-summary-label">本月收入</view>
+      <view class="bill-summary-value bill-summary-value--income">¥{{summary.monthIncomeText}}</view>
+    </view>
+
+    <view class="bill-summary-item">
+      <view class="bill-summary-label">本月结余</view>
+      <view class="bill-summary-value">¥{{summary.monthBalanceText}}</view>
+    </view>
+  </view>
+
+  <view class="bill-filter-card">
+    <view class="bill-filter-tabs">
+      <block wx:for="{{filterTabs}}" wx:key="key">
+        <view
+          class="bill-filter-tab {{activeFilter === item.key ? 'bill-filter-tab--active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="handleFilterTabTap"
+        >
+          {{item.label}}
+        </view>
+      </block>
+    </view>
+
+    <view class="bill-filter-chip-row">
+      <block wx:for="{{filterChips}}" wx:key="key">
+        <view
+          class="bill-filter-chip"
+          data-key="{{item.key}}"
+          bindtap="handleFakeFilterTap"
+        >
+          <view class="bill-filter-chip-text">{{item.label}}</view>
+          <view class="bill-filter-chip-arrow">⌄</view>
+        </view>
+      </block>
+    </view>
+
+    <view class="bill-search-box">
+      <input
+        class="bill-search-input"
+        placeholder="搜索账单名称、备注、分类"
+        placeholder-class="bill-search-placeholder"
+        value="{{keyword}}"
+        bindinput="handleKeywordInput"
+      />
+    </view>
+  </view>
+
+  <block wx:if="{{displaySectionList.length > 0}}">
+    <block wx:for="{{displaySectionList}}" wx:key="date">
+      <view class="bill-section-card">
+        <view
+          class="bill-section-head"
+          data-date="{{item.date}}"
+          bindtap="handleToggleSection"
+        >
+          <view class="bill-section-head-left">
+            <view class="bill-section-date">{{item.date}}</view>
+            <view class="bill-section-week">{{item.weekText}}</view>
+          </view>
+
+          <view class="bill-section-head-right">
+            <view class="bill-section-money bill-section-money--expense">
+              支出 ¥{{item.totalExpenseText}}
+            </view>
+            <view class="bill-section-money bill-section-money--income">
+              收入 ¥{{item.totalIncomeText}}
+            </view>
+          </view>
+
+          <view class="bill-section-arrow">
+            {{item.expanded ? '⌃' : '⌄'}}
+          </view>
+        </view>
+
+        <view wx:if="{{item.expanded}}">
+          <block wx:for="{{item.items}}" wx:key="id">
+            <view class="bill-item" data-id="{{item.id}}" bindtap="handleBillDetail">
+              <view class="bill-item-accent {{item.accentClass}}"></view>
+
+              <view class="bill-item-main">
+                <view class="bill-item-top">
+                  <view class="bill-item-title">{{item.title}}</view>
+                  <view class="bill-item-amount {{item.amountClass}}">{{item.amountText}}</view>
+                </view>
+
+                <view class="bill-item-sub">{{item.subText}}</view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </block>
+
+  <view wx:else class="bill-empty-card">
+    <view class="bill-empty-text">暂无符合条件的账单记录</view>
+  </view>
+
+  <view class="bill-create-btn" bindtap="handleCreateBill">＋</view>
+
+  <mobe-tabbar current="scale" currentSub="bill" />
+</view>
