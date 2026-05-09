@@ -50,7 +50,7 @@ public interface AuthService {
    * @throws RuntimeException 当微信凭证无效、远程接口失败或建档过程出现业务冲突时抛出。
    * @implNote 该方法可能创建新用户记录，并会发起微信远程调用。
    */
-  LoginUserVO wxMiniLogin(WxMiniLoginDTO wxMiniLoginDTO);
+  LoginUserVO wxMiniLogin(WxMiniLoginDTO wxMiniLoginDTO, HttpServletRequest request);
 
   /**
    * 刷新当前用户的访问令牌。
@@ -65,10 +65,11 @@ public interface AuthService {
   /**
    * 执行登出。
    *
-   * @throws RuntimeException 当前实现无显式异常；未来若接入黑名单或审计系统，可能引入外部副作用。
-   * @implNote 当前版本 JWT 采用无状态方案，服务端不会落登出记录。
+   * @param authorization `Authorization` 请求头值，不允许为 null 或空白；支持包含 `Bearer ` 前缀。
+   * @throws RuntimeException 当 token 缺失、格式非法或对应会话不存在时抛出。
+   * @implNote 当前版本会把登录会话标记为 `LOGOUT`，不创建新的会话记录。
    */
-  void logout();
+  void logout(String authorization);
 
   /**
    * 将微信手机号绑定到当前登录用户。
@@ -143,7 +144,7 @@ public interface AuthService {
    * @implNote 该方法会校验账号密码，并且需要校验验证码的正确性以防止暴力破解；成功登录后会返回用户信息和 JWT。
    * @return 登录结果，不返回 null。
    */
-  LoginUserVO passwordLogin(PasswordLoginDTO passwordLoginDTO);
+  LoginUserVO passwordLogin(PasswordLoginDTO passwordLoginDTO, HttpServletRequest request);
 
   /**
    * 使用验证码登录。
@@ -155,7 +156,7 @@ public interface AuthService {
    *           JWT。该登录方式适用于用户忘记密码但已绑定手机号/邮箱的场景，或者作为无密码登录的补充方式。
    * @return 登录结果，不返回 null。
    */
-  LoginUserVO codeLogin(CodeLoginDTO codeLoginDTO);
+  LoginUserVO codeLogin(CodeLoginDTO codeLoginDTO, HttpServletRequest request);
 
   void sendLoginEmailCode(SendEmailCodeDTO sendEmailCodeDTO, HttpServletRequest request);
 

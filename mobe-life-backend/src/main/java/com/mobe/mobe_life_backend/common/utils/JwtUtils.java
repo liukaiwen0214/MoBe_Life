@@ -11,7 +11,10 @@ import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * JWT 工具类。
@@ -26,7 +29,7 @@ public class JwtUtils {
   private static final String SECRET_KEY = "mobe-life-secret-key-2026-very-safe";
 
   /** token 有效期，当前固定为 7 天。 */
-  private static final long EXPIRE_TIME = 7L * 24 * 60 * 60 * 1000;
+  public static final long EXPIRE_TIME = 7L * 24 * 60 * 60 * 1000;
 
   /** 预先构建的签名密钥，避免重复创建。 */
   private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
@@ -41,15 +44,36 @@ public class JwtUtils {
    * @return JWT 字符串，不返回 null。
    */
   public static String createToken(Long userId) {
+    return createToken(userId, generateJti());
+  }
+
+  /**
+   * 生成带指定 jti 的 token。
+   *
+   * @param userId 用户主键，不允许为 null。
+   * @param jti    令牌唯一 ID，不允许为空。
+   * @return JWT 字符串，不返回 null。
+   */
+  public static String createToken(Long userId, String jti) {
     Date now = new Date();
     Date expireDate = new Date(now.getTime() + EXPIRE_TIME);
 
     return Jwts.builder()
         .subject(String.valueOf(userId))
+        .id(jti)
         .issuedAt(now)
         .expiration(expireDate)
         .signWith(KEY)
         .compact();
+  }
+
+  /**
+   * 生成访问令牌唯一 ID。
+   *
+   * @return 去除横线的 UUID 字符串。
+   */
+  public static String generateJti() {
+    return UUID.randomUUID().toString().replace("-", "");
   }
 
   /**
@@ -77,6 +101,27 @@ public class JwtUtils {
   public static Long getUserId(String token) {
     Claims claims = parseToken(token);
     return Long.valueOf(claims.getSubject());
+  }
+
+  /**
+   * 从 token 中提取 jti。
+   *
+   * @param token JWT 字符串，不允许为 null。
+   * @return jti，可能为空。
+   */
+  public static String getJti(String token) {
+    return parseToken(token).getId();
+  }
+
+  /**
+   * 从 token 中提取过期时间。
+   *
+   * @param token JWT 字符串，不允许为 null。
+   * @return 过期时间，不返回 null。
+   */
+  public static LocalDateTime getExpireTime(String token) {
+    Date expiration = parseToken(token).getExpiration();
+    return LocalDateTime.ofInstant(expiration.toInstant(), ZoneId.systemDefault());
   }
 
   /**

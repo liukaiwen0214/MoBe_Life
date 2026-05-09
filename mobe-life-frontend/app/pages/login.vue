@@ -331,8 +331,8 @@ onMounted(async () => {
 .login-page {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 1.02fr 1.38fr;
-  background: #f7f7f8;
+  grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
+  background: #f8faf7;
 }
 
 /* ===== 左侧夜空区 ===== */
@@ -352,7 +352,7 @@ onMounted(async () => {
     ),
     linear-gradient(180deg, #050608 0%, #090b0f 52%, #0b0d12 100%);
   color: #fff;
-  padding: 40px 48px 32px;
+  padding: 40px 48px 32px 84px;
   display: flex;
   flex-direction: column;
 }
@@ -387,6 +387,7 @@ onMounted(async () => {
   position: relative;
   z-index: 3;
   margin-top: 72px;
+  margin-left: 22px;
   max-width: 560px;
 }
 
@@ -468,6 +469,7 @@ onMounted(async () => {
   position: relative;
   z-index: 3;
   margin-top: auto;
+  margin-left: 22px;
   color: rgba(255, 255, 255, 0.36);
   font-size: 14px;
 }
@@ -708,88 +710,102 @@ onMounted(async () => {
 
 /* ===== 右侧登录区 ===== */
 .login-right {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  padding: 48px 64px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 252, 249, 0.98)),
+    #f8faf7;
 }
 
 .login-panel {
   width: 100%;
-  max-width: 420px;
+  max-width: 388px;
+  border: 1px solid #e7eee5;
+  border-radius: 22px;
+  background: #ffffff;
+  padding: 32px;
+  box-shadow: 0 18px 52px rgba(38, 53, 42, 0.06);
 }
 
 .panel-header {
-  margin-bottom: 28px;
+  margin-bottom: 22px;
 }
 
 .panel-title {
   margin: 0;
-  font-size: 40px;
+  font-size: 30px;
   line-height: 1.2;
-  font-weight: 800;
+  font-weight: 720;
   color: #18181b;
-  letter-spacing: -0.6px;
+  letter-spacing: 0;
 }
 
 .panel-subtitle {
-  margin: 10px 0 0;
-  font-size: 16px;
-  color: #8b8b95;
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #899489;
   line-height: 1.6;
 }
 
 .login-type-tabs {
   display: flex;
-  gap: 12px;
-  margin-bottom: 28px;
+  gap: 4px;
+  margin-bottom: 22px;
+  border: 1px solid #e6ede3;
+  border-radius: 12px;
+  background: #fbfdfb;
+  padding: 3px;
 }
 
 .login-type-btn {
-  height: 38px;
+  height: 32px;
+  flex: 1;
   padding: 0 14px;
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: #9a9aa4;
-  font-size: 15px;
+  color: #78857a;
+  font-size: 14px;
   cursor: pointer;
 }
 
 .login-type-btn--active {
-  background: #f3f4f6;
-  color: #18181b;
+  background: #eef8f2;
+  color: #172018;
   font-weight: 600;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 18px;
 }
 
 .form-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .form-label {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  color: #2b2b31;
+  color: #354238;
 }
 
 .form-input :deep(.ui-input) {
-  border-radius: 14px;
-  background: #fcfcfd;
-  border-color: #e8e8ee;
+  border-radius: 11px;
+  background: #ffffff;
+  border-color: #dfe8dc;
   box-shadow: none;
 }
 
 .form-input :deep(input) {
-  height: 42px;
-  font-size: 15px;
+  height: 38px;
+  font-size: 14px;
   color: #1f1f23;
 }
 
@@ -817,14 +833,14 @@ onMounted(async () => {
 
 .code-btn {
   flex-shrink: 0;
-  min-width: 122px;
-  height: 42px;
-  padding: 0 18px;
-  border: 1px solid #e5ebe5;
-  border-radius: 9px;
-  background: #f9fcfa;
-  color: #18c66f;
-  font-size: 14px;
+  min-width: 112px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #dbe8dc;
+  border-radius: 11px;
+  background: #f8fcf8;
+  color: #0f9f68;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -846,22 +862,23 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #81818b;
-  font-size: 15px;
+  color: #7f8a80;
+  font-size: 13px;
 }
 
 .link-btn {
   border: none;
   background: transparent;
-  color: #15c973;
-  font-size: 15px;
+  color: #0f9f68;
+  font-size: 13px;
   cursor: pointer;
 }
 
 .submit-btn {
-  height: 54px;
-  margin-top: 4px;
-  font-size: 17px;
+  height: 46px;
+  margin-top: 2px;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 700;
   justify-content: center;
 }
@@ -871,11 +888,11 @@ onMounted(async () => {
 }
 
 .divider {
-  margin: 28px 0 20px;
+  margin: 22px 0 16px;
   display: flex;
   align-items: center;
-  color: #b4b4be;
-  font-size: 14px;
+  color: #a5afa6;
+  font-size: 13px;
 }
 
 .divider::before,
@@ -896,11 +913,11 @@ onMounted(async () => {
 }
 
 .wechat-btn {
-  width: 56px;
-  height: 56px;
-  border: none;
-  border-radius: 16px;
-  background: #f3f4f6;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e1e9de;
+  border-radius: 12px;
+  background: #ffffff;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -912,8 +929,8 @@ onMounted(async () => {
 }
 
 .wechat-btn-icon {
-  width: 24px;
-  height: 24px;
+  width: 21px;
+  height: 21px;
   display: block;
 }
 
@@ -995,10 +1012,10 @@ onMounted(async () => {
 }
 
 .agreement {
-  margin: 28px 0 0;
+  margin: 20px 0 0;
   text-align: center;
-  color: #a3a3ad;
-  font-size: 13px;
+  color: #9aa49b;
+  font-size: 12px;
   line-height: 1.7;
 }
 
@@ -1008,11 +1025,11 @@ onMounted(async () => {
 }
 
 .captcha-box {
-  width: 122px;
-  height: 42px;
-  border: 1px solid #e5ebe5;
-  border-radius: 10px;
-  background: #f9fcfa;
+  width: 112px;
+  height: 38px;
+  border: 1px solid #dbe8dc;
+  border-radius: 11px;
+  background: #f8fcf8;
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -1034,6 +1051,7 @@ onMounted(async () => {
 
   .login-left {
     min-height: 420px;
+    padding-left: 48px;
   }
 
   .left-title {
@@ -1041,8 +1059,17 @@ onMounted(async () => {
     font-size: 42px;
   }
 
+  .left-content,
+  .left-footer {
+    margin-left: 0;
+  }
+
   .login-right {
     padding: 40px 24px 56px;
+  }
+
+  .login-panel {
+    max-width: 420px;
   }
 }
 
@@ -1076,7 +1103,12 @@ onMounted(async () => {
   }
 
   .panel-title {
-    font-size: 32px;
+    font-size: 30px;
+  }
+
+  .login-panel {
+    padding: 28px 22px;
+    border-radius: 24px;
   }
 
   .code-row {

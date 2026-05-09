@@ -47,8 +47,9 @@ public class AuthController {
   @Operation(summary = "微信小程序登录", description = "通过微信小程序临时登录凭证完成登录，首次登录会自动注册账号并返回用户信息与访问令牌")
   @PostMapping("/wx-mini-login")
   public Result<LoginUserVO> wxMiniLogin(
-      @RequestBody @Valid WxMiniLoginDTO wxMiniLoginDTO) {
-    return Result.success(authService.wxMiniLogin(wxMiniLoginDTO));
+      @RequestBody @Valid WxMiniLoginDTO wxMiniLoginDTO,
+      HttpServletRequest request) {
+    return Result.success(authService.wxMiniLogin(wxMiniLoginDTO, request));
   }
 
   /**
@@ -68,8 +69,9 @@ public class AuthController {
    */
   @Operation(summary = "退出登录", description = "当前登录用户主动退出登录，当前无状态 token 模式下主要由客户端清理本地登录态")
   @PostMapping("/logout")
-  public Result<Boolean> logout() {
-    authService.logout();
+  public Result<Boolean> logout(
+      @Parameter(description = "登录访问令牌，请求头中传入 Bearer Token", required = true) @RequestHeader("Authorization") String authorization) {
+    authService.logout(authorization);
     return Result.success(true);
   }
 
@@ -168,8 +170,9 @@ public class AuthController {
   @Operation(summary = "账号密码登录", description = "使用手机号或邮箱配合密码及图形验证码完成登录")
   @PostMapping("/password-login")
   public Result<LoginUserVO> passwordLogin(
-      @RequestBody @Valid PasswordLoginDTO passwordLoginDTO) {
-    return Result.success(authService.passwordLogin(passwordLoginDTO));
+      @RequestBody @Valid PasswordLoginDTO passwordLoginDTO,
+      HttpServletRequest request) {
+    return Result.success(authService.passwordLogin(passwordLoginDTO, request));
   }
 
   /**
@@ -180,8 +183,9 @@ public class AuthController {
   @Operation(summary = "验证码登录", description = "使用手机号或邮箱配合邮箱验证码完成快捷登录")
   @PostMapping("/code-login")
   public Result<LoginUserVO> codeLogin(
-      @RequestBody @Valid CodeLoginDTO codeLoginDTO) {
-    return Result.success(authService.codeLogin(codeLoginDTO));
+      @RequestBody @Valid CodeLoginDTO codeLoginDTO,
+      HttpServletRequest request) {
+    return Result.success(authService.codeLogin(codeLoginDTO, request));
   }
 
   /**

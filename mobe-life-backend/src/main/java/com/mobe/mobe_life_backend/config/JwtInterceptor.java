@@ -5,12 +5,17 @@
  */
 package com.mobe.mobe_life_backend.config;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mobe.mobe_life_backend.auth.entity.MobeUserSession;
+import com.mobe.mobe_life_backend.auth.mapper.MobeUserSessionMapper;
 import com.mobe.mobe_life_backend.common.context.UserContext;
 import com.mobe.mobe_life_backend.common.exception.BusinessException;
 import com.mobe.mobe_life_backend.common.exception.AuthErrorCode;
 import com.mobe.mobe_life_backend.common.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.lang.NonNull;
@@ -29,10 +34,14 @@ import org.springframework.lang.Nullable;
  * </p>
  */
 @Component
+@RequiredArgsConstructor
 public class JwtInterceptor implements HandlerInterceptor {
 
   /** Bearer token 前缀。 */
   private static final String BEARER_PREFIX = "Bearer ";
+
+  /** 用户登录会话持久化入口。 */
+  private final MobeUserSessionMapper mobeUserSessionMapper;
 
   /**
    * 请求前鉴权。
@@ -62,6 +71,35 @@ public class JwtInterceptor implements HandlerInterceptor {
     }
 
     Long userId = JwtUtils.getUserId(token);
+    String jti = JwtUtils.getJti(token);
+    if (jti == null || jti.isBlank()) {
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+    }
+
+    MobeUserSession session = mobeUserSessionMapper.selectOne(
+        new LambdaQueryWrapper<MobeUserSession>()
+            .eq(MobeUserSession::getAccessTokenJti, jti)
+            .eq(MobeUserSession::getUserId, userId)
+            .eq(MobeUserSession::getIsDeleted, 0)
+            .last("limit 1"));
+
+    if (session == null) {
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    if (!"ACTIVE".equals(session.getStatus())) {
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+    }
+    if (session.getExpireTime() == null || !session.getExpireTime().isAfter(now)) {
+      session.setStatus("EXPIRED");
+      session.setRemark("会话已过期");
+      mobeUserSessionMapper.updateById(session);
+      throw new BusinessException(AuthErrorCode.TOKEN_EXPIRED);
+    }
+
+    session.setLastActiveTime(now);
+    mobeUserSessionMapper.updateById(session);
     UserContext.setCurrentUserId(userId);
     return true;
   }

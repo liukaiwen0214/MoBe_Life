@@ -52,6 +52,7 @@ file:
     # 开发环境上传目录直接落在当前工程里，便于本地查看上传结果。
     path: /Users/liukaiwen/Desktop/MoBe_Life/mobe-life-backend/uploads
     # 文件访问前缀。若端口、域名变化，这里也要同步调整。
+    # access-url-prefix: http://39.106.162.13/uploads
     access-url-prefix: http://127.0.0.1:8080/uploads
 wechat:
   miniapp:

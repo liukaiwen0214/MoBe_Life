@@ -18,8 +18,10 @@ import com.mobe.mobe_life_backend.auth.dto.SendEmailCodeDTO;
 import com.mobe.mobe_life_backend.auth.dto.SetPasswordDTO;
 import com.mobe.mobe_life_backend.auth.dto.WxMiniLoginDTO;
 import com.mobe.mobe_life_backend.auth.entity.MessageSendLog;
+import com.mobe.mobe_life_backend.auth.entity.MobeUserSession;
 import com.mobe.mobe_life_backend.auth.entity.VerificationCode;
 import com.mobe.mobe_life_backend.auth.mapper.MessageSendLogMapper;
+import com.mobe.mobe_life_backend.auth.mapper.MobeUserSessionMapper;
 import com.mobe.mobe_life_backend.auth.mapper.VerificationCodeMapper;
 import com.mobe.mobe_life_backend.auth.service.AuthService;
 import com.mobe.mobe_life_backend.auth.service.EmailService;
@@ -47,6 +49,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 /**
  * 认证服务实现。
@@ -125,6 +128,11 @@ public class AuthServiceImpl implements AuthService {
   private final MessageSendLogMapper messageSendLogMapper;
 
   /**
+   * 用户登录会话持久化入口。
+   */
+  private final MobeUserSessionMapper mobeUserSessionMapper;
+
+  /**
    * 腾讯云 SES 配置。
    * 主要用于回写模板编号到消息日志。
    */
@@ -162,7 +170,7 @@ public class AuthServiceImpl implements AuthService {
    * @implNote 该方法可能创建新用户，并更新既有用户缺失的 `unionid`。
    */
   @Override
-  public LoginUserVO wxMiniLogin(WxMiniLoginDTO wxMiniLoginDTO) {
+  public LoginUserVO wxMiniLogin(WxMiniLoginDTO wxMiniLoginDTO, HttpServletRequest request) {
     WxCode2SessionVO wxSession = wechatMiniAppService.code2Session(wxMiniLoginDTO.getCode());
 
     String openid = wxSession.getOpenid();
@@ -189,14 +197,7 @@ public class AuthServiceImpl implements AuthService {
       mobeUserService.updateById(user);
     }
 
-    String token = JwtUtils.createToken(user.getId());
-
-    LoginUserVO loginUserVO = new LoginUserVO();
-    loginUserVO.setUserId(user.getId());
-    loginUserVO.setNickname(user.getNickname());
-    loginUserVO.setAvatar(user.getAvatar());
-    loginUserVO.setToken(token);
-    return loginUserVO;
+    return createLoginResult(user, "WECHAT_MINI", request);
   }
 
   /**
@@ -209,21 +210,36 @@ public class AuthServiceImpl implements AuthService {
    */
   @Override
   public TokenVO refreshToken(String authorization) {
-    if (authorization == null || authorization.isBlank()) {
-      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
-    }
-
-    String token = authorization;
-    if (token.startsWith("Bearer ")) {
-      token = token.substring(7);
-    }
+    String token = resolveToken(authorization);
 
     if (!JwtUtils.isValid(token)) {
       throw new BusinessException(AuthErrorCode.TOKEN_EXPIRED);
     }
 
     Long userId = JwtUtils.getUserId(token);
-    String newToken = JwtUtils.createToken(userId);
+    String jti = JwtUtils.getJti(token);
+    if (jti == null || jti.isBlank()) {
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+    }
+
+    MobeUserSession session = mobeUserSessionMapper.selectOne(
+        new LambdaQueryWrapper<MobeUserSession>()
+            .eq(MobeUserSession::getAccessTokenJti, jti)
+            .eq(MobeUserSession::getUserId, userId)
+            .eq(MobeUserSession::getIsDeleted, 0)
+            .last("limit 1"));
+    if (session == null || !"ACTIVE".equals(session.getStatus())) {
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+    }
+    if (session.getExpireTime() == null || !session.getExpireTime().isAfter(LocalDateTime.now())) {
+      throw new BusinessException(AuthErrorCode.TOKEN_EXPIRED);
+    }
+
+    String newToken = JwtUtils.createToken(userId, jti);
+    session.setExpireTime(JwtUtils.getExpireTime(newToken));
+    session.setLastActiveTime(LocalDateTime.now());
+    session.setRemark("刷新访问令牌");
+    mobeUserSessionMapper.updateById(session);
 
     TokenVO tokenVO = new TokenVO();
     tokenVO.setToken(newToken);
@@ -233,11 +249,37 @@ public class AuthServiceImpl implements AuthService {
   /**
    * 登出。
    *
-   * @implNote 当前版本采用无状态 JWT，服务端没有黑名单或会话表，因此此处显式保持空实现。
+   * @implNote 退出只更新当前 token 对应的会话状态，不创建新的登录记录。
    */
   @Override
-  public void logout() {
-    // 第一版 JWT 选择无状态实现，优先降低系统复杂度；真正失效依赖客户端丢弃 token 与自然过期。
+  public void logout(String authorization) {
+    String token = resolveToken(authorization);
+    if (!JwtUtils.isValid(token)) {
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+    }
+
+    Long userId = JwtUtils.getUserId(token);
+    String jti = JwtUtils.getJti(token);
+    if (jti == null || jti.isBlank()) {
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+    }
+
+    MobeUserSession session = mobeUserSessionMapper.selectOne(
+        new LambdaQueryWrapper<MobeUserSession>()
+            .eq(MobeUserSession::getAccessTokenJti, jti)
+            .eq(MobeUserSession::getUserId, userId)
+            .eq(MobeUserSession::getIsDeleted, 0)
+            .last("limit 1"));
+    if (session == null) {
+      throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    session.setStatus("LOGOUT");
+    session.setLogoutTime(now);
+    session.setLastActiveTime(now);
+    session.setRemark("用户主动退出登录");
+    mobeUserSessionMapper.updateById(session);
   }
 
   /**
@@ -554,6 +596,18 @@ public class AuthServiceImpl implements AuthService {
     mobeUserService.updateById(currentUser);
   }
 
+  private String resolveToken(String authorization) {
+    if (authorization == null || authorization.isBlank()) {
+      throw new BusinessException(AuthErrorCode.TOKEN_MISSING);
+    }
+
+    String token = authorization;
+    if (token.startsWith("Bearer ")) {
+      token = token.substring(7);
+    }
+    return token;
+  }
+
   /**
    * 从请求中提取尽量接近真实客户端的 IP。
    *
@@ -579,6 +633,146 @@ public class AuthServiceImpl implements AuthService {
     }
 
     return request.getRemoteAddr();
+  }
+
+  /**
+   * 创建登录结果，并登记服务端登录会话。
+   *
+   * @param user      已通过认证的用户，不允许为 null。
+   * @param loginType 登录方式。
+   * @param request   当前请求，允许为 null。
+   * @return 登录结果，不返回 null。
+   */
+  private LoginUserVO createLoginResult(MobeUser user, String loginType, HttpServletRequest request) {
+    validateUserCanLogin(user);
+
+    String accessTokenJti = JwtUtils.generateJti();
+    String token = JwtUtils.createToken(user.getId(), accessTokenJti);
+    LocalDateTime expireTime = JwtUtils.getExpireTime(token);
+    LocalDateTime now = LocalDateTime.now();
+
+    MobeUserSession session = new MobeUserSession();
+    session.setUserId(user.getId());
+    session.setSessionNo("SESSION" + now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+        + JwtUtils.generateJti().substring(0, 8).toUpperCase(Locale.ROOT));
+    session.setAccessTokenJti(accessTokenJti);
+    session.setLoginType(loginType);
+    session.setPlatform(resolvePlatform(loginType, request));
+    session.setDeviceId(getHeader(request, "X-Device-Id"));
+    session.setDeviceName(resolveDeviceName(request));
+    session.setDeviceType(resolveDeviceType(request));
+    session.setBrowser(resolveBrowser(request));
+    session.setOs(resolveOs(request));
+    session.setLoginIp(getRequestIp(request));
+    session.setUserAgent(getHeader(request, "User-Agent"));
+    session.setStatus("ACTIVE");
+    session.setLoginTime(now);
+    session.setLastActiveTime(now);
+    session.setExpireTime(expireTime);
+    session.setRemark("用户登录创建会话");
+    session.setIsDeleted(0);
+    mobeUserSessionMapper.insert(session);
+
+    LoginUserVO loginUserVO = new LoginUserVO();
+    loginUserVO.setUserId(user.getId());
+    loginUserVO.setNickname(user.getNickname());
+    loginUserVO.setAvatar(user.getAvatar());
+    loginUserVO.setToken(token);
+    return loginUserVO;
+  }
+
+  private void validateUserCanLogin(MobeUser user) {
+    if (user == null || Integer.valueOf(1).equals(user.getIsDeleted())) {
+      throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
+    }
+    if (Integer.valueOf(1).equals(user.getStatus())) {
+      throw new BusinessException(AuthErrorCode.NO_PERMISSION, "账号已被禁用");
+    }
+  }
+
+  private String getHeader(HttpServletRequest request, String name) {
+    if (request == null) {
+      return null;
+    }
+    String value = request.getHeader(name);
+    return value == null || value.isBlank() ? null : value;
+  }
+
+  private String resolvePlatform(String loginType, HttpServletRequest request) {
+    String platform = getHeader(request, "X-Platform");
+    if (platform != null) {
+      return platform;
+    }
+    return "WECHAT_MINI".equals(loginType) ? "miniapp" : "h5";
+  }
+
+  private String resolveDeviceName(HttpServletRequest request) {
+    String deviceName = getHeader(request, "X-Device-Name");
+    if (deviceName != null) {
+      return deviceName;
+    }
+    String browser = resolveBrowser(request);
+    String os = resolveOs(request);
+    if (browser == null && os == null) {
+      return null;
+    }
+    return (browser == null ? "Unknown" : browser) + " on " + (os == null ? "Unknown" : os);
+  }
+
+  private String resolveDeviceType(HttpServletRequest request) {
+    String userAgent = getHeader(request, "User-Agent");
+    if (userAgent == null) {
+      return "UNKNOWN";
+    }
+    String lower = userAgent.toLowerCase(Locale.ROOT);
+    if (lower.contains("ipad") || lower.contains("tablet")) {
+      return "TABLET";
+    }
+    if (lower.contains("mobile") || lower.contains("iphone") || lower.contains("android")) {
+      return "MOBILE";
+    }
+    return "PC";
+  }
+
+  private String resolveBrowser(HttpServletRequest request) {
+    String userAgent = getHeader(request, "User-Agent");
+    if (userAgent == null) {
+      return null;
+    }
+    if (userAgent.contains("Edg/")) {
+      return "Edge";
+    }
+    if (userAgent.contains("Chrome/")) {
+      return "Chrome";
+    }
+    if (userAgent.contains("Safari/")) {
+      return "Safari";
+    }
+    if (userAgent.contains("Firefox/")) {
+      return "Firefox";
+    }
+    return "Unknown";
+  }
+
+  private String resolveOs(HttpServletRequest request) {
+    String userAgent = getHeader(request, "User-Agent");
+    if (userAgent == null) {
+      return null;
+    }
+    String lower = userAgent.toLowerCase(Locale.ROOT);
+    if (lower.contains("mac os")) {
+      return "macOS";
+    }
+    if (lower.contains("windows")) {
+      return "Windows";
+    }
+    if (lower.contains("iphone") || lower.contains("ipad")) {
+      return "iOS";
+    }
+    if (lower.contains("android")) {
+      return "Android";
+    }
+    return "Unknown";
   }
 
   /**
@@ -732,7 +926,7 @@ public class AuthServiceImpl implements AuthService {
    * 账号密码登录。
    */
   @Override
-  public LoginUserVO passwordLogin(PasswordLoginDTO passwordLoginDTO) {
+  public LoginUserVO passwordLogin(PasswordLoginDTO passwordLoginDTO, HttpServletRequest request) {
     validateLoginCaptcha(passwordLoginDTO.getCaptchaKey(), passwordLoginDTO.getCaptchaCode());
 
     String account = passwordLoginDTO.getAccount().trim();
@@ -761,14 +955,7 @@ public class AuthServiceImpl implements AuthService {
       throw new BusinessException(AuthErrorCode.ACCOUNT_PASSWORD_ERROR);
     }
 
-    String token = JwtUtils.createToken(user.getId());
-
-    LoginUserVO loginUserVO = new LoginUserVO();
-    loginUserVO.setUserId(user.getId());
-    loginUserVO.setNickname(user.getNickname());
-    loginUserVO.setAvatar(user.getAvatar());
-    loginUserVO.setToken(token);
-    return loginUserVO;
+    return createLoginResult(user, "PASSWORD", request);
   }
 
   private boolean isEmailFormat(String account) {
@@ -819,7 +1006,7 @@ public class AuthServiceImpl implements AuthService {
    * 执行codeLogin。
    */
   @Override
-  public LoginUserVO codeLogin(CodeLoginDTO codeLoginDTO) {
+  public LoginUserVO codeLogin(CodeLoginDTO codeLoginDTO, HttpServletRequest request) {
     String account = codeLoginDTO.getAccount().trim();
     String code = codeLoginDTO.getCode().trim();
 
@@ -846,14 +1033,7 @@ public class AuthServiceImpl implements AuthService {
       throw new BusinessException(AuthErrorCode.USER_NOT_FOUND, "该账号未注册");
     }
 
-    String token = JwtUtils.createToken(user.getId());
-
-    LoginUserVO loginUserVO = new LoginUserVO();
-    loginUserVO.setUserId(user.getId());
-    loginUserVO.setNickname(user.getNickname());
-    loginUserVO.setAvatar(user.getAvatar());
-    loginUserVO.setToken(token);
-    return loginUserVO;
+    return createLoginResult(user, "EMAIL_CODE", request);
   }
 
   /**
