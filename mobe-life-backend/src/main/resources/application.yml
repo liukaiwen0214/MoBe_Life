@@ -1,13 +1,19 @@
 #
-# 核心职责：定义所有环境共享的基础配置，并声明默认启用的 Spring Profile。
-# 所属业务模块：后端基础设施 / 全局配置。
-# 重要依赖关系或外部约束：这里的值会作为 application-dev.yml、application-prod.yml 的共同底座；
+# 定义所有环境共享的基础配置，并声明默认启用的 Spring Profile。
+# 模块：后端基础设施 / 全局配置。
+# 约束：这里的值会作为 application-dev.yml、application-prod.yml 的共同底座；
 # 敏感信息理论上应优先外置到环境变量或更安全的配置中心。
 #
 spring:
   application:
     # Spring 应用名，主要用于日志、监控、Actuator 等场景展示。
     name: mobe-life-backend
+  config:
+    # 让 VSCode、mvn spring-boot:run 和 mobe.sh 都能直接读取本地 .env。
+    # 第二个路径用于从仓库根目录启动时兜底；文件不存在时不会报错。
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:mobe-life-backend/.env[.properties]
   profiles:
     # 默认激活开发环境配置；生产部署时应通过外部参数覆盖。
     active: dev

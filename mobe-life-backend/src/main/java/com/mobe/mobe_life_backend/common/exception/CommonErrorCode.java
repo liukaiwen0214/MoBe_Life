@@ -1,7 +1,7 @@
 /**
- * 核心职责：定义公共/通用模块的错误码。
- * 所属业务模块：公共基础设施 / 错误码体系。
- * 重要依赖关系或外部约束：实现 BaseErrorCode 接口，确保错误码格式和属性的一致性。
+ * 定义公共模块的错误码。
+ * 模块：公共基础设施 / 错误码体系。
+ * 约束：实现 BaseErrorCode 接口，确保错误码格式和属性的一致性。
  */
 package com.mobe.mobe_life_backend.common.exception;
 

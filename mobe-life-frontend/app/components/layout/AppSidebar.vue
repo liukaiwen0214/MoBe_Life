@@ -1,7 +1,7 @@
 <!--
-  核心职责：提供个人使用场景下的轻量左侧导航。
-  所属业务模块：前端展示层 / 布局组件。
-  重要依赖关系或外部约束：顶部栏负责页面标题和操作，侧栏只负责模块切换。
+  提供个人场景下的轻量左侧导航。
+  模块：前端展示层 / 布局组件。
+  约束：顶部栏负责页面标题和操作，侧栏只负责模块切换。
 -->
 <script setup lang="ts">
 const route = useRoute()
@@ -24,7 +24,11 @@ const menuGroups = [
     items: [
       { name: '账单', path: '/bills', icon: 'i-lucide-receipt-text' },
       { name: '账户', path: '/accounts', icon: 'i-lucide-credit-card' },
-      { name: '统计', path: '/statistics', icon: 'i-lucide-chart-no-axes-column' },
+      {
+        name: '统计',
+        path: '/statistics',
+        icon: 'i-lucide-chart-no-axes-column',
+      },
     ],
   },
   {
@@ -91,18 +95,24 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
 
         <div class="life-group__items">
           <NuxtLink
-            v-for="item in group.items.filter((menuItem) => !menuItem.placeholder)"
+            v-for="item in group.items.filter(
+              (menuItem) => !menuItem.placeholder
+            )"
             :key="item.path"
             :to="item.path"
             class="life-subitem"
-            :class="{ 'life-subitem--active': item.path && isActive(item.path) }"
+            :class="{
+              'life-subitem--active': item.path && isActive(item.path),
+            }"
           >
             <UIcon :name="item.icon" class="life-subitem__icon" />
             <span>{{ item.name }}</span>
           </NuxtLink>
 
           <span
-            v-for="(item, index) in group.items.filter((menuItem) => menuItem.placeholder)"
+            v-for="(item, index) in group.items.filter(
+              (menuItem) => menuItem.placeholder
+            )"
             :key="`${group.name}-placeholder-${index}`"
             class="life-subitem life-subitem--placeholder"
             aria-hidden="true"
@@ -160,12 +170,16 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
 .life-sidebar {
   display: flex;
   width: 212px;
-  height: 100%;
+  height: 100vh;
   flex-shrink: 0;
   flex-direction: column;
-  border-right: 1px solid #eef1ec;
-  background: #fbfcfa;
+  border-right: 1px solid var(--life-shell-border);
+  background: var(--life-shell-bg);
   padding: 22px 12px 14px;
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
 }
 
 .life-brand {
@@ -174,8 +188,9 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
   gap: 10px;
   margin-bottom: 18px;
   padding: 0 10px;
-  color: #172018;
+  color: var(--life-shell-text);
   text-decoration: none;
+  transition: color 220ms ease;
 }
 
 .life-brand__mark {
@@ -219,7 +234,7 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
   gap: 10px;
   border-radius: 10px;
   padding: 0 10px;
-  color: #4b574e;
+  color: var(--life-shell-muted);
   font-size: 14px;
   font-weight: 650;
   transition:
@@ -229,8 +244,8 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
 
 .life-home:hover,
 .life-home--active {
-  background: #edf5eb;
-  color: #172018;
+  background: var(--life-shell-hover);
+  color: var(--life-shell-text);
 }
 
 .life-home__icon {
@@ -248,14 +263,15 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
   height: 28px;
   gap: 8px;
   padding: 0 10px;
-  color: #8b968c;
+  color: var(--life-shell-subtle);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
+  transition: color 220ms ease;
 }
 
 .life-group--active .life-group__title {
-  color: #172018;
+  color: var(--life-shell-text);
 }
 
 .life-group__icon {
@@ -274,7 +290,7 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
   gap: 9px;
   border-radius: 9px;
   padding: 0 10px 0 28px;
-  color: #5f6b61;
+  color: var(--life-shell-muted);
   font-size: 13px;
   font-weight: 560;
   transition:
@@ -284,25 +300,25 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
 }
 
 .life-subitem:hover {
-  background: #f1f4ef;
-  color: #172018;
+  background: var(--life-shell-hover);
+  color: var(--life-shell-text);
 }
 
 .life-subitem--active {
-  background: #e8f4e8;
-  color: #1f6c3a;
+  background: var(--life-shell-active);
+  color: var(--life-shell-text);
   font-weight: 700;
 }
 
 .life-subitem--placeholder {
-  color: #b4beb5;
+  color: var(--life-shell-subtle);
   cursor: default;
   opacity: 0.58;
 }
 
 .life-subitem--placeholder:hover {
   background: transparent;
-  color: #b4beb5;
+  color: var(--life-shell-subtle);
 }
 
 .life-subitem__icon {
@@ -313,16 +329,26 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
 .life-sidebar__divider {
   height: 1px;
   margin: 0 10px 12px;
-  background: #edf1eb;
+  background: var(--life-shell-border);
+  transition: background-color 220ms ease;
 }
 
 .life-sidebar__footer {
   margin-top: auto;
-  padding-top: 14px;
+  padding-top: 10px;
 }
 
 .life-profile {
   position: relative;
+}
+
+.life-profile::before {
+  position: absolute;
+  right: 0;
+  bottom: 46px;
+  left: 0;
+  height: 14px;
+  content: '';
 }
 
 .life-profile__button {
@@ -333,13 +359,16 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
   border-radius: 12px;
   background: transparent;
   padding: 0 10px;
-  color: #172018;
+  color: var(--life-shell-text);
   text-align: left;
   cursor: default;
+  transition:
+    background-color 140ms ease,
+    color 220ms ease;
 }
 
 .life-profile__button:hover {
-  background: #f1f4ef;
+  background: var(--life-shell-hover);
 }
 
 .life-profile__avatar {
@@ -349,7 +378,7 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
   flex-shrink: 0;
   place-items: center;
   border-radius: 999px;
-  background: #172018;
+  background: #27272a;
   color: #ffffff;
   font-size: 12px;
   font-weight: 760;
@@ -376,7 +405,7 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
 .life-profile__name,
 .life-profile__summary strong {
   overflow: hidden;
-  color: #172018;
+  color: var(--life-shell-text);
   font-size: 13px;
   font-weight: 720;
   text-overflow: ellipsis;
@@ -386,7 +415,7 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
 .life-profile__hint,
 .life-profile__summary small {
   overflow: hidden;
-  color: #8b968c;
+  color: var(--life-shell-subtle);
   font-size: 11px;
   font-weight: 500;
   text-overflow: ellipsis;
@@ -396,29 +425,31 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
 .life-profile__chevron {
   width: 15px;
   height: 15px;
-  color: #9aa49b;
+  color: var(--life-shell-subtle);
 }
 
 .life-profile__panel {
   position: absolute;
-  bottom: 54px;
+  bottom: 50px;
   left: 2px;
   z-index: 20;
   display: flex;
   width: 196px;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid #e4e9df;
+  border: 1px solid var(--life-shell-border);
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 16px 40px rgb(32 43 34 / 12%);
+  background: var(--life-shell-panel);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 32%);
   opacity: 0;
   padding: 8px;
   pointer-events: none;
-  transform: translateY(6px);
+  transform: translateY(4px);
   transition:
     opacity 150ms ease,
-    transform 150ms ease;
+    transform 150ms ease,
+    background-color 220ms ease,
+    border-color 220ms ease;
 }
 
 .life-profile:hover .life-profile__panel,
@@ -432,7 +463,7 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
   display: flex;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid #edf1eb;
+  border-bottom: 1px solid var(--life-shell-border);
   margin-bottom: 4px;
   padding: 6px 6px 10px;
 }
@@ -445,15 +476,15 @@ const groupIsActive = (items: Array<{ path?: string }>) => {
   border-radius: 8px;
   background: transparent;
   padding: 0 8px;
-  color: #536057;
+  color: var(--life-shell-muted);
   font-size: 13px;
   font-weight: 560;
   cursor: pointer;
 }
 
 .life-profile__action:hover {
-  background: #f4f6f2;
-  color: #172018;
+  background: var(--life-shell-hover);
+  color: var(--life-shell-text);
 }
 
 .life-profile__action :deep(svg) {

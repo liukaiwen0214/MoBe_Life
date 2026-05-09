@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  核心职责：定义后端模块的 Maven 构建方式、依赖版本和打包插件配置。
-  所属业务模块：后端基础设施 / 构建配置。
-  重要依赖关系或外部约束：父 POM 统一继承 Spring Boot 的依赖管理策略；
-  修改版本号或插件配置前，需要同步评估编译、测试、运行时兼容性。
+  定义后端模块的 Maven 构建方式、依赖版本与打包插件。
+  模块：后端基础设施 / 构建配置。
+  约束：父 POM 继承 Spring Boot 依赖管理；修改版本或插件前需评估编译、测试与运行时兼容性。
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

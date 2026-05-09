@@ -1,7 +1,7 @@
 <!--
-  核心职责：承载首页中间内容区，把今日执行、专注、财务和动态聚合成一屏总览。
-  所属业务模块：前端展示层 / 首页工作台。
-  重要依赖关系或外部约束：顶部导航、侧边导航和底部信息由外部布局注入，本页面只负责主内容区域。
+  承载首页主内容区，把今日执行、专注、财务与动态聚成一屏总览。
+  模块：前端展示层 / 首页工作台。
+  约束：顶部导航、侧边导航和底部信息由外部布局注入，本页面只负责主内容区域。
 -->
 <script setup lang="ts">
 definePageMeta({
@@ -101,10 +101,10 @@ onMounted(async () => {
 
       <article class="mobe-card relative overflow-hidden">
         <div class="pointer-events-none absolute inset-0 text-emerald-500/90">
-          <span class="absolute left-16 top-[68px] text-3xl">✦</span>
+          <span class="absolute left-16 top-17 text-3xl">✦</span>
           <span class="absolute right-16 top-16 text-2xl text-slate-500">✦</span>
-          <span class="absolute bottom-[104px] left-28 text-3xl">✧</span>
-          <span class="absolute bottom-[76px] right-28 text-2xl">✦</span>
+          <span class="absolute bottom-26 left-28 text-3xl">✧</span>
+          <span class="absolute bottom-19 right-28 text-2xl">✦</span>
           <span class="absolute left-1/2 top-20 text-4xl">✧</span>
         </div>
 

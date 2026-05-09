@@ -1,7 +1,7 @@
 /**
- * 核心职责：定义用户中心围绕“当前用户”展开的业务能力。
- * 所属业务模块：用户中心 / 业务服务接口。
- * 重要依赖关系或外部约束：继承 MyBatis Plus `IService` 以复用基础 CRUD，同时补充当前项目的业务方法。
+ * 定义用户中心围绕「当前用户」展开的业务能力。
+ * 模块：用户中心 / 业务服务接口。
+ * 约束：继承 MyBatis Plus `IService` 以复用基础 CRUD，同时补充当前项目的业务方法。
  */
 package com.mobe.mobe_life_backend.user.service;
 
@@ -14,7 +14,7 @@ import com.mobe.mobe_life_backend.user.vo.CurrentUserVO;
  * 用户服务接口。
  *
  * <p>
- * 设计初衷是区分“通用用户数据操作”和“围绕当前登录用户的业务动作”，
+ * 区分“通用用户数据操作”和“围绕当前登录用户的业务动作”，
  * 让控制层无需直接理解 `UserContext` 或实体转换细节。
  * </p>
  */

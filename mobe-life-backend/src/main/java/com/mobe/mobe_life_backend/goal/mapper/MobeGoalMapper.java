@@ -1,7 +1,7 @@
 /**
- * 核心职责：声明目标中心的数据访问接口，负责组织数据库查询与持久化入口。
- * 所属业务模块：目标中心 / 数据访问层。
- * 重要依赖关系或外部约束：通常由 MyBatis 或 MyBatis-Plus 生成代理实现，方法签名需与 XML 或框架约定对应。
+ * 声明目标中心的 Mapper，集中数据库访问入口。
+ * 模块：目标中心 / 数据访问层。
+ * 约束：通常由 MyBatis 或 MyBatis-Plus 生成代理实现，方法签名需与 XML 或框架约定对应。
  */
 package com.mobe.mobe_life_backend.goal.mapper;
 

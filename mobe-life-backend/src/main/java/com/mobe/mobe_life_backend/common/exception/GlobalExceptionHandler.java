@@ -1,7 +1,7 @@
 /**
- * 核心职责：统一收口控制层抛出的异常，保证接口始终返回可预期的响应结构。
- * 所属业务模块：公共基础设施 / Web 异常处理。
- * 重要依赖关系或外部约束：依赖 Spring MVC 异常分派机制；所有异常最终都会被包装为 `Result` 或 `ErrorResponse`。
+ * 统一收口控制层异常，保证接口始终返回可预期的响应结构。
+ * 模块：公共基础设施 / Web 异常处理。
+ * 约束：依赖 Spring MVC 异常分派机制；所有异常最终都会被包装为 `Result` 或 `ErrorResponse`。
  */
 package com.mobe.mobe_life_backend.common.exception;
 
@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,7 +27,7 @@ import java.util.List;
  * 全局异常处理器。
  *
  * <p>
- * 设计初衷是把异常到 HTTP 响应的转换逻辑集中在同一个地方，
+ * 将异常到 HTTP 响应的转换逻辑集中在同一个地方，
  * 避免各个 Controller 复制 try-catch，同时让前端拿到稳定的错误码和消息结构。
  * </p>
  *
@@ -58,9 +59,10 @@ public class GlobalExceptionHandler {
         message = errorCode.getDefaultMessage();
       }
 
+      HttpStatusCode httpStatus = HttpStatusCode.valueOf(errorCode.getHttpStatus().value());
       ErrorResponse response = ErrorResponse.builder()
           .timestamp(Instant.now())
-          .status(errorCode.getHttpStatus().value())
+          .status(httpStatus.value())
           .code(errorCode.getCode())
           .message(message)
           .path(request.getRequestURI())
@@ -68,7 +70,7 @@ public class GlobalExceptionHandler {
           .details(Collections.emptyList())
           .build();
 
-      return new ResponseEntity<>(response, errorCode.getHttpStatus());
+      return new ResponseEntity<>(response, httpStatus);
     } else {
       // 兼容旧的错误码体系
       return ResponseEntity

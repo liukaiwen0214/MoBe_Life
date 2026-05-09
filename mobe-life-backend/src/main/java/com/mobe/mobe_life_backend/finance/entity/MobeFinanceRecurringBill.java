@@ -1,3 +1,8 @@
+/**
+ * 作为固定收支模板持久化模型，定义可周期性自动生成账单的规则。
+ * 模块：财务 / 固定收支。
+ * 约束：模板本身不代表真实账单，只有执行后生成的账单才会影响账户余额。
+ */
 package com.mobe.mobe_life_backend.finance.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -38,21 +43,27 @@ public class MobeFinanceRecurringBill {
   @Schema(description = "账户ID")
   private Long accountId;
 
+  /** 重复规则的周期粒度，决定调度器如何计算下一次执行日期。 */
   @Schema(description = "周期类型：DAILY/WEEKLY/MONTHLY")
   private String cycleType;
 
+  /** 周期参数文本，例如每月第几天或每周星期几，由业务层负责解析。 */
   @Schema(description = "周期值，例如每月5号、每周一")
   private String cycleValue;
 
+  /** 模板开始生效的日期，早于该日期时调度器不应生成账单。 */
   @Schema(description = "生效开始日期")
   private LocalDate startDate;
 
+  /** 模板结束生效的日期；为空表示长期有效。 */
   @Schema(description = "生效结束日期")
   private LocalDate endDate;
 
+  /** 调度器下一次应尝试生成账单的日期，执行成功后会向后滚动。 */
   @Schema(description = "下次执行日期")
   private LocalDate nextExecuteDate;
 
+  /** 最近一次成功执行时间，用于排查漏跑、重复执行和补偿任务。 */
   @Schema(description = "上次执行时间")
   private LocalDateTime lastExecuteTime;
 

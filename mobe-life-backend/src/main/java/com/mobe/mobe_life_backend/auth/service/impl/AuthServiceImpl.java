@@ -1,8 +1,7 @@
 /**
- * 核心职责：实现认证中心的核心业务流程，包括微信登录、账号绑定、验证码校验和密码管理。
- * 所属业务模块：认证中心 / 业务服务实现。
- * 重要依赖关系或外部约束：依赖微信接口、邮件通道、验证码表、消息日志表和用户表；
- * 业务正确性依赖数据库状态与 JWT 约定一致。
+ * 实现认证中心的核心流程：微信登录、账号绑定、验证码与密码管理。
+ * 模块：认证中心 / 业务服务实现。
+ * 约束：依赖微信接口、邮件通道、验证码表、消息日志表与用户表；业务正确性依赖数据库状态与 JWT 约定一致。
  */
 package com.mobe.mobe_life_backend.auth.service.impl;
 
@@ -55,8 +54,8 @@ import java.util.Locale;
  * 认证服务实现。
  *
  * <p>
- * 设计初衷是把“用户身份建立”和“账号安全增强”收敛在同一应用服务中，
- * 使 Controller 看见的是稳定用例，而底层数据库与第三方系统交互则被完整封装。
+ * 将「用户身份建立」与「账号安全增强」收敛在同一应用服务中，
+ * 使 Controller 只看到稳定用例，数据库与第三方交互封装在本服务内。
  * </p>
  *
  * <p>
@@ -913,10 +912,10 @@ public class AuthServiceImpl implements AuthService {
 
   /**
    * 判断账号输入是邮箱还是手机号。
-   * 
-   * @param account 账号输入，允许为 null；如果包含 '@' 则视为邮箱，否则视为手机号。
-   * @return 如果输入包含 '@' 则返回 true，表示是邮箱账号；否则返回 false，表示是手机号账号。
-   * @implNote 该方法的设计初衷是为了在登录时根据用户输入的账号自动识别是邮箱还是手机号，从而查询对应的字段进行登录验证。
+   *
+   * @param account 账号字符串，允许为 null；含 {@code @} 时按邮箱处理，否则按手机号处理。
+   * @return 含 {@code @} 时返回 true 表示邮箱账号，否则为手机号账号。
+   * @implNote 按是否含 {@code @} 区分查询字段，供密码登录组合查询条件。
    */
   private boolean isEmailAccount(String account) {
     return account != null && account.contains("@");

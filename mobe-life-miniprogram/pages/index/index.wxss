@@ -1,5 +1,4 @@
-/* 核心职责：定义首页“此刻”页的轻量信息布局，强调问候、聚焦和流水统计三层结构。 */
-.page {
+/* 定义首页“此刻”页的轻量信息布局，强调问候、聚焦和流水统计三层结构。 */.page {
   min-height: 100vh;
   box-sizing: border-box;
   padding: 28rpx 24rpx 150rpx;

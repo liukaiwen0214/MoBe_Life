@@ -1,5 +1,4 @@
-<!-- 核心职责：渲染个人中心资料卡片与账号安全入口。 -->
-<view class="page">
+<!-- 渲染个人中心资料卡片与账号安全入口。 --><view class="page">
   <view wx:if="{{loading}}" class="loading-wrap">
     <text class="loading-text">加载中...</text>
   </view>

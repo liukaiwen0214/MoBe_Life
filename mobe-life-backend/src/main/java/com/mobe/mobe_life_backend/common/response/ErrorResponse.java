@@ -1,7 +1,7 @@
 /**
- * 核心职责：定义标准错误响应结构，确保错误响应格式的一致性。
- * 所属业务模块：公共基础设施 / 响应模型。
- * 重要依赖关系或外部约束：用于 GlobalExceptionHandler 统一处理异常时返回。
+ * 定义标准错误响应结构，保证错误响应格式一致。
+ * 模块：公共基础设施 / 响应模型。
+ * 约束：用于 GlobalExceptionHandler 统一处理异常时返回。
  */
 package com.mobe.mobe_life_backend.common.response;
 
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 标准错误响应。
  *
- * <p>设计初衷是提供一个统一的错误响应格式，包含足够的信息以便前端处理和排查问题。</p>
+ * <p>提供一个统一的错误响应格式，包含足够的信息以便前端处理和排查问题。</p>
  */
 @Data
 @Builder

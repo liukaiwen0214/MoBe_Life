@@ -1,15 +1,12 @@
 <!--
-  核心职责：提供个人工作台顶部轻操作栏，承载当前页面标题、搜索、通知和用户入口。
-  所属业务模块：前端展示层 / 布局组件。
-  重要依赖关系或外部约束：侧栏负责模块切换，顶部不承载全量导航。
+  提供工作台顶部轻操作栏，承载当前页标题与消息提示。
+  模块：前端展示层 / 布局组件。
+  约束：侧栏负责模块切换，顶部不承载全量导航，只负责页面上下文和轻提醒。
 -->
 <script setup lang="ts">
 const route = useRoute()
-const { currentUser } = useAuth()
+const appStore = useAppStore()
 
-/**
- * 页面标题映射集中维护在这里，避免标题字符串散落在布局和页面里双向重复维护。
- */
 const titleMap: Record<string, string> = {
   '/': '首页',
   '/tasks': '待办',
@@ -28,27 +25,37 @@ const titleMap: Record<string, string> = {
 }
 
 const pageTitle = computed(() => titleMap[route.path] || 'MoBe')
-const userName = computed(() => currentUser.value?.nickname || '李明')
-const userInitial = computed(() => userName.value.slice(0, 1).toUpperCase())
+
+const latestMessage = ref('Q2 报表初稿已更新')
+const unreadCount = ref(3)
 </script>
 
 <template>
   <header class="life-header">
-    <h1 class="life-header__title">{{ pageTitle }}</h1>
+    <div class="life-header__left">
+      <h1 class="life-header__title">{{ pageTitle }}</h1>
+    </div>
 
     <div class="life-header__actions">
-      <label class="life-search">
-        <UIcon name="i-lucide-search" class="life-search__icon" />
-        <input class="life-search__input" placeholder="搜索..." type="search" />
-      </label>
-
-      <button class="life-icon-button" type="button" aria-label="通知">
-        <UIcon name="i-lucide-bell" />
-        <span class="life-icon-button__dot" />
+      <button
+        class="life-action-button"
+        type="button"
+        :aria-label="appStore.isDarkTheme ? '切换为白色主题' : '切换为黑色主题'"
+        @click="appStore.toggleTheme"
+      >
+        <UIcon
+          :name="appStore.isDarkTheme ? 'i-lucide-sun' : 'i-lucide-moon'"
+          class="life-action-button__icon"
+        />
       </button>
 
-      <button class="life-user" type="button" aria-label="用户">
-        {{ userInitial }}
+      <button class="life-action-button" type="button" :aria-label="latestMessage">
+        <span class="life-action-button__icon-wrap">
+          <UIcon name="i-lucide-bell" class="life-action-button__icon" />
+          <span v-if="unreadCount > 0" class="life-message__badge">
+            {{ unreadCount > 99 ? '99+' : unreadCount }}
+          </span>
+        </span>
       </button>
     </div>
   </header>
@@ -57,104 +64,107 @@ const userInitial = computed(() => userName.value.slice(0, 1).toUpperCase())
 <style scoped>
 .life-header {
   display: flex;
-  height: 64px;
+  flex-shrink: 0;
+  min-height: 54px;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #eef1ec;
-  background: #ffffff;
+  gap: 20px;
+  border-bottom: 1px solid var(--life-shell-border);
+  background: var(--life-shell-bg);
   padding: 0 24px 0 28px;
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+.life-header__left {
+  display: flex;
+  min-width: 0;
+  align-items: center;
 }
 
 .life-header__title {
   margin: 0;
-  color: #172018;
+  color: var(--life-shell-text);
   font-size: 20px;
   font-weight: 720;
   line-height: 1;
+  transition: color 220ms ease;
 }
 
 .life-header__actions {
   display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.life-search {
-  display: flex;
-  width: 260px;
-  height: 38px;
-  align-items: center;
-  gap: 9px;
-  border: 1px solid #e5eae2;
-  border-radius: 999px;
-  background: #fbfcfa;
-  padding: 0 14px;
-  color: #8b958d;
-}
-
-.life-search__icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.life-search__input {
   min-width: 0;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #243024;
-  font-size: 14px;
+  align-items: center;
+  gap: 6px;
 }
 
-.life-search__input::placeholder {
-  color: #9aa49b;
-}
-
-.life-icon-button,
-.life-user {
+.life-action-button {
   position: relative;
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid var(--life-shell-control-border);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--life-shell-muted);
   place-items: center;
-  border: 1px solid #e5eae2;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #5d685f;
+  transition:
+    border-color 140ms ease,
+    transform 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease;
 }
 
-.life-icon-button {
-  font-size: 18px;
+.life-action-button:hover {
+  border-color: var(--life-shell-subtle);
+  background: var(--life-shell-hover);
+  color: var(--life-shell-text);
 }
 
-.life-icon-button__dot {
+.life-action-button:active {
+  transform: translateY(1px);
+}
+
+.life-action-button__icon-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.life-action-button__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.life-message__badge {
   position: absolute;
-  top: 8px;
-  right: 9px;
-  width: 7px;
-  height: 7px;
-  border: 2px solid #ffffff;
+  top: -4px;
+  right: -7px;
+  min-width: 16px;
+  height: 16px;
+  border: 2px solid var(--life-shell-control);
   border-radius: 999px;
-  background: #13b981;
+  background: #ef4444;
+  padding: 0 4px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 12px;
+  text-align: center;
 }
 
-.life-user {
-  border-color: #172018;
-  background: #172018;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
+@media (max-width: 960px) {
+  .life-header {
+    padding-inline: 16px;
+  }
 }
 
 @media (max-width: 760px) {
   .life-header {
-    padding-inline: 18px;
-  }
-
-  .life-search {
-    width: 180px;
+    gap: 12px;
   }
 }
 </style>

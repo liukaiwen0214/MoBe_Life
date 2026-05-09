@@ -1,3 +1,8 @@
+/**
+ * 封装浏览器侧登录凭证：token 与当前用户快照的读写。
+ * 模块：前端基础设施 / 认证存储。
+ * 约束：仅在客户端读写 localStorage；服务端渲染时不访问 DOM。
+ */
 const TOKEN_KEY = 'mobe_token'
 const USER_KEY = 'mobe_user'
 

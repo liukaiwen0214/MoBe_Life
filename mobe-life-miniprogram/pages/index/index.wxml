@@ -1,5 +1,4 @@
-<!-- 核心职责：作为小程序首页的最小展示层，承接登录成功后的欢迎、每日一句、天气与首页聚焦反馈。 -->
-<view wx:if="{{loading}}" class="page">
+<!-- 作为小程序首页的最小展示层，承接登录成功后的欢迎、每日一句、天气与首页聚焦反馈。 --><view wx:if="{{loading}}" class="page">
   <view class="loading-wrap">
     <view class="loading-text">加载中...</view>
   </view>

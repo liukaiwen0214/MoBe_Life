@@ -1,7 +1,7 @@
 /**
- * 核心职责：在请求进入控制层前完成 JWT 鉴权，并把用户 ID 写入请求线程上下文。
- * 所属业务模块：认证中心 / 安全拦截层。
- * 重要依赖关系或外部约束：依赖 `JwtUtils` 和 `UserContext`；必须与 `WebMvcConfig` 中的排除路径保持一致。
+ * 在请求进入控制层前完成 JWT 鉴权，并将用户 ID 写入线程上下文。
+ * 模块：认证中心 / 安全拦截层。
+ * 约束：依赖 `JwtUtils` 和 `UserContext`；必须与 `WebMvcConfig` 中的排除路径保持一致。
  */
 package com.mobe.mobe_life_backend.config;
 
@@ -25,8 +25,8 @@ import org.springframework.lang.Nullable;
  * JWT 拦截器。
  *
  * <p>
- * 设计初衷是把鉴权从业务逻辑里抽离出来，确保服务层只处理“当前用户是谁之后要做什么”，
- * 而不重复处理 token 提取、合法性校验和线程上下文注入。
+ * 将鉴权从业务逻辑里抽离，让服务层只处理「当前用户是谁之后要做什么」，
+ * token 提取、合法性校验与线程上下文注入不再散落在业务里。
  * </p>
  *
  * <p>

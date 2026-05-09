@@ -1,5 +1,4 @@
-<!-- 核心职责：承载绑定邮箱与更换邮箱的交互表单。 -->
-<view class="page">
+<!-- 承载绑定邮箱与更换邮箱的交互表单。 --><view class="page">
   <view class="card">
     <view class="title">{{hasEmail ? '更换邮箱' : '绑定邮箱'}}</view>
     <view class="desc">

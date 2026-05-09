@@ -1,3 +1,8 @@
+<!--
+  承载 Web 登录页：密码登录与邮箱验证码登录双模式，并串接图形验证码。
+  模块：前端展示层 / 认证入口。
+  约束：layout 关闭以使用全屏登录壳；依赖 useAuth 与后端 /api/auth 契约一致。
+-->
 <script setup lang="ts">
 definePageMeta({
   layout: false,

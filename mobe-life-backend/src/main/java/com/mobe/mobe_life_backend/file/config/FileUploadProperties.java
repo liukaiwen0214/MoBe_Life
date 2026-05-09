@@ -1,7 +1,7 @@
 /**
- * 核心职责：承接本地文件上传配置。
- * 所属业务模块：文件服务 / 基础配置。
- * 重要依赖关系或外部约束：配置项需与 `application*.yml` 中的 `file.upload` 前缀保持一致，且目录对运行进程可写。
+ * 承接本地文件上传配置。
+ * 模块：文件服务 / 基础配置。
+ * 约束：配置项需与 `application*.yml` 中的 `file.upload` 前缀保持一致，且目录对运行进程可写。
  */
 package com.mobe.mobe_life_backend.file.config;
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 /**
  * 文件上传配置。
  *
- * <p>设计初衷是把存储路径和访问前缀从代码中抽离，便于开发、测试和生产环境使用不同磁盘目录或 CDN 前缀。</p>
+ * <p>把存储路径和访问前缀从代码中抽离，便于开发、测试和生产环境使用不同磁盘目录或 CDN 前缀。</p>
  */
 @Data
 @Component

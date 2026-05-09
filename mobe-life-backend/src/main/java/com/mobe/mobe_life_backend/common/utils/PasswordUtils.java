@@ -1,7 +1,7 @@
 /**
- * 核心职责：提供统一的密码加密与比对工具，避免业务层直接操作加密器实例。
- * 所属业务模块：公共基础设施 / 安全工具。
- * 重要依赖关系或外部约束：依赖 Spring Security 的 BCrypt 实现；明文密码只应短暂存在于调用栈中。
+ * 提供统一的密码加密与比对工具，避免业务层直接实例化或操作底层加密器。
+ * 模块：公共基础设施 / 安全工具。
+ * 约束：依赖 Spring Security 的 BCrypt 实现；明文密码只应短暂存在于调用栈中。
  */
 package com.mobe.mobe_life_backend.common.utils;
 
@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 /**
  * 密码工具类。
  *
- * <p>设计初衷是把密码算法选择集中起来，避免系统里出现多种加密方式并存导致无法统一验证。</p>
+ * <p>把密码算法选择集中起来，避免系统里出现多种加密方式并存导致无法统一验证。</p>
  *
  * <p>线程安全性：`BCryptPasswordEncoder` 可安全复用，本类只暴露静态方法，线程安全。</p>
  */

@@ -1,7 +1,7 @@
 /**
- * 核心职责：定义任务模块的错误码。
- * 所属业务模块：任务模块 / 错误码体系。
- * 重要依赖关系或外部约束：实现 BaseErrorCode 接口，确保错误码格式和属性的一致性。
+ * 定义任务模块的错误码。
+ * 模块：任务模块 / 错误码体系。
+ * 约束：实现 BaseErrorCode 接口，确保错误码格式和属性的一致性。
  */
 package com.mobe.mobe_life_backend.common.exception;
 

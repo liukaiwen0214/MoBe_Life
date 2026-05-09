@@ -1,7 +1,7 @@
 /**
- * 核心职责：实现当前登录用户资料读取与更新逻辑。
- * 所属业务模块：用户中心 / 业务服务实现。
- * 重要依赖关系或外部约束：依赖 `UserContext` 获取当前身份，依赖 `mobe_user` 表维护用户资料。
+ * 实现当前登录用户资料的读取与更新逻辑。
+ * 模块：用户中心 / 业务服务实现。
+ * 约束：依赖 `UserContext` 获取当前身份，依赖 `mobe_user` 表维护用户资料。
  */
 package com.mobe.mobe_life_backend.user.service.impl;
 
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
  * 用户服务实现。
  *
  * <p>
- * 设计初衷是把“当前登录用户”视角下的资料操作封装起来，
+ * 将“当前登录用户”视角下的资料操作封装起来，
  * 让控制层看到的是稳定 VO，而不是直接暴露数据库实体。
  * </p>
  *

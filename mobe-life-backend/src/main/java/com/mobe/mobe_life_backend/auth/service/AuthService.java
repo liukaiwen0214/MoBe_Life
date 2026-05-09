@@ -1,7 +1,7 @@
 /**
- * 核心职责：定义认证中心的业务契约，覆盖登录、登录态维护、账号绑定和密码管理。
- * 所属业务模块：认证中心 / 业务服务接口。
- * 重要依赖关系或外部约束：实现类通常会组合微信小程序接口、JWT 工具、验证码表和消息日志表完成业务闭环。
+ * 定义认证中心的业务契约，覆盖登录、会话维护、绑定与密码管理。
+ * 模块：认证中心 / 业务服务接口。
+ * 约束：实现类通常会组合微信小程序接口、JWT 工具、验证码表和消息日志表完成业务闭环。
  */
 package com.mobe.mobe_life_backend.auth.service;
 
@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * 认证服务接口。
  *
  * <p>
- * 设计初衷是在控制层和具体实现之间建立稳定边界，让认证相关用例都围绕“业务动作”建模，
+ * 于控制层与实现之间划边界，让认证用例围绕「业务动作」建模，
  * 而不是围绕数据库操作或第三方 SDK 细节建模。
  * </p>
  *
@@ -58,7 +58,7 @@ public interface AuthService {
    * @param authorization `Authorization` 请求头值，不允许为 null 或空白；支持包含 `Bearer ` 前缀。
    * @return 新 token 结果，不返回 null；当前实现只返回一个新的 JWT。
    * @throws RuntimeException 当 token 缺失、格式非法、校验失败或已过期时抛出。
-   * @implNote 该方法不会访问数据库，但会解析和重新生成 JWT。
+   * @implNote 实现类将校验会话表中的 jti 与过期时间，通过后解析并签发新 JWT。
    */
   TokenVO refreshToken(String authorization);
 

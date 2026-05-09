@@ -1,7 +1,7 @@
 /**
- * 核心职责：对外暴露待办列表与详情接口，负责把 HTTP 请求转换为任务查询用例调用。
- * 所属业务模块：待办中心 / 控制层。
- * 重要依赖关系或外部约束：依赖 `JwtInterceptor` 预先完成登录态校验；返回结构遵循统一 `Result` 包装。
+ * 对外暴露待办列表与详情接口，并把 HTTP 请求转成任务查询用例。
+ * 模块：待办中心 / 控制层。
+ * 约束：依赖 `JwtInterceptor` 预先完成登录态校验；返回结构遵循统一 `Result` 包装。
  */
 package com.mobe.mobe_life_backend.task.controller;
 
@@ -35,7 +35,7 @@ import com.mobe.mobe_life_backend.task.vo.TaskFlowVO;
  * 待办控制器。
  *
  * <p>
- * 设计初衷是保持控制层足够薄，只承担参数接收、接口文档暴露和结果包装，
+ * 保持控制层足够薄，只承担参数接收、接口文档暴露与结果包装，
  * 真正的业务聚合逻辑全部下沉到 `MobeTaskService`。
  * </p>
  */

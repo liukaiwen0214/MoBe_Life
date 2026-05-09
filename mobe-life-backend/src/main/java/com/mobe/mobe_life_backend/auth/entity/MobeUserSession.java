@@ -1,7 +1,7 @@
 /**
- * 核心职责：定义用户登录会话实体，用于服务端控制 JWT 是否仍然有效。
- * 所属业务模块：认证中心 / 登录会话。
- * 重要依赖关系或外部约束：字段需要与 `mobe_user_session` 表结构保持一致。
+ * 定义登录会话实体，供服务端判断 JWT 是否仍有效。
+ * 模块：认证中心 / 登录会话。
+ * 约束：字段需要与 `mobe_user_session` 表结构保持一致。
  */
 package com.mobe.mobe_life_backend.auth.entity;
 
